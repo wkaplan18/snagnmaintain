@@ -8,7 +8,7 @@ import { ArrowLeft, Plus, Home, ChevronDown, ChevronRight, Camera, MapPin } from
 import AddSnagSheet from '@/components/snags/AddSnagSheet'
 import SnagCard from '@/components/snags/SnagCard'
 import { useSnags } from '@/hooks/useSnags'
-import { DEFAULT_ROOMS, type Contractor, type Room, type UnitType } from '@/types'
+import { DEFAULT_ROOMS, type Contractor, type DashboardTerms, type Room, type UnitType } from '@/types'
 
 interface UnitRow {
   id: string
@@ -31,23 +31,23 @@ interface ProjectInfo {
 
 const UNIT_TYPES: UnitType[] = ['apartment', 'house', 'townhouse', 'villa', 'penthouse', 'office', 'retail', 'other']
 
-function UnitSnags({ projectId, unitId, rooms, contractors, orgId }: { projectId: string; unitId: string; rooms: Room[]; contractors: Contractor[]; orgId: string }) {
+function UnitSnags({ projectId, unitId, rooms, contractors, orgId, terms }: { projectId: string; unitId: string; rooms: Room[]; contractors: Contractor[]; orgId: string; terms: DashboardTerms }) {
   const { snags, loading, refetch } = useSnags({ unitId })
   const [adding, setAdding] = useState(false)
 
   return (
     <div className="border-t border-slate-100 px-4 pb-4 pt-3">
       {loading ? (
-        <p className="py-2 text-xs text-slate-400">Loading snags…</p>
+        <p className="py-2 text-xs text-slate-400">Loading {terms.issues.toLowerCase()}…</p>
       ) : snags.length === 0 ? (
-        <p className="py-2 text-xs text-slate-400">No snags logged in this unit yet.</p>
+        <p className="py-2 text-xs text-slate-400">No {terms.issues.toLowerCase()} logged in this unit yet.</p>
       ) : (
         <div className="space-y-2">
           {snags.map(s => <SnagCard key={s.id} snag={s} />)}
         </div>
       )}
       <button onClick={() => setAdding(true)} className="sf-btn-primary mt-3 w-full py-2.5 text-sm">
-        <Camera className="h-4 w-4" /> Add snag
+        <Camera className="h-4 w-4" /> Add {terms.issue.toLowerCase()}
       </button>
       {adding && (
         <AddSnagSheet
@@ -64,7 +64,7 @@ function UnitSnags({ projectId, unitId, rooms, contractors, orgId }: { projectId
   )
 }
 
-export default function ProjectClient({ project, units, contractors }: { project: ProjectInfo; units: UnitRow[]; contractors: Contractor[] }) {
+export default function ProjectClient({ project, units, contractors, terms }: { project: ProjectInfo; units: UnitRow[]; contractors: Contractor[]; terms: DashboardTerms }) {
   const [openUnit, setOpenUnit] = useState<string | null>(units.length === 1 ? units[0].id : null)
   const [showAddUnit, setShowAddUnit] = useState(units.length === 0)
   const [unitName, setUnitName] = useState('')
@@ -113,7 +113,7 @@ export default function ProjectClient({ project, units, contractors }: { project
   return (
     <div className="mx-auto max-w-lg px-4 pb-24 pt-6">
       <Link href="/projects" className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700">
-        <ArrowLeft className="h-4 w-4" /> Projects
+        <ArrowLeft className="h-4 w-4" /> {terms.projects}
       </Link>
 
       <div className="flex items-start justify-between gap-3">
@@ -164,7 +164,7 @@ export default function ProjectClient({ project, units, contractors }: { project
       {units.length === 0 && !showAddUnit ? (
         <div className="sf-card flex flex-col items-center p-8 text-center">
           <Home className="mb-3 h-8 w-8 text-slate-300" />
-          <p className="text-sm text-slate-500">No units yet — add the first house, apartment or office to start logging snags.</p>
+          <p className="text-sm text-slate-500">No units yet — add the first unit to start logging {terms.issues.toLowerCase()}.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -184,7 +184,7 @@ export default function ProjectClient({ project, units, contractors }: { project
                   </div>
                   {open ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
                 </button>
-                {open && <UnitSnags projectId={project.id} unitId={u.id} rooms={u.rooms} contractors={contractors} orgId={project.org_id} />}
+                {open && <UnitSnags projectId={project.id} unitId={u.id} rooms={u.rooms} contractors={contractors} orgId={project.org_id} terms={terms} />}
               </div>
             )
           })}
@@ -192,7 +192,7 @@ export default function ProjectClient({ project, units, contractors }: { project
       )}
 
       <button onClick={handleDeleteProject} className="mt-10 w-full text-center text-xs font-medium text-red-400 hover:text-red-600">
-        Delete this project
+        Delete this {terms.project.toLowerCase()}
       </button>
     </div>
   )

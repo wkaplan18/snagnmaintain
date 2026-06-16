@@ -2,34 +2,41 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, MapPin, FolderOpen } from 'lucide-react'
+import { DASHBOARD_TERMS } from '@/types'
+import type { OrgType } from '@/types'
 
 export default async function ProjectsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: projects }, { data: stats }] = await Promise.all([
+  const [{ data: orgMember }, { data: projects }, { data: stats }] = await Promise.all([
+    supabase.from('org_members').select('org_id, organizations(org_type)').eq('user_id', user.id).limit(1).maybeSingle(),
     supabase.from('projects').select('id, name, address, city, status, image_url').order('updated_at', { ascending: false }),
     supabase.from('snag_stats_by_project').select('*'),
   ])
+
+  const raw = orgMember?.organizations
+  const org = Array.isArray(raw) ? raw[0] : raw as { org_type?: string } | null | undefined
+  const terms = DASHBOARD_TERMS[(org?.org_type ?? 'builder') as OrgType]
   const statsByProject = new Map((stats ?? []).map(s => [s.project_id, s]))
 
   return (
     <div className="mx-auto max-w-lg px-4 pb-24 pt-6">
       <div className="mb-5 flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Projects</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{terms.projects}</h1>
         <Link href="/projects/new" className="sf-btn-primary px-4 py-2.5 text-sm">
-          <Plus className="h-4 w-4" /> New project
+          <Plus className="h-4 w-4" /> New {terms.project.toLowerCase()}
         </Link>
       </div>
 
       {(projects ?? []).length === 0 ? (
         <div className="sf-card flex flex-col items-center p-10 text-center">
           <FolderOpen className="mb-3 h-10 w-10 text-slate-300" />
-          <p className="text-sm font-medium text-slate-900">No projects yet</p>
-          <p className="mt-1 text-sm text-slate-500">Create your first project to start snagging.</p>
+          <p className="text-sm font-medium text-slate-900">No {terms.projects.toLowerCase()} yet</p>
+          <p className="mt-1 text-sm text-slate-500">Add your first {terms.project.toLowerCase()} to start tracking {terms.issues.toLowerCase()}.</p>
           <Link href="/projects/new" className="sf-btn-primary mt-5 px-5 py-2.5 text-sm">
-            <Plus className="h-4 w-4" /> Create project
+            <Plus className="h-4 w-4" /> Add {terms.project.toLowerCase()}
           </Link>
         </div>
       ) : (
@@ -53,10 +60,10 @@ export default async function ProjectsPage() {
                 <div className="mt-3">
                   <div className="flex items-center justify-between text-xs text-slate-500">
                     <span>{(s?.open_snags ?? 0) + (s?.in_progress_snags ?? 0)} active · {s?.resolved_snags ?? 0} done</span>
-                    <span className="font-semibold text-slate-700">{pct ?? 0}%</span>
+                    <span className="font-semibold text-slate-700">{pct}%</span>
                   </div>
                   <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                    <div className="h-full rounded-full bg-[#1A56DB]" style={{ width: `${pct ?? 0}%` }} />
+                    <div className="h-full rounded-full bg-[#1A56DB]" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               </Link>
