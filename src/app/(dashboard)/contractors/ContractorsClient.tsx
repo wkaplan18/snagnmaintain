@@ -300,7 +300,7 @@ export default function ContractorsClient({ orgId, contractors, terms }: { orgId
                     </p>
                   )}
                 </button>
-                <div className="flex flex-shrink-0 gap-2">
+                <div className="flex flex-shrink-0 flex-col gap-1.5">
                   {c.whatsapp && origin && (
                     <a
                       href={waLink(c.whatsapp, `Hi ${c.name}, here's your SnagandGo link — it shows all snags assigned to you, now and in future:\n${origin}/c/${c.access_token}`)}
