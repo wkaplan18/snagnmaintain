@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { X, Camera, Sparkles, Loader2, ChevronDown, BookUser } from 'lucide-react'
 import PhotoAnnotator from '@/components/snags/PhotoAnnotator'
 import { createClient } from '@/lib/supabase/client'
@@ -35,6 +35,13 @@ const BASE_CATEGORIES = ['paint', 'crack', 'tile', 'water', 'fitting', 'alignmen
 type Step = 'camera' | 'annotate' | 'ai_loading' | 'form' | 'success'
 
 export default function AddSnagSheet({ projectId, unitId, rooms, contractors, terms, orgType, orgId, onClose, onSaved }: Props) {
+  // Lock body scroll while sheet is open — prevents iOS touch-coordinate offset bug
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
+
   const simplified = orgType === 'homeowner'
   const [step, setStep] = useState<Step>('camera')
   const [savedWaUrl, setSavedWaUrl] = useState<string | null>(null)
