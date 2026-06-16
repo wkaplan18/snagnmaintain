@@ -250,8 +250,8 @@ export default function ContractorsClient({ orgId, contractors, terms }: { orgId
         </form>
       )}
 
-      {/* Bulk import (desktop) */}
-      <div className="sf-card mb-4 p-4">
+      {/* Bulk import (desktop only) */}
+      <div className="hidden sm:block sf-card mb-4 p-4">
         <div className="flex items-start gap-3">
           <FileSpreadsheet className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-700" />
           <div className="min-w-0 flex-1">
