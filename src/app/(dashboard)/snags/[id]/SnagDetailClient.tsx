@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, BookUser, Camera, ChevronRight, Loader2, MapPin, Plus, User, CalendarClock, Sparkles } from 'lucide-react'
+import { ArrowLeft, BookUser, Camera, ChevronRight, Loader2, MapPin, Pencil, Plus, User, CalendarClock, Sparkles } from 'lucide-react'
 import { waLink } from '@/lib/whatsappLink'
 import { compressImage } from '@/lib/compressImage'
 import { STATUS_CONFIG, PRIORITY_CONFIG, type Attachment, type Contractor, type DashboardTerms, type SnagStatus } from '@/types'
@@ -48,7 +48,7 @@ function formatWhatsApp(raw: string): string {
   return num
 }
 
-export default function SnagDetailClient({ snag, contractors, terms, orgId }: { snag: SnagDetail; contractors: Contractor[]; terms: DashboardTerms; orgId: string }) {
+export default function SnagDetailClient({ snag, contractors, terms, orgId, rooms }: { snag: SnagDetail; contractors: Contractor[]; terms: DashboardTerms; orgId: string; rooms: { id: string; name: string; room_order: number }[] }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [origin, setOrigin] = useState('')
@@ -66,6 +66,13 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId }: { 
   const [newCTrade, setNewCTrade] = useState('')
   const [newCWhatsApp, setNewCWhatsApp] = useState('')
   const [newCIsInternal, setNewCIsInternal] = useState(false)
+
+  // Edit mode
+  const canEdit = snag.status === 'open' || snag.status === 'assigned'
+  const [editing, setEditing] = useState(false)
+  const [editTitle, setEditTitle] = useState(snag.title)
+  const [editDescription, setEditDescription] = useState(snag.description ?? '')
+  const [editRoomId, setEditRoomId] = useState(snag.room?.id ?? '')
 
   useEffect(() => setOrigin(window.location.origin), [])
 
@@ -153,6 +160,12 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId }: { 
     setContractorBusy(false)
   }
 
+  async function saveEdit() {
+    if (!editTitle.trim()) return
+    await update({ title: editTitle.trim(), description: editDescription.trim() || null, room_id: editRoomId || null })
+    setEditing(false)
+  }
+
   async function pickContact() {
     const nav = navigator as Navigator & { contacts?: { select: (props: string[], opts?: object) => Promise<Array<{ tel?: string[]; name?: string[] }>> } }
     if (!nav.contacts) return
@@ -172,25 +185,88 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId }: { 
         </Link>
       )}
 
-      <div className="flex items-start justify-between gap-3">
-        <h1 className="text-xl font-bold leading-snug tracking-tight text-slate-900">
-          #{snag.snag_number} {snag.title}
-        </h1>
-        <span className={`sf-badge flex-shrink-0 ${status.bg} ${status.color}`}>{status.label}</span>
-      </div>
+      {editing ? (
+        <div className="sf-card mt-1 p-4 space-y-3">
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wide">Title</label>
+            <input
+              autoFocus
+              type="text"
+              value={editTitle}
+              onChange={e => setEditTitle(e.target.value)}
+              className="sf-input"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-slate-500 uppercase tracking-wide">Note</label>
+            <textarea
+              value={editDescription}
+              onChange={e => setEditDescription(e.target.value)}
+              rows={3}
+              placeholder="Any details…"
+              className="sf-input resize-none"
+            />
+          </div>
+          {rooms.length > 0 && (
+            <div>
+              <label className="mb-2 block text-xs font-semibold text-slate-500 uppercase tracking-wide">Room</label>
+              <div className="flex flex-wrap gap-2">
+                {rooms.map(r => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setEditRoomId(editRoomId === r.id ? '' : r.id)}
+                    className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                      editRoomId === r.id
+                        ? 'border-[#1A56DB] bg-[#1A56DB] text-white'
+                        : 'border-slate-200 bg-white text-slate-700'
+                    }`}
+                  >
+                    {r.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="flex gap-2 pt-1">
+            <button onClick={saveEdit} disabled={busy || !editTitle.trim()} className="sf-btn-primary flex-1 py-2.5 text-sm disabled:opacity-50">
+              {busy ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Save changes'}
+            </button>
+            <button onClick={() => { setEditing(false); setEditTitle(snag.title); setEditDescription(snag.description ?? ''); setEditRoomId(snag.room?.id ?? '') }} className="sf-btn-secondary px-4 py-2.5 text-sm">
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-xl font-bold leading-snug tracking-tight text-slate-900">
+              #{snag.snag_number} {snag.title}
+            </h1>
+            <div className="flex flex-shrink-0 items-center gap-2">
+              <span className={`sf-badge ${status.bg} ${status.color}`}>{status.label}</span>
+              {canEdit && (
+                <button onClick={() => setEditing(true)} className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:text-slate-600 active:bg-slate-100 transition-colors">
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-        <span className={`inline-flex items-center gap-1 ${priority.color}`}>
-          <span className={`sf-priority-dot ${priority.dot}`} /> {priority.label}
-        </span>
-        {snag.unit && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {snag.unit.name}{snag.room ? ` · ${snag.room.name}` : ''}</span>}
-        {snag.due_date && <span className="flex items-center gap-1"><CalendarClock className="h-3 w-3" /> due {new Date(snag.due_date).toLocaleDateString('en-ZA')}</span>}
-        {snag.ai_suggested && <span className="flex items-center gap-1 text-violet-600"><Sparkles className="h-3 w-3" /> AI suggested</span>}
-        <span className="capitalize">{snag.category}</span>
-      </div>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            <span className={`inline-flex items-center gap-1 ${priority.color}`}>
+              <span className={`sf-priority-dot ${priority.dot}`} /> {priority.label}
+            </span>
+            {snag.unit && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {snag.unit.name}{snag.room ? ` · ${snag.room.name}` : ''}</span>}
+            {snag.due_date && <span className="flex items-center gap-1"><CalendarClock className="h-3 w-3" /> due {new Date(snag.due_date).toLocaleDateString('en-ZA')}</span>}
+            {snag.ai_suggested && <span className="flex items-center gap-1 text-violet-600"><Sparkles className="h-3 w-3" /> AI suggested</span>}
+            <span className="capitalize">{snag.category}</span>
+          </div>
 
-      {snag.description && (
-        <p className="mt-4 text-sm leading-relaxed text-slate-600">{snag.description}</p>
+          {snag.description && (
+            <p className="mt-4 text-sm leading-relaxed text-slate-600">{snag.description}</p>
+          )}
+        </>
       )}
 
       {/* Photos */}

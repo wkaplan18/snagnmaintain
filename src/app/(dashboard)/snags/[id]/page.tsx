@@ -25,6 +25,10 @@ export default async function SnagDetailPage({ params }: { params: Promise<{ id:
 
   if (!snag) notFound()
 
+  const { data: rooms } = await supabase
+    .from('rooms').select('id, name, room_order')
+    .eq('unit_id', snag.unit_id).order('room_order')
+
   const raw = orgMember?.organizations
   const org = Array.isArray(raw) ? raw[0] : raw as { org_type?: string } | null | undefined
   const terms = DASHBOARD_TERMS[(org?.org_type ?? 'builder') as OrgType]
@@ -41,5 +45,5 @@ export default async function SnagDetailPage({ params }: { params: Promise<{ id:
     project: one(snag.project),
   }
 
-  return <SnagDetailClient snag={flat} contractors={contractors ?? []} terms={terms} orgId={orgMember?.org_id ?? ''} />
+  return <SnagDetailClient snag={flat} contractors={contractors ?? []} terms={terms} orgId={orgMember?.org_id ?? ''} rooms={rooms ?? []} />
 }
