@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, Camera, ChevronRight, Loader2, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { compressImage } from '@/lib/compressImage'
@@ -27,6 +27,9 @@ const WA_ICON = (
 
 export default function AddJobClient() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const qProjectId = searchParams.get('projectId') ?? ''
+  const qUnitId = searchParams.get('unitId') ?? ''
   const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -87,38 +90,46 @@ export default function AddJobClient() {
       setOrgId(_orgId)
       setTerms(DASHBOARD_TERMS[orgType])
 
-      // Find or create project + unit
-      const { data: project } = await supabase
-        .from('projects')
-        .select('id')
-        .eq('org_id', _orgId)
-        .limit(1)
-        .maybeSingle()
+      let _projectId = qProjectId
+      let _unitId = qUnitId
 
-      if (!project) { router.push('/projects/new'); return }
-      setProjectId(project.id)
-
-      let { data: unit } = await supabase
-        .from('units')
-        .select('id')
-        .eq('project_id', project.id)
-        .limit(1)
-        .maybeSingle()
-
-      if (!unit) {
-        const { data: created } = await supabase
-          .from('units')
-          .insert({ project_id: project.id, name: 'Main', unit_type: 'house' })
+      if (!_projectId || !_unitId) {
+        // Auto-detect homeowner's project + unit
+        const { data: project } = await supabase
+          .from('projects')
           .select('id')
-          .single()
-        unit = created
+          .eq('org_id', _orgId)
+          .limit(1)
+          .maybeSingle()
+
+        if (!project) { router.push('/projects/new'); return }
+        _projectId = project.id
+
+        let { data: unit } = await supabase
+          .from('units')
+          .select('id')
+          .eq('project_id', project.id)
+          .limit(1)
+          .maybeSingle()
+
+        if (!unit) {
+          const { data: created } = await supabase
+            .from('units')
+            .insert({ project_id: project.id, name: 'Main', unit_type: 'house' })
+            .select('id')
+            .single()
+          unit = created
+        }
+
+        if (!unit) { router.push('/projects'); return }
+        _unitId = unit.id
       }
 
-      if (!unit) { router.push('/projects'); return }
-      setUnitId(unit.id)
+      setProjectId(_projectId)
+      setUnitId(_unitId)
 
       const [{ data: _rooms }, { data: _contractors }] = await Promise.all([
-        supabase.from('rooms').select('*').eq('unit_id', unit.id).order('room_order'),
+        supabase.from('rooms').select('*').eq('unit_id', _unitId).order('room_order'),
         supabase.from('contractors').select('*').eq('org_id', _orgId).eq('is_active', true).order('name'),
       ])
 

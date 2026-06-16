@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Home, ChevronDown, ChevronRight, Camera, MapPin } from 'lucide-react'
-import AddSnagSheet from '@/components/snags/AddSnagSheet'
 import SnagCard from '@/components/snags/SnagCard'
 import { useSnags } from '@/hooks/useSnags'
 import { DEFAULT_ROOMS, type Contractor, type DashboardTerms, type OrgType, type Room, type UnitType } from '@/types'
@@ -31,37 +30,26 @@ interface ProjectInfo {
 
 const UNIT_TYPES: UnitType[] = ['apartment', 'house', 'townhouse', 'villa', 'penthouse', 'office', 'retail', 'other']
 
-function UnitSnags({ projectId, unitId, rooms, contractors, orgId, terms, orgType, bare = false }: { projectId: string; unitId: string; rooms: Room[]; contractors: Contractor[]; orgId: string; terms: DashboardTerms; orgType: OrgType; bare?: boolean }) {
-  const { snags, loading, refetch } = useSnags({ unitId })
-  const [adding, setAdding] = useState(false)
+function UnitSnags({ projectId, unitId, terms, bare = false }: { projectId: string; unitId: string; terms: DashboardTerms; bare?: boolean }) {
+  const { snags, loading } = useSnags({ unitId })
 
   return (
     <div className={bare ? 'pt-3' : 'border-t border-slate-100 px-4 pb-4 pt-3'}>
       {loading ? (
         <p className="py-2 text-xs text-slate-400">Loading {terms.issues.toLowerCase()}…</p>
       ) : snags.length === 0 ? (
-        <p className="py-2 text-xs text-slate-400">No {terms.issues.toLowerCase()} logged in this unit yet.</p>
+        <p className="py-2 text-xs text-slate-400">No {terms.issues.toLowerCase()} logged yet.</p>
       ) : (
         <div className="space-y-2">
           {snags.map(s => <SnagCard key={s.id} snag={s} />)}
         </div>
       )}
-      <button onClick={() => setAdding(true)} className="sf-btn-primary mt-3 w-full py-2.5 text-sm">
+      <Link
+        href={`/snags/new?projectId=${projectId}&unitId=${unitId}`}
+        className="sf-btn-primary mt-3 flex w-full items-center justify-center gap-2 py-2.5 text-sm"
+      >
         <Camera className="h-4 w-4" /> Add {terms.issue.toLowerCase()}
-      </button>
-      {adding && (
-        <AddSnagSheet
-          projectId={projectId}
-          unitId={unitId}
-          rooms={rooms}
-          contractors={contractors}
-          terms={terms}
-          orgType={orgType}
-          orgId={orgId}
-          onClose={() => setAdding(false)}
-          onSaved={() => { setAdding(false); refetch() }}
-        />
-      )}
+      </Link>
     </div>
   )
 }
@@ -133,7 +121,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
         </div>
         {unit ? (
           <div className="mt-6">
-            <UnitSnags projectId={project.id} unitId={unit.id} rooms={unit.rooms} contractors={contractors} orgId={project.org_id} terms={terms} orgType={orgType} bare />
+            <UnitSnags projectId={project.id} unitId={unit.id} terms={terms} bare />
           </div>
         ) : (
           <p className="mt-6 text-sm text-slate-400">Setting up your home…</p>
@@ -219,7 +207,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
                   </div>
                   {open ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
                 </button>
-                {open && <UnitSnags projectId={project.id} unitId={u.id} rooms={u.rooms} contractors={contractors} orgId={project.org_id} terms={terms} orgType={orgType} />}
+                {open && <UnitSnags projectId={project.id} unitId={u.id} terms={terms} />}
               </div>
             )
           })}
