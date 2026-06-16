@@ -9,7 +9,7 @@ export default async function SnagsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: orgMember }, { data: initialSnags }, { data: projects }] = await Promise.all([
+  const [{ data: orgMember }, { data: initialSnags }, { data: projects }, { count: fixedCount }] = await Promise.all([
     supabase.from('org_members').select('org_id, organizations(org_type)').eq('user_id', user.id).limit(1).maybeSingle(),
     supabase.from('snags').select(`
       *, attachments(*),
@@ -17,6 +17,7 @@ export default async function SnagsPage() {
       room:rooms(id, name)
     `).in('status', ['open', 'assigned', 'rejected']).order('created_at', { ascending: false }),
     supabase.from('projects').select('id, name').order('name'),
+    supabase.from('snags').select('id', { count: 'exact', head: true }).eq('status', 'fixed'),
   ])
 
   const raw = orgMember?.organizations
@@ -28,6 +29,7 @@ export default async function SnagsPage() {
       initialSnags={initialSnags ?? []}
       projects={projects ?? []}
       terms={terms}
+      fixedCount={fixedCount ?? 0}
     />
   )
 }

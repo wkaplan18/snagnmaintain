@@ -8,7 +8,7 @@ import { compressImage } from '@/lib/compressImage'
 import { DASHBOARD_TERMS } from '@/types'
 import type { Contractor, DashboardTerms, OrgType, Room } from '@/types'
 
-type Step = 'photo' | 'details' | 'room' | 'assign' | 'whatsapp'
+type Step = 'project' | 'photo' | 'details' | 'room' | 'assign' | 'whatsapp'
 
 function formatWhatsApp(raw: string): string {
   const num = raw.replace(/[\s\-().]/g, '')
@@ -169,6 +169,8 @@ export default function AddJobClient() {
   const [terms, setTerms] = useState<DashboardTerms>(DASHBOARD_TERMS['homeowner'])
   const [rooms, setRooms] = useState<Room[]>([])
   const [contractors, setContractors] = useState<Contractor[]>([])
+  const [allProjects, setAllProjects] = useState<{ id: string; name: string }[]>([])
+  const [supportsContacts, setSupportsContacts] = useState(false)
 
   // Wizard state
   const [step, setStep] = useState<Step>('photo')
@@ -200,6 +202,8 @@ export default function AddJobClient() {
   const [waName, setWaName] = useState<string | null>(null)
 
   useEffect(() => {
+    setSupportsContacts(typeof navigator !== 'undefined' && 'contacts' in navigator)
+
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
@@ -223,28 +227,37 @@ export default function AddJobClient() {
       let _unitId = qUnitId
 
       if (!_projectId || !_unitId) {
-        // Auto-detect homeowner's project + unit
-        const { data: project } = await supabase
+        const { data: projectsData } = await supabase
           .from('projects')
-          .select('id')
+          .select('id, name')
           .eq('org_id', _orgId)
-          .limit(1)
-          .maybeSingle()
+          .order('name')
 
-        if (!project) { router.push('/projects/new'); return }
-        _projectId = project.id
+        const projects = projectsData ?? []
+        if (projects.length === 0) { router.push('/projects/new'); return }
+
+        if (projects.length > 1) {
+          // Let user pick which project
+          setAllProjects(projects)
+          setOrgId(_orgId)
+          setReady(true)
+          setStep('project')
+          return
+        }
+
+        _projectId = projects[0].id
 
         let { data: unit } = await supabase
           .from('units')
           .select('id')
-          .eq('project_id', project.id)
+          .eq('project_id', _projectId)
           .limit(1)
           .maybeSingle()
 
         if (!unit) {
           const { data: created } = await supabase
             .from('units')
-            .insert({ project_id: project.id, name: 'Main', unit_type: 'house' })
+            .insert({ project_id: _projectId, name: 'Main', unit_type: 'house' })
             .select('id')
             .single()
           unit = created
@@ -287,6 +300,25 @@ export default function AddJobClient() {
     setPhoto(compressed)
     setPhotoUrl(URL.createObjectURL(compressed))
     if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  async function selectProject(id: string) {
+    setProjectId(id)
+    let { data: unit } = await supabase.from('units').select('id').eq('project_id', id).limit(1).maybeSingle()
+    if (!unit) {
+      const { data: created } = await supabase
+        .from('units').insert({ project_id: id, name: 'Main', unit_type: 'house' }).select('id').single()
+      unit = created
+    }
+    if (!unit) return
+    setUnitId(unit.id)
+    const [{ data: _rooms }, { data: _contractors }] = await Promise.all([
+      supabase.from('rooms').select('*').eq('unit_id', unit.id).order('room_order'),
+      supabase.from('contractors').select('*').eq('org_id', orgId).eq('is_active', true).order('name'),
+    ])
+    setRooms(_rooms ?? [])
+    setContractors(_contractors ?? [])
+    setStep('photo')
   }
 
   async function addRoom() {
@@ -413,6 +445,47 @@ export default function AddJobClient() {
     }
   }
 
+  const hasProjectStep = allProjects.length > 1
+  const totalSteps = hasProjectStep ? 4 : 3
+  const stepNum = (s: Step) => {
+    const base: Record<Step, number> = { project: 1, photo: hasProjectStep ? 2 : 1, details: hasProjectStep ? 3 : 2, room: hasProjectStep ? 4 : 3, assign: 0, whatsapp: 0 }
+    return base[s]
+  }
+
+  // ─── STEP: Project picker ────────────────────────────────────────────────────
+  if (step === 'project') {
+    return (
+      <div className="flex min-h-screen flex-col bg-white">
+        <div className="border-b border-slate-200 px-4 pt-safe pb-4">
+          <div className="flex items-center gap-3 pt-3">
+            <button onClick={() => router.push('/snags')} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500">
+              <X className="h-4 w-4" />
+            </button>
+            <div>
+              <p className="text-xs text-slate-400">Step 1 of {totalSteps}</p>
+              <h1 className="text-base font-bold text-slate-900">Which {terms.project.toLowerCase()}?</h1>
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 divide-y divide-slate-100 overflow-y-auto">
+          {allProjects.map(p => (
+            <button
+              key={p.id}
+              onClick={() => selectProject(p.id)}
+              className="flex w-full items-center gap-3 px-4 py-4 hover:bg-slate-50 active:bg-slate-100 transition-colors text-left"
+            >
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#EEF4FF] text-xl">
+                🏠
+              </div>
+              <p className="flex-1 text-sm font-semibold text-slate-900">{p.name}</p>
+              <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-300" />
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   // ─── STEP: Photo ─────────────────────────────────────────────────────────────
   if (step === 'photo') {
     return (
@@ -423,7 +496,7 @@ export default function AddJobClient() {
               <X className="h-4 w-4" />
             </button>
             <div>
-              <p className="text-xs text-slate-400">Step 1 of 3</p>
+              <p className="text-xs text-slate-400">Step {stepNum('photo')} of {totalSteps}</p>
               <h1 className="text-base font-bold text-slate-900">Add a photo</h1>
             </div>
           </div>
@@ -502,7 +575,7 @@ export default function AddJobClient() {
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div>
-              <p className="text-xs text-slate-400">Step 2 of 3</p>
+              <p className="text-xs text-slate-400">Step {stepNum('details')} of {totalSteps}</p>
               <h1 className="text-base font-bold text-slate-900">Describe the problem</h1>
             </div>
           </div>
@@ -564,7 +637,7 @@ export default function AddJobClient() {
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div>
-              <p className="text-xs text-slate-400">Step 3 of 3</p>
+              <p className="text-xs text-slate-400">Step {stepNum('room')} of {totalSteps}</p>
               <h1 className="text-base font-bold text-slate-900">Which room?</h1>
             </div>
           </div>
@@ -718,14 +791,16 @@ export default function AddJobClient() {
                   placeholder="WhatsApp number"
                   className="sf-input flex-1"
                 />
-                <button
-                  type="button"
-                  onClick={pickContact}
-                  title="Choose from contacts"
-                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 active:bg-slate-100"
-                >
-                  <BookUser className="h-5 w-5" />
-                </button>
+                {supportsContacts && (
+                  <button
+                    type="button"
+                    onClick={pickContact}
+                    title="Choose from contacts"
+                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 active:bg-slate-100"
+                  >
+                    <BookUser className="h-5 w-5" />
+                  </button>
+                )}
               </div>
               <div className="flex gap-2 pt-1">
                 <button onClick={addAndAssignContractor} disabled={contractorBusy || !newName.trim()} className="sf-btn-primary flex-1 py-3 text-sm disabled:opacity-60">
