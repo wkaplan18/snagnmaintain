@@ -13,10 +13,22 @@ export default async function SettingsPage() {
     .eq('id', user.id)
     .single()
 
+  const { data: membership } = await supabase
+    .from('org_members')
+    .select('organizations(name, org_type)')
+    .eq('user_id', user.id)
+    .single()
+
+  const org = Array.isArray(membership?.organizations)
+    ? membership.organizations[0]
+    : membership?.organizations
+
   return (
     <SettingsClient
       email={user.email ?? ''}
       profile={profile ?? { full_name: null, whatsapp: null, phone: null, job_title: null }}
+      orgName={org?.name ?? null}
+      orgType={org?.org_type ?? null}
     />
   )
 }

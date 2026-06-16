@@ -3,15 +3,20 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, User, Check, LogOut } from 'lucide-react'
+import { ArrowLeft, User, Check, LogOut, Building2 } from 'lucide-react'
 import Link from 'next/link'
+import { ORG_TYPE_CONFIG } from '@/types'
+import type { OrgType } from '@/types'
 
 interface Props {
   email: string
   profile: { full_name: string | null; whatsapp: string | null; phone: string | null; job_title: string | null }
+  orgName: string | null
+  orgType: string | null
 }
 
-export default function SettingsClient({ email, profile }: Props) {
+export default function SettingsClient({ email, profile, orgName, orgType }: Props) {
+  const orgTypeConfig = orgType ? ORG_TYPE_CONFIG[orgType as OrgType] : null
   const [fullName, setFullName] = useState(profile.full_name ?? '')
   const [whatsapp, setWhatsapp] = useState(profile.whatsapp ?? '')
   const [phone, setPhone] = useState(profile.phone ?? '')
@@ -62,6 +67,19 @@ export default function SettingsClient({ email, profile }: Props) {
           <p className="text-sm text-slate-500">{email}</p>
         </div>
       </div>
+
+      {orgTypeConfig && (
+        <div className="sf-card mb-4 flex items-center gap-3 p-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEF4FF]">
+            <Building2 className="h-5 w-5 text-[#1A56DB]" />
+          </div>
+          <div>
+            <p className="text-xs font-medium text-slate-500">Organisation type</p>
+            <p className="text-sm font-semibold text-slate-900">{orgTypeConfig.label}</p>
+            {orgName && <p className="text-xs text-slate-400">{orgName}</p>}
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSave} className="sf-card space-y-4 p-5">
         <div>
