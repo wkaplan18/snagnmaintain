@@ -96,7 +96,7 @@ function SnagsInner({ terms }: { terms: DashboardTerms }) {
 }
 
 function SnagsWithTerms() {
-  const [terms, setTerms] = useState<DashboardTerms>(DASHBOARD_TERMS['builder'])
+  const [terms, setTerms] = useState<DashboardTerms | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -110,9 +110,15 @@ function SnagsWithTerms() {
         .maybeSingle()
       const raw = data?.organizations
       const org = Array.isArray(raw) ? raw[0] : raw as { org_type?: string } | null | undefined
-      if (org?.org_type) setTerms(DASHBOARD_TERMS[org.org_type as OrgType])
+      setTerms(DASHBOARD_TERMS[(org?.org_type as OrgType) ?? 'builder'])
     })
   }, [])
+
+  if (!terms) return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-slate-200 border-t-[#1A56DB]" />
+    </div>
+  )
 
   return (
     <Suspense>
