@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -14,22 +14,27 @@ export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  // With a password we sign in directly; left blank we fall back to a magic link.
-  async function handleEmailLogin(e: React.FormEvent) {
+  async function handleRegister(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
+
     if (password) {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${location.origin}/auth/callback` },
+      })
       if (error) {
         setError(error.message)
         setLoading(false)
       } else {
-        router.push('/dashboard')
-        router.refresh()
+        setSent(true)
+        setLoading(false)
       }
       return
     }
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: `${location.origin}/auth/callback` },
@@ -42,7 +47,7 @@ export default function LoginPage() {
     setLoading(false)
   }
 
-  async function handleGoogleLogin() {
+  async function handleGoogle() {
     setLoading(true)
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -52,7 +57,6 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-sf-base px-5">
-      {/* Logo */}
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1A56DB]">
           <svg viewBox="0 0 32 32" fill="none" className="h-9 w-9">
@@ -61,8 +65,8 @@ export default function LoginPage() {
             <path d="M21.5 22l2 2 3-3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">SnagandGo</h1>
-        <p className="mt-1 text-sm text-slate-500">Construction snagging made simple</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">snagnmaintain</h1>
+        <p className="mt-1 text-sm text-slate-500">Property maintenance, sorted</p>
       </div>
 
       <div className="sf-card w-full max-w-sm p-6">
@@ -75,16 +79,15 @@ export default function LoginPage() {
             </div>
             <h2 className="text-base font-semibold text-slate-900">Check your email</h2>
             <p className="mt-2 text-sm text-slate-500">
-              We sent a magic link to <strong>{email}</strong>. Tap the link to sign in.
+              We sent a link to <strong>{email}</strong>. Tap it to activate your account.
             </p>
           </div>
         ) : (
           <>
-            <h2 className="mb-5 text-lg font-semibold text-slate-900">Sign in to SnagandGo</h2>
+            <h2 className="mb-5 text-lg font-semibold text-slate-900">Create your account</h2>
 
-            {/* Google OAuth */}
             <button
-              onClick={handleGoogleLogin}
+              onClick={handleGoogle}
               disabled={loading}
               className="sf-btn-secondary mb-4 w-full"
             >
@@ -94,7 +97,7 @@ export default function LoginPage() {
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
-              Continue with Google
+              Sign up with Google
             </button>
 
             <div className="mb-4 flex items-center gap-3">
@@ -103,8 +106,7 @@ export default function LoginPage() {
               <div className="h-px flex-1 bg-slate-200" />
             </div>
 
-            {/* Magic link */}
-            <form onSubmit={handleEmailLogin} className="space-y-3">
+            <form onSubmit={handleRegister} className="space-y-3">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">Email address</label>
                 <input
@@ -130,7 +132,7 @@ export default function LoginPage() {
               </div>
               {error && <p className="text-xs text-red-600">{error}</p>}
               <button type="submit" disabled={loading} className="sf-btn-primary w-full">
-                {loading ? 'Signing in…' : password ? 'Sign in' : 'Send magic link'}
+                {loading ? 'Creating account…' : password ? 'Create account' : 'Send magic link'}
               </button>
             </form>
           </>
@@ -138,13 +140,13 @@ export default function LoginPage() {
       </div>
 
       <p className="mt-4 text-center text-sm text-slate-500">
-        Don&apos;t have an account?{' '}
-        <Link href="/register" className="font-semibold text-[#1A56DB] hover:underline">Register free</Link>
+        Already have an account?{' '}
+        <Link href="/login" className="font-semibold text-[#1A56DB] hover:underline">Sign in</Link>
       </p>
 
       <p className="mt-4 text-center text-xs text-slate-400">
-        By signing in you agree to our Terms of Service and Privacy Policy.
-        <br />POPIA compliant · Data stored in South Africa
+        By registering you agree to our Terms of Service and Privacy Policy.
+        <br />POPIA compliant · Data stored securely
       </p>
     </div>
   )

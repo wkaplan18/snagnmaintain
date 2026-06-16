@@ -106,7 +106,7 @@ export default function LandingPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link href="/login" className="hidden text-sm font-medium text-white/70 hover:text-white transition-colors sm:block">Sign in</Link>
-          <Link href="/login" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95" style={{ background: '#1A56DB', boxShadow: '0 0 20px rgba(26,86,219,0.4)' }}>
+          <Link href="/register" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95" style={{ background: '#1A56DB', boxShadow: '0 0 20px rgba(26,86,219,0.4)' }}>
             Get started free
           </Link>
         </div>
@@ -143,7 +143,7 @@ export default function LandingPage() {
 
         {/* CTAs */}
         <div className="animate-fade-up flex flex-wrap items-center justify-center gap-3" style={{ opacity: 0, animationDelay: '500ms' }}>
-          <Link href="/login" className="group flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold text-white transition-all hover:scale-105 active:scale-95" style={{ background: 'linear-gradient(135deg, #1A56DB, #6366F1)', boxShadow: '0 4px 30px rgba(26,86,219,0.5)' }}>
+          <Link href="/register" className="group flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold text-white transition-all hover:scale-105 active:scale-95" style={{ background: 'linear-gradient(135deg, #1A56DB, #6366F1)', boxShadow: '0 4px 30px rgba(26,86,219,0.5)' }}>
             Start for free
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
@@ -253,7 +253,7 @@ export default function LandingPage() {
           <p className="mx-auto mb-10 max-w-md text-lg leading-relaxed text-white/60">
             Join builders, hotel managers, homeowners and facilities teams who log, assign, and close maintenance faster.
           </p>
-          <Link href="/login" className="group inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-bold transition-all hover:scale-105 active:scale-95" style={{ color: '#1A56DB', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
+          <Link href="/register" className="group inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-bold transition-all hover:scale-105 active:scale-95" style={{ color: '#1A56DB', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
             Start free — no credit card
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
