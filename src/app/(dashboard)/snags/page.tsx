@@ -13,7 +13,7 @@ export default async function SnagsPage() {
     supabase.from('org_members').select('org_id, organizations(org_type)').eq('user_id', user.id).limit(1).maybeSingle(),
     supabase.from('snags').select(`
       *, attachments(*),
-      contractor:contractors(id, name, company, whatsapp, trade),
+      contractor:contractors(id, name, company, whatsapp, trade, access_token),
       room:rooms(id, name)
     `).in('status', ['open', 'assigned', 'rejected']).order('created_at', { ascending: false }),
     supabase.from('projects').select('id, name').order('name'),
