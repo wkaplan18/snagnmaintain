@@ -45,8 +45,7 @@ export default async function DashboardPage() {
     supabase
       .from('snags')
       .select('id', { count: 'exact', head: true })
-      .eq('status', 'fixed')
-      .eq('project_id', supabase.from('projects').select('id').eq('org_id', orgId) as never),
+      .eq('status', 'fixed'),
     supabase
       .from('projects')
       .select('id, name, status, image_url, city')
