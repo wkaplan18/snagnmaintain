@@ -26,6 +26,19 @@ const ORG_TYPE_ICONS: Record<OrgType, React.ElementType> = {
 
 const ORG_TYPES = Object.entries(ORG_TYPE_CONFIG) as [OrgType, { label: string; description: string }][]
 
+const ORG_NAME_CONFIG: Record<OrgType, { label: string; placeholder: string }> = {
+  builder:           { label: 'Company name',    placeholder: 'e.g. Kaplan Developments' },
+  hotel:             { label: 'Property name',   placeholder: 'e.g. The Grand Hotel' },
+  homeowner:         { label: 'Household name',  placeholder: 'e.g. The Kaplan Home' },
+  property_manager:  { label: 'Business name',   placeholder: 'e.g. Kaplan Property Group' },
+  body_corporate:    { label: 'Complex name',    placeholder: 'e.g. Oak Lane Estate' },
+  facilities:        { label: 'Company name',    placeholder: 'e.g. Kaplan Facilities Management' },
+  short_term_rental: { label: 'Property name',   placeholder: 'e.g. Sea View Cottage' },
+  restaurant:        { label: 'Restaurant name', placeholder: 'e.g. The Kaplan Kitchen' },
+  school:            { label: 'School name',     placeholder: 'e.g. Kaplan Academy' },
+  retail:            { label: 'Business name',   placeholder: 'e.g. Kaplan Retail Group' },
+}
+
 export default function OnboardingClient({ email }: { email: string }) {
   const [step, setStep] = useState<1 | 2>(1)
   const [orgType, setOrgType] = useState<OrgType | null>(null)
@@ -145,14 +158,16 @@ export default function OnboardingClient({ email }: { email: string }) {
               </div>
             )}
 
-            <h2 className="text-lg font-bold text-slate-900">Name your organisation</h2>
+            <h2 className="text-lg font-bold text-slate-900">
+              {orgType ? ORG_NAME_CONFIG[orgType].label : 'Name your organisation'}
+            </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Your projects and snags live under your organisation. Invite your team later.
+              Your projects and snags live here. You can invite your team later.
             </p>
 
             <form onSubmit={handleCreate} className="mt-5">
               <label htmlFor="orgName" className="block text-sm font-medium text-slate-700">
-                Organisation name
+                {orgType ? ORG_NAME_CONFIG[orgType].label : 'Organisation name'}
               </label>
               <input
                 id="orgName"
@@ -162,7 +177,7 @@ export default function OnboardingClient({ email }: { email: string }) {
                 autoFocus
                 value={orgName}
                 onChange={(e) => setOrgName(e.target.value)}
-                placeholder="e.g. Kaplan Developments"
+                placeholder={orgType ? ORG_NAME_CONFIG[orgType].placeholder : 'e.g. Kaplan Developments'}
                 className="mt-1.5 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1A56DB] focus:outline-none focus:ring-2 focus:ring-[#1A56DB]/20"
               />
 
