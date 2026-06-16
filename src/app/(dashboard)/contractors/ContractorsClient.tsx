@@ -95,7 +95,7 @@ export default function ContractorsClient({ orgId, contractors, terms }: { orgId
     ws['!cols'] = TEMPLATE_HEADERS.map(() => ({ wch: 22 }))
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Contractors')
-    XLSX.writeFile(wb, 'snagandgo-contractors-template.xlsx')
+    XLSX.writeFile(wb, 'contractors-template.xlsx')
   }
 
   async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -155,9 +155,9 @@ export default function ContractorsClient({ orgId, contractors, terms }: { orgId
 
   function portalMailtoLink(c: Contractor) {
     const url = `${origin}/c/${c.access_token}`
-    const subject = encodeURIComponent('Your SnagandGo portal link')
+    const subject = encodeURIComponent('Your maintenance portal link')
     const body = encodeURIComponent(
-      `Hi ${c.name},\n\nHere is your secure SnagandGo portal link — it shows all snags assigned to you:\n\n${url}\n\nThis link is private, please do not share it with anyone.`
+      `Hi ${c.name},\n\nHere is your secure portal link — it shows all jobs assigned to you:\n\n${url}\n\nThis link is private, please do not share it with anyone.`
     )
     return `mailto:${c.email ? encodeURIComponent(c.email) : ''}?subject=${subject}&body=${body}`
   }
@@ -313,7 +313,7 @@ export default function ContractorsClient({ orgId, contractors, terms }: { orgId
                 <div className="flex flex-shrink-0 flex-col gap-1.5">
                   {c.whatsapp && origin && (
                     <a
-                      href={waLink(c.whatsapp, `Hi ${c.name}, here's your SnagandGo link — it shows all jobs assigned to you, now and in future:\n${origin}/c/${c.access_token}?t=${Date.now()}`)}
+                      href={waLink(c.whatsapp, `Hi ${c.name}, here's your portal link — it shows all jobs assigned to you, now and in future:\n${origin}/c/${c.access_token}?t=${Date.now()}`)}
                       target="_blank"
                       rel="noopener"
                       className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1EBE5B] active:scale-[0.97] transition-[transform,opacity]"

@@ -389,10 +389,6 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
         onChange={handlePhotoSelect}
       />
 
-      <p className="mt-4 text-center text-xs text-slate-400 px-6">
-        Powered by SnagandGo · kaplan.co.za/snagandgo
-        <br />This link is private — do not share
-      </p>
     </div>
   )
 }

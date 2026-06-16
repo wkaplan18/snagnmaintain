@@ -3,7 +3,7 @@
 
 const INTERAKT_API_URL = 'https://api.interakt.ai/v1/public/message/'
 const API_KEY = process.env.INTERAKT_API_KEY ?? ''
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kaplan.co.za/snagandgo'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? ''
 
 interface WhatsAppSnagPayload {
   contractorName: string
