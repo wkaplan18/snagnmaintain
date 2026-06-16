@@ -204,23 +204,27 @@ export default function ContractorsClient({ orgId, contractors, terms }: { orgId
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className={isInternal ? '' : 'grid grid-cols-2 gap-3'}>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
               <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Sipho Dlamini" className="sf-input" />
             </div>
+            {!isInternal && (
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">Trade</label>
+                <select value={trade} onChange={e => setTrade(e.target.value)} className="sf-input">
+                  <option value="">Select…</option>
+                  {TRADES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            )}
+          </div>
+          {!isInternal && (
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">Trade</label>
-              <select value={trade} onChange={e => setTrade(e.target.value)} className="sf-input">
-                <option value="">Select…</option>
-                {TRADES.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">Company <span className="font-normal text-slate-400">(optional)</span></label>
+              <input type="text" value={company} onChange={e => setCompany(e.target.value)} placeholder="Dlamini Painting cc" className="sf-input" />
             </div>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">Company <span className="font-normal text-slate-400">(optional)</span></label>
-            <input type="text" value={company} onChange={e => setCompany(e.target.value)} placeholder="Dlamini Painting cc" className="sf-input" />
-          </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700">WhatsApp</label>
