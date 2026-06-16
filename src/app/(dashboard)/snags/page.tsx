@@ -181,10 +181,22 @@ function SnagsWithTerms() {
           .maybeSingle()
 
         if (project) {
-          const [{ data: unit }, { data: contractors }] = await Promise.all([
+          const [unitRes, { data: contractors }] = await Promise.all([
             supabase.from('units').select('id, rooms(*)').eq('project_id', project.id).limit(1).maybeSingle(),
             supabase.from('contractors').select('*').eq('org_id', orgId).eq('is_active', true).order('name'),
           ])
+
+          let unit = unitRes.data
+
+          // Homeowners don't go through a unit-creation step — auto-create one if missing
+          if (!unit) {
+            const { data: created } = await supabase
+              .from('units')
+              .insert({ project_id: project.id, name: 'Main', unit_type: 'house' })
+              .select('id')
+              .single()
+            if (created) unit = { id: created.id, rooms: [] }
+          }
 
           if (unit) {
             const rooms = Array.isArray(unit.rooms) ? unit.rooms : []
