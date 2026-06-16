@@ -27,16 +27,16 @@ const ORG_TYPE_ICONS: Record<OrgType, React.ElementType> = {
 const ORG_TYPES = Object.entries(ORG_TYPE_CONFIG) as [OrgType, { label: string; description: string }][]
 
 const ORG_NAME_CONFIG: Record<OrgType, { label: string; placeholder: string; hint: string }> = {
-  builder:           { label: 'Company name',    placeholder: 'e.g. Kaplan Developments',         hint: 'Your projects, snags and contractors all live under your company.' },
-  hotel:             { label: 'Property name',   placeholder: 'e.g. The Grand Hotel',             hint: 'Your rooms, maintenance jobs and staff all live under your property.' },
-  homeowner:         { label: 'Household name',  placeholder: 'e.g. The Kaplan Home',             hint: 'Your home, maintenance tasks and service providers all live here.' },
-  property_manager:  { label: 'Business name',   placeholder: 'e.g. Kaplan Property Group',       hint: 'Your properties, tenants and maintenance jobs all live under your business.' },
-  body_corporate:    { label: 'Complex name',    placeholder: 'e.g. Oak Lane Estate',             hint: 'Your common areas, maintenance jobs and contractors all live here.' },
-  facilities:        { label: 'Company name',    placeholder: 'e.g. Kaplan Facilities Management',hint: 'Your sites, maintenance jobs and teams all live under your company.' },
-  short_term_rental: { label: 'Property name',   placeholder: 'e.g. Sea View Cottage',            hint: 'Your property, maintenance tasks and service providers all live here.' },
-  restaurant:        { label: 'Restaurant name', placeholder: 'e.g. The Kaplan Kitchen',          hint: 'Your venue, maintenance jobs and contractors all live here.' },
-  school:            { label: 'School name',     placeholder: 'e.g. Kaplan Academy',              hint: 'Your campus, maintenance tasks and contractors all live under your school.' },
-  retail:            { label: 'Business name',   placeholder: 'e.g. Kaplan Retail Group',         hint: 'Your stores, maintenance jobs and contractors all live under your business.' },
+  builder:           { label: 'Company name',    placeholder: 'Your company name',    hint: 'Your projects, snags and contractors all live under your company.' },
+  hotel:             { label: 'Property name',   placeholder: 'Your property name',   hint: 'Your rooms, maintenance jobs and staff all live under your property.' },
+  homeowner:         { label: 'Household name',  placeholder: 'Your household name',  hint: 'Your home, maintenance tasks and service providers all live here.' },
+  property_manager:  { label: 'Business name',   placeholder: 'Your business name',   hint: 'Your properties, tenants and maintenance jobs all live under your business.' },
+  body_corporate:    { label: 'Complex name',    placeholder: 'Your complex name',    hint: 'Your common areas, maintenance jobs and contractors all live here.' },
+  facilities:        { label: 'Company name',    placeholder: 'Your company name',    hint: 'Your sites, maintenance jobs and teams all live under your company.' },
+  short_term_rental: { label: 'Property name',   placeholder: 'Your property name',   hint: 'Your property, maintenance tasks and service providers all live here.' },
+  restaurant:        { label: 'Restaurant name', placeholder: 'Your restaurant name', hint: 'Your venue, maintenance jobs and contractors all live here.' },
+  school:            { label: 'School name',     placeholder: 'Your school name',     hint: 'Your campus, maintenance tasks and contractors all live under your school.' },
+  retail:            { label: 'Business name',   placeholder: 'Your business name',   hint: 'Your stores, maintenance jobs and contractors all live under your business.' },
 }
 
 export default function OnboardingClient({ email }: { email: string }) {
