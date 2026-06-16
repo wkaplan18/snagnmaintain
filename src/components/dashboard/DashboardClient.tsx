@@ -65,6 +65,38 @@ export default function DashboardClient({ orgName, terms, projects, projectStats
       </div>
 
       <div className="mx-auto max-w-2xl px-4 pt-4 space-y-5">
+
+        {/* Get started — shown only when no projects exist yet */}
+        {projects.length === 0 && (
+          <div className="rounded-2xl border border-[#1A56DB]/20 bg-[#EEF4FF] p-5">
+            <p className="text-base font-bold text-slate-900">Welcome — let's get you set up 👋</p>
+            <p className="mt-1 text-sm text-slate-500">Three steps to get your first job sent to a service provider.</p>
+            <div className="mt-4 space-y-3">
+              {[
+                { n: 1, label: `Add your ${terms.project.toLowerCase()}`, sub: `Give it a name and address`, href: '/projects/new', done: false },
+                { n: 2, label: `Log your first ${terms.issue.toLowerCase()}`, sub: 'Take a photo and describe the problem', href: null, done: false },
+                { n: 3, label: 'Send it to your service provider', sub: 'They get a WhatsApp link to view and update it', href: null, done: false },
+              ].map(step => (
+                <div key={step.n} className="flex items-start gap-3">
+                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#1A56DB] text-xs font-bold text-white">
+                    {step.n}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-slate-900">{step.label}</p>
+                    <p className="text-xs text-slate-500">{step.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Link
+              href="/projects/new"
+              className="sf-btn-primary mt-5 flex w-full items-center justify-center gap-2 py-3"
+            >
+              <Plus className="h-4 w-4" /> Add your first {terms.project.toLowerCase()}
+            </Link>
+          </div>
+        )}
+
         {/* Needs Review alert */}
         {needsReview > 0 && (
           <Link

@@ -32,11 +32,13 @@ function formatWhatsApp(raw: string): string {
 }
 const BASE_CATEGORIES = ['paint', 'crack', 'tile', 'water', 'fitting', 'alignment', 'finishing', 'electrical', 'plumbing', 'structural', 'carpentry', 'glazing', 'hvac', 'other']
 
-type Step = 'camera' | 'annotate' | 'ai_loading' | 'form'
+type Step = 'camera' | 'annotate' | 'ai_loading' | 'form' | 'success'
 
 export default function AddSnagSheet({ projectId, unitId, rooms, contractors, terms, orgType, orgId, onClose, onSaved }: Props) {
   const simplified = orgType === 'homeowner'
   const [step, setStep] = useState<Step>('camera')
+  const [savedWaUrl, setSavedWaUrl] = useState<string | null>(null)
+  const [savedContractorName, setSavedContractorName] = useState<string | null>(null)
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
   const [aiSuggestion, setAiSuggestion] = useState<AISuggestion | null>(null)
@@ -217,13 +219,17 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
         await fetch('/api/uploads/snag-photo', { method: 'POST', body: formData })
       }
 
-      // Trigger WhatsApp if assigned
-      if (contractorId && snag.id) {
-        await fetch('/api/notifications/whatsapp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ snagId: snag.id }),
-        })
+      // Build WhatsApp prompt if contractor has a number
+      const assignedContractor = localContractors.find(c => c.id === contractorId)
+      if (assignedContractor?.whatsapp && snag.id) {
+        const digits = assignedContractor.whatsapp.replace(/\D/g, '')
+        const e164 = digits.startsWith('0') ? '27' + digits.slice(1) : digits
+        const msg = `Hi ${assignedContractor.name}, you've been assigned a new ${terms.issue.toLowerCase()}: "${title}". View and update it here:\n${window.location.origin}/c/${assignedContractor.access_token}`
+        setSavedWaUrl(`https://wa.me/${e164}?text=${encodeURIComponent(msg)}`)
+        setSavedContractorName(assignedContractor.name)
+        onSaved()
+        setStep('success')
+        return
       }
 
       onSaved()
@@ -290,6 +296,40 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
           }}
           onSkip={() => photo && proceedAfterPhoto(photo)}
         />
+      )}
+
+      {/* Success + WhatsApp prompt step */}
+      {step === 'success' && (
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-8 text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+            <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-xl font-bold text-slate-900">{terms.issue} saved!</p>
+            {savedContractorName && (
+              <p className="mt-2 text-sm text-slate-500">
+                Send {savedContractorName} the link so they can view and update it.
+              </p>
+            )}
+          </div>
+          {savedWaUrl && (
+            <a
+              href={savedWaUrl}
+              target="_blank"
+              rel="noopener"
+              onClick={onClose}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-4 text-base font-bold text-white hover:bg-[#1EBE5B] active:scale-[0.98] transition-[transform,colors]"
+            >
+              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Send to {savedContractorName} via WhatsApp
+            </a>
+          )}
+          <button onClick={onClose} className="text-sm text-slate-400 underline underline-offset-2">
+            {savedWaUrl ? 'Skip for now' : 'Done'}
+          </button>
+        </div>
       )}
 
       {/* AI loading step */}
@@ -430,20 +470,30 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
               {/* Assign contractor */}
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">Assign {terms.contractor.toLowerCase()}</label>
-                <div className="relative">
-                  <select
-                    value={contractorId}
-                    onChange={e => e.target.value === ADD_NEW ? setAddingContractor(true) : setContractorId(e.target.value)}
-                    className="sf-input appearance-none pr-8"
+                {localContractors.length === 0 && !addingContractor ? (
+                  <button
+                    type="button"
+                    onClick={() => setAddingContractor(true)}
+                    className="w-full rounded-xl border-2 border-dashed border-[#1A56DB]/40 bg-[#EEF4FF] py-3 text-sm font-medium text-[#1A56DB] hover:border-[#1A56DB] transition-colors"
                   >
-                    <option value="">— Unassigned —</option>
-                    {localContractors.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}{c.trade ? ` · ${c.trade}` : ''}</option>
-                    ))}
-                    {orgId && <option value={ADD_NEW}>+ Add new {terms.contractor.toLowerCase()}…</option>}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-3 top-3.5 h-4 w-4 text-slate-400" />
-                </div>
+                    + Add a {terms.contractor.toLowerCase()} to notify via WhatsApp
+                  </button>
+                ) : (
+                  <div className="relative">
+                    <select
+                      value={contractorId}
+                      onChange={e => e.target.value === ADD_NEW ? setAddingContractor(true) : setContractorId(e.target.value)}
+                      className="sf-input appearance-none pr-8"
+                    >
+                      <option value="">— Unassigned —</option>
+                      {localContractors.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}{c.trade ? ` · ${c.trade}` : ''}</option>
+                      ))}
+                      {orgId && <option value={ADD_NEW}>+ Add new {terms.contractor.toLowerCase()}…</option>}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-3 top-3.5 h-4 w-4 text-slate-400" />
+                  </div>
+                )}
                 {addingContractor && (
                   <div className="mt-2 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
                     {/* Internal / External toggle */}
