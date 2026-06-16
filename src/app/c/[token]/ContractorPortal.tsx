@@ -178,7 +178,7 @@ function SnagCard({
                 onChange={e => onNoteChange(e.target.value)}
                 placeholder="Add a note (optional)…"
                 rows={3}
-                className="sf-input resize-none text-sm"
+                className="sf-input resize-none"
               />
 
               <div className="flex gap-2">

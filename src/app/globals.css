@@ -41,12 +41,17 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Smooth momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 
   body {
     background-color: var(--sf-base);
     color: var(--sf-text);
     font-family: var(--font-inter), system-ui, sans-serif;
+    /* Prevent horizontal overflow on all screen sizes */
+    overflow-x: hidden;
   }
 
   /* Custom scrollbar */
@@ -100,9 +105,11 @@
 
   /* Input */
   .sf-input {
-    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder-slate-400;
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 placeholder-slate-400;
     @apply transition-[border-color,box-shadow] duration-150;
     @apply focus:border-[#1A56DB] focus:outline-none focus:ring-2 focus:ring-[#1A56DB]/20;
+    /* 16px minimum prevents iOS Safari from auto-zooming on focus */
+    font-size: max(16px, 1rem);
   }
 
   /* Status badge */
@@ -123,8 +130,9 @@
   }
 
   .sf-nav-item {
-    @apply flex flex-col items-center gap-0.5 rounded-xl px-4 py-2 text-slate-500;
+    @apply flex flex-col items-center gap-0.5 rounded-xl px-3 py-2.5 text-slate-500;
     @apply transition-[color,background-color] duration-150;
+    min-height: 44px; /* iOS HIG minimum touch target */
   }
 
   .sf-nav-item.active {
