@@ -222,10 +222,16 @@ export default function AddJobClient() {
   async function assignContractor(contractor: Contractor) {
     if (!savedSnagId) return
     setContractorBusy(true)
-    await supabase
+    const { error: assignError } = await supabase
       .from('snags')
       .update({ assigned_to: contractor.id, status: 'assigned', assigned_at: new Date().toISOString() })
       .eq('id', savedSnagId)
+
+    if (assignError) {
+      alert('Could not assign: ' + assignError.message)
+      setContractorBusy(false)
+      return
+    }
 
     if (contractor.whatsapp) {
       const digits = contractor.whatsapp.replace(/\D/g, '')

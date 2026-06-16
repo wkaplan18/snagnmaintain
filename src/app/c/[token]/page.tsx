@@ -34,7 +34,6 @@ export default async function ContractorPage({ params }: { params: Promise<{ tok
       project:projects(name, address, city)
     `)
     .eq('assigned_to', contractor.id)
-    .in('status', ['assigned', 'in_progress', 'fixed', 'rejected'])
     .order('priority', { ascending: false })
     .order('created_at', { ascending: false })
 
