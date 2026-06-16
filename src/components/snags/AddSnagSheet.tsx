@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { X, Camera, Sparkles, Loader2, ChevronDown } from 'lucide-react'
+import { X, Camera, Sparkles, Loader2, ChevronDown, BookUser } from 'lucide-react'
 import PhotoAnnotator from '@/components/snags/PhotoAnnotator'
 import { createClient } from '@/lib/supabase/client'
 import type { AISuggestion, Contractor, DashboardTerms, OrgType, Room, SnagPriority } from '@/types'
@@ -20,6 +20,15 @@ interface Props {
 }
 
 const ADD_NEW = '__add_new__'
+
+function formatWhatsApp(raw: string): string {
+  let num = raw.replace(/[\s\-().]/g, '')
+  if (num.startsWith('0027')) return '+27' + num.slice(4)
+  if (num.startsWith('00')) return '+' + num.slice(2)
+  if (num.startsWith('0')) return '+27' + num.slice(1)
+  if (/^\d/.test(num) && !num.startsWith('+')) return '+' + num
+  return num
+}
 const BASE_CATEGORIES = ['paint', 'crack', 'tile', 'water', 'fitting', 'alignment', 'finishing', 'electrical', 'plumbing', 'structural', 'carpentry', 'glazing', 'hvac', 'other']
 
 type Step = 'camera' | 'annotate' | 'ai_loading' | 'form'
@@ -83,6 +92,18 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
     setCategory(c)
     setNewCategoryName('')
     setAddingCategory(false)
+  }
+
+  async function pickContact() {
+    if (!('contacts' in navigator)) return
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const results = await (navigator as any).contacts.select(['tel'], { multiple: false })
+      const tel = results?.[0]?.tel?.[0]
+      if (tel) setNewContractorWhatsApp(formatWhatsApp(tel))
+    } catch {
+      // user cancelled or permission denied — silently ignore
+    }
   }
 
   async function addContractor() {
@@ -442,8 +463,26 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
                     <div className="grid grid-cols-2 gap-2">
                       <input type="text" value={newContractorTrade} onChange={e => setNewContractorTrade(e.target.value)}
                         placeholder={terms.contractorTrade} className="sf-input" />
-                      <input type="tel" value={newContractorWhatsApp} onChange={e => setNewContractorWhatsApp(e.target.value)}
-                        placeholder="WhatsApp number" className="sf-input" />
+                      <div className="relative">
+                        <input
+                          type="tel"
+                          value={newContractorWhatsApp}
+                          onChange={e => setNewContractorWhatsApp(e.target.value)}
+                          onBlur={e => { if (e.target.value.trim()) setNewContractorWhatsApp(formatWhatsApp(e.target.value.trim())) }}
+                          placeholder="WhatsApp number"
+                          className="sf-input pr-9"
+                        />
+                        {'contacts' in navigator && (
+                          <button
+                            type="button"
+                            onClick={pickContact}
+                            title="Pick from contacts"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 hover:text-[#1A56DB] transition-colors"
+                          >
+                            <BookUser className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <button type="button" onClick={addContractor} disabled={inlineBusy || !newContractorName.trim()} className="sf-btn-primary flex-1 py-2 text-sm disabled:opacity-60">Add {terms.contractor.toLowerCase()}</button>
