@@ -440,27 +440,38 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
                 </>
               )}
 
-              {/* Room */}
+              {/* Room — pill picker (avoids iOS native select issues in fixed overlays) */}
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">Room</label>
-                <div className="relative">
-                  <select
-                    value={roomId}
-                    onChange={e => e.target.value === ADD_NEW ? setAddingRoom(true) : setRoomId(e.target.value)}
-                    className="sf-input appearance-none pr-8"
-                  >
-                    <option value="">— Select room —</option>
-                    {localRooms.map(r => (
-                      <option key={r.id} value={r.id}>{r.name}</option>
-                    ))}
-                    <option value={ADD_NEW}>+ Add new room…</option>
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-3 top-3.5 h-4 w-4 text-slate-400" />
+                <div className="flex flex-wrap gap-2">
+                  {localRooms.map(r => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => setRoomId(roomId === r.id ? '' : r.id)}
+                      className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors active:scale-95 ${
+                        roomId === r.id
+                          ? 'border-[#1A56DB] bg-[#1A56DB] text-white'
+                          : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      {r.name}
+                    </button>
+                  ))}
+                  {!addingRoom && (
+                    <button
+                      type="button"
+                      onClick={() => setAddingRoom(true)}
+                      className="rounded-full border border-dashed border-slate-300 px-3.5 py-1.5 text-sm font-medium text-slate-500 hover:border-slate-400 transition-colors"
+                    >
+                      + Add room
+                    </button>
+                  )}
                 </div>
                 {addingRoom && (
                   <div className="mt-2 flex gap-2">
                     <input type="text" autoFocus value={newRoomName} onChange={e => setNewRoomName(e.target.value)}
-                      placeholder="e.g. Wine cellar" className="sf-input flex-1" />
+                      placeholder="e.g. Kitchen" className="sf-input flex-1" />
                     <button type="button" onClick={addRoom} disabled={inlineBusy} className="sf-btn-primary px-4 py-2 text-sm disabled:opacity-60">Add</button>
                     <button type="button" onClick={() => setAddingRoom(false)} className="sf-btn-secondary px-3 py-2 text-sm">✕</button>
                   </div>
