@@ -2,11 +2,24 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
+import { DASHBOARD_TERMS } from '@/types'
+import type { OrgType } from '@/types'
 
 export default async function ReportsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const { data: orgMember } = await supabase
+    .from('org_members')
+    .select('organizations(org_type)')
+    .eq('user_id', user.id)
+    .limit(1)
+    .maybeSingle()
+
+  const raw = orgMember?.organizations
+  const org = Array.isArray(raw) ? raw[0] : raw as { org_type?: string } | null | undefined
+  const terms = DASHBOARD_TERMS[(org?.org_type ?? 'builder') as OrgType]
 
   const { data: stats } = await supabase
     .from('snag_stats_by_project')
@@ -28,7 +41,7 @@ export default async function ReportsPage() {
   return (
     <div className="mx-auto max-w-lg px-4 pb-24 pt-6">
       <h1 className="mb-1 text-2xl font-bold tracking-tight text-slate-900">Reports</h1>
-      <p className="mb-5 text-sm text-slate-500">Snag progress across all projects.</p>
+      <p className="mb-5 text-sm text-slate-500">{terms.issue} progress across all {terms.projects.toLowerCase()}.</p>
 
       {/* Org totals */}
       <div className="mb-4 grid grid-cols-4 gap-2">
@@ -49,7 +62,7 @@ export default async function ReportsPage() {
         <div className="sf-card flex flex-col items-center p-10 text-center">
           <FileText className="mb-3 h-10 w-10 text-slate-300" />
           <p className="text-sm font-medium text-slate-900">Nothing to report yet</p>
-          <p className="mt-1 text-sm text-slate-500">Stats appear here as soon as you log snags.</p>
+          <p className="mt-1 text-sm text-slate-500">Stats appear here as soon as you log {terms.issues.toLowerCase()}.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -63,7 +76,7 @@ export default async function ReportsPage() {
                 <div className="h-full rounded-full bg-[#1A56DB]" style={{ width: `${r.completion_pct ?? 0}%` }} />
               </div>
               <p className="mt-2 text-xs text-slate-500">
-                {r.total_snags} snags · {r.open_snags} open · {r.in_progress_snags} in progress · {r.resolved_snags} resolved
+                {r.total_snags} {terms.issues.toLowerCase()} · {r.open_snags} open · {r.in_progress_snags} in progress · {r.resolved_snags} resolved
                 {Number(r.critical_snags) > 0 && <span className="font-medium text-red-600"> · {r.critical_snags} critical</span>}
               </p>
             </Link>
@@ -71,7 +84,7 @@ export default async function ReportsPage() {
         </div>
       )}
 
-      <p className="mt-6 text-center text-xs text-slate-400">PDF snag reports for clients — coming soon.</p>
+      <p className="mt-6 text-center text-xs text-slate-400">PDF {terms.issues.toLowerCase()} reports — coming soon.</p>
     </div>
   )
 }
