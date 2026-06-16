@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
+import { DASHBOARD_TERMS, DASHBOARD_TERMS as DT } from '@/types'
+import type { OrgType } from '@/types'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -10,7 +12,7 @@ export default async function DashboardPage() {
   // Get user's org
   const { data: orgMember } = await supabase
     .from('org_members')
-    .select('org_id, role, organizations(id, name, logo_url, plan)')
+    .select('org_id, role, organizations(id, name, logo_url, plan, org_type)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
     .limit(1)
@@ -52,6 +54,12 @@ export default async function DashboardPage() {
       .order('updated_at', { ascending: false }),
   ])
 
+  const org = Array.isArray(orgMember.organizations)
+    ? orgMember.organizations[0]
+    : orgMember.organizations as { name?: string; org_type?: string } | null
+  const orgType = (org?.org_type ?? 'builder') as OrgType
+  const terms = DASHBOARD_TERMS[orgType]
+
   const one = <T,>(v: T | T[] | null | undefined): T | null =>
     Array.isArray(v) ? (v[0] ?? null) : (v ?? null)
   const flatSnags = (recentSnags ?? []).map((s) => ({
@@ -64,7 +72,8 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
-      orgName={(Array.isArray(orgMember.organizations) ? orgMember.organizations[0]?.name : (orgMember.organizations as { name?: string } | null)?.name) ?? 'My Organisation'}
+      orgName={org?.name ?? 'My Organisation'}
+      terms={terms}
       projects={projects ?? []}
       projectStats={projectStats ?? []}
       recentSnags={flatSnags}

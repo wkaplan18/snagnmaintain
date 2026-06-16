@@ -3,10 +3,11 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import Link from 'next/link'
 import { AlertTriangle, CheckCircle, Clock, FolderOpen, Plus, ClipboardCheck, Settings } from 'lucide-react'
-import type { ProjectStats } from '@/types'
+import type { ProjectStats, DashboardTerms } from '@/types'
 
 interface Props {
   orgName: string
+  terms: DashboardTerms
   projects: Array<{ id: string; name: string; status: string; image_url: string | null; city: string | null }>
   projectStats: Array<ProjectStats & { project_name: string; project_id: string }>
   recentSnags: Array<{
@@ -21,7 +22,7 @@ interface Props {
 
 const DONUT_COLORS = ['#DC2626', '#EA580C', '#1A56DB', '#16A34A', '#64748B']
 
-export default function DashboardClient({ orgName, projects, projectStats, recentSnags, needsReview }: Props) {
+export default function DashboardClient({ orgName, terms, projects, projectStats, recentSnags, needsReview }: Props) {
   const totals = projectStats.reduce(
     (acc, p) => ({
       total: acc.total + (p.total_snags ?? 0),
@@ -56,7 +57,7 @@ export default function DashboardClient({ orgName, projects, projectStats, recen
               </Link>
               <Link href="/projects/new" className="sf-btn-primary py-2.5 px-4 text-sm">
                 <Plus className="h-4 w-4" />
-                New Project
+                New {terms.project}
               </Link>
             </div>
           </div>
@@ -73,9 +74,9 @@ export default function DashboardClient({ orgName, projects, projectStats, recen
             <ClipboardCheck className="h-5 w-5 flex-shrink-0 text-amber-600" />
             <div className="flex-1">
               <p className="text-sm font-semibold text-amber-900">
-                {needsReview} snag{needsReview === 1 ? '' : 's'} need{needsReview === 1 ? 's' : ''} your sign-off
+                {needsReview} {needsReview === 1 ? terms.issue.toLowerCase() : terms.issues.toLowerCase()} need{needsReview === 1 ? 's' : ''} your sign-off
               </p>
-              <p className="text-xs text-amber-700">Contractors have marked these as fixed — tap to review</p>
+              <p className="text-xs text-amber-700">{terms.contractor}s have marked these as fixed — tap to review</p>
             </div>
             <span className="flex-shrink-0 rounded-full bg-amber-500 px-2.5 py-0.5 text-xs font-bold text-white">{needsReview}</span>
           </Link>
@@ -86,7 +87,7 @@ export default function DashboardClient({ orgName, projects, projectStats, recen
           <div className="sf-card p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Snags</p>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Total {terms.issues}</p>
                 <p className="mt-1 text-3xl font-bold text-slate-900">{totals.total}</p>
               </div>
               <FolderOpen className="h-5 w-5 text-slate-300 mt-0.5" />
@@ -127,13 +128,13 @@ export default function DashboardClient({ orgName, projects, projectStats, recen
         {/* Projects */}
         <div className="sf-card overflow-hidden">
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Active Projects</h2>
+            <h2 className="text-sm font-semibold text-slate-900">Active {terms.projects}</h2>
             <Link href="/projects" className="text-xs font-medium text-[#1A56DB]">View all</Link>
           </div>
           <div className="divide-y divide-slate-100">
             {projects.length === 0 && (
               <div className="px-4 py-6 text-center text-sm text-slate-400">
-                No active projects. <Link href="/projects/new" className="text-[#1A56DB]">Create one →</Link>
+                No active {terms.projects.toLowerCase()}. <Link href="/projects/new" className="text-[#1A56DB]">Create one →</Link>
               </div>
             )}
             {projects.map(p => {
@@ -155,7 +156,7 @@ export default function DashboardClient({ orgName, projects, projectStats, recen
                   </div>
                   <div className="flex-shrink-0 text-right">
                     <p className="text-sm font-semibold text-slate-900">{stat?.completion_pct ?? 0}%</p>
-                    <p className="text-xs text-red-500">{stat?.open_snags ?? 0} open</p>
+                    <p className="text-xs text-red-500">{stat?.open_snags ?? 0} open {terms.issues.toLowerCase()}</p>
                   </div>
                 </Link>
               )
@@ -193,7 +194,7 @@ export default function DashboardClient({ orgName, projects, projectStats, recen
         {/* Project completion bar chart */}
         {projectStats.length > 0 && (
           <div className="sf-card p-4">
-            <h2 className="mb-3 text-sm font-semibold text-slate-900">Completion by Project</h2>
+            <h2 className="mb-3 text-sm font-semibold text-slate-900">Completion by {terms.project}</h2>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={projectStats} layout="vertical" margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
                 <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="#F1F5F9" />
@@ -209,7 +210,7 @@ export default function DashboardClient({ orgName, projects, projectStats, recen
         {/* Recent snags */}
         <div className="sf-card overflow-hidden">
           <div className="px-4 pt-4 pb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Recent Snags</h2>
+            <h2 className="text-sm font-semibold text-slate-900">Recent {terms.issues}</h2>
           </div>
           <div className="divide-y divide-slate-100">
             {recentSnags.map(snag => (

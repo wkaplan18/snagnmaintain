@@ -25,6 +25,27 @@ export const ORG_TYPE_CONFIG: Record<OrgType, { label: string; description: stri
   retail:            { label: 'Retail / Multi-store', description: 'Store maintenance across locations' },
 }
 
+export interface DashboardTerms {
+  project: string
+  projects: string
+  issue: string
+  issues: string
+  contractor: string
+}
+
+export const DASHBOARD_TERMS: Record<OrgType, DashboardTerms> = {
+  builder:           { project: 'Project',  projects: 'Projects',   issue: 'Snag',  issues: 'Snags',  contractor: 'Contractor' },
+  hotel:             { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Staff member' },
+  homeowner:         { project: 'Home',     projects: 'Homes',      issue: 'Job',   issues: 'Jobs',   contractor: 'Service provider' },
+  property_manager:  { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Contractor' },
+  body_corporate:    { project: 'Complex',  projects: 'Complexes',  issue: 'Issue', issues: 'Issues', contractor: 'Contractor' },
+  facilities:        { project: 'Site',     projects: 'Sites',      issue: 'Job',   issues: 'Jobs',   contractor: 'Contractor' },
+  short_term_rental: { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Service provider' },
+  restaurant:        { project: 'Venue',    projects: 'Venues',     issue: 'Issue', issues: 'Issues', contractor: 'Contractor' },
+  school:            { project: 'Campus',   projects: 'Campuses',   issue: 'Job',   issues: 'Jobs',   contractor: 'Contractor' },
+  retail:            { project: 'Store',    projects: 'Stores',     issue: 'Issue', issues: 'Issues', contractor: 'Contractor' },
+}
+
 export type SnagStatus = 'open' | 'assigned' | 'in_progress' | 'fixed' | 'approved' | 'closed' | 'rejected'
 // Active statuses in the current workflow (in_progress / closed kept for legacy data)
 export const ACTIVE_STATUSES: SnagStatus[] = ['open', 'assigned', 'rejected']
