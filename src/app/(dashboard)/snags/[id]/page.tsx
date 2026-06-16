@@ -11,7 +11,7 @@ export default async function SnagDetailPage({ params }: { params: Promise<{ id:
   if (!user) redirect('/login')
 
   const [{ data: orgMember }, { data: snag }, { data: contractors }] = await Promise.all([
-    supabase.from('org_members').select('organizations(org_type)').eq('user_id', user.id).limit(1).maybeSingle(),
+    supabase.from('org_members').select('org_id, organizations(org_type)').eq('user_id', user.id).limit(1).maybeSingle(),
     supabase.from('snags').select(`
       *,
       attachments(*),
@@ -41,5 +41,5 @@ export default async function SnagDetailPage({ params }: { params: Promise<{ id:
     project: one(snag.project),
   }
 
-  return <SnagDetailClient snag={flat} contractors={contractors ?? []} terms={terms} />
+  return <SnagDetailClient snag={flat} contractors={contractors ?? []} terms={terms} orgId={orgMember?.org_id ?? ''} />
 }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Camera, Loader2, MapPin, User, CalendarClock, Sparkles, MessageCircle } from 'lucide-react'
+import { ArrowLeft, BookUser, Camera, ChevronRight, Loader2, MapPin, Plus, User, CalendarClock, Sparkles } from 'lucide-react'
 import { waLink } from '@/lib/whatsappLink'
 import { compressImage } from '@/lib/compressImage'
 import { STATUS_CONFIG, PRIORITY_CONFIG, type Attachment, type Contractor, type DashboardTerms, type SnagStatus } from '@/types'
@@ -39,7 +39,16 @@ interface SnagDetail {
   project: { id: string; name: string } | null
 }
 
-export default function SnagDetailClient({ snag, contractors, terms }: { snag: SnagDetail; contractors: Contractor[]; terms: DashboardTerms }) {
+function formatWhatsApp(raw: string): string {
+  const num = raw.replace(/[\s\-().]/g, '')
+  if (num.startsWith('0027')) return '+27' + num.slice(4)
+  if (num.startsWith('00')) return '+' + num.slice(2)
+  if (num.startsWith('0')) return '+27' + num.slice(1)
+  if (/^\d/.test(num) && !num.startsWith('+')) return '+' + num
+  return num
+}
+
+export default function SnagDetailClient({ snag, contractors, terms, orgId }: { snag: SnagDetail; contractors: Contractor[]; terms: DashboardTerms; orgId: string }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [origin, setOrigin] = useState('')
@@ -47,6 +56,16 @@ export default function SnagDetailClient({ snag, contractors, terms }: { snag: S
   const photoInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const supabase = createClient()
+
+  // Assign UI state
+  const [assignMode, setAssignMode] = useState<'view' | 'picking' | 'adding'>('view')
+  const [localContractor, setLocalContractor] = useState<Contractor | null>(snag.contractor)
+  const [allContractors, setAllContractors] = useState<Contractor[]>(contractors)
+  const [contractorBusy, setContractorBusy] = useState(false)
+  const [newCName, setNewCName] = useState('')
+  const [newCTrade, setNewCTrade] = useState('')
+  const [newCWhatsApp, setNewCWhatsApp] = useState('')
+  const [newCIsInternal, setNewCIsInternal] = useState(false)
 
   useEffect(() => setOrigin(window.location.origin), [])
 
@@ -99,18 +118,50 @@ export default function SnagDetailClient({ snag, contractors, terms }: { snag: S
     else { router.push(snag.project ? `/projects/${snag.project.id}` : '/snags'); router.refresh() }
   }
 
-  async function assign(contractorId: string) {
-    if (!contractorId) {
-      await update({ assigned_to: null, status: 'open' })
-      return
+  async function handleAssign(contractor: Contractor) {
+    setContractorBusy(true)
+    const { error } = await supabase
+      .from('snags')
+      .update({ assigned_to: contractor.id, status: 'assigned', assigned_at: new Date().toISOString() })
+      .eq('id', snag.id)
+    if (!error) {
+      setLocalContractor(contractor)
+      setAssignMode('view')
+      router.refresh()
+      fetch('/api/notifications/whatsapp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ snagId: snag.id }),
+      }).catch(() => {})
     }
-    await update({ assigned_to: contractorId, status: 'assigned', assigned_at: new Date().toISOString() })
-    // Fire-and-forget WhatsApp notification (no-op until Interakt is configured)
-    fetch('/api/notifications/whatsapp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ snagId: snag.id }),
-    }).catch(() => {})
+    setContractorBusy(false)
+  }
+
+  async function addAndAssign() {
+    if (!newCName.trim()) return
+    setContractorBusy(true)
+    const { data, error } = await supabase
+      .from('contractors')
+      .insert({ org_id: orgId, name: newCName.trim(), trade: newCTrade.trim() || null, whatsapp: newCWhatsApp.trim() || null, is_internal: newCIsInternal })
+      .select('*')
+      .single()
+    if (!error && data) {
+      setAllContractors(c => [...c, data])
+      await handleAssign(data)
+      setNewCName(''); setNewCTrade(''); setNewCWhatsApp(''); setNewCIsInternal(false)
+    }
+    setContractorBusy(false)
+  }
+
+  async function pickContact() {
+    const nav = navigator as Navigator & { contacts?: { select: (props: string[], opts?: object) => Promise<Array<{ tel?: string[]; name?: string[] }>> } }
+    if (!nav.contacts) return
+    try {
+      const results = await nav.contacts.select(['name', 'tel'], { multiple: false })
+      const picked = results?.[0]
+      if (picked?.tel?.[0]) setNewCWhatsApp(formatWhatsApp(picked.tel[0]))
+      if (picked?.name?.[0] && !newCName.trim()) setNewCName(picked.name[0])
+    } catch { /* user cancelled */ }
   }
 
   return (
@@ -187,41 +238,140 @@ export default function SnagDetailClient({ snag, contractors, terms }: { snag: S
       )}
 
       {/* Contractor */}
-      <div className="sf-card mt-6 p-4">
-        <h2 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-          <User className="h-4 w-4 text-slate-400" /> Assigned {terms.contractor.toLowerCase()}
-        </h2>
-        <select
-          value={snag.assigned_to ?? ''}
-          onChange={e => assign(e.target.value)}
-          disabled={busy}
-          className="sf-input"
-        >
-          <option value="">Unassigned</option>
-          {contractors.map(c => (
-            <option key={c.id} value={c.id}>{c.name}{c.trade ? ` — ${c.trade}` : ''}</option>
-          ))}
-        </select>
-        {contractors.length === 0 && (
-          <p className="mt-2 text-xs text-slate-400">
-            No {terms.contractor.toLowerCase()}s yet — <Link href="/contractors" className="text-[#1A56DB]">add your team</Link> first.
-          </p>
-        )}
-        {snag.contractor?.whatsapp && origin && (
-          <a
-            href={waLink(
-              snag.contractor.whatsapp,
-              `Hi ${snag.contractor.name}, you've been assigned ${terms.issue.toLowerCase()} #${snag.snag_number} (${snag.title})` +
-                `${snag.project ? ` on ${snag.project.name}` : ''}` +
-                `${snag.unit ? ` — ${snag.unit.name}${snag.room ? `, ${snag.room.name}` : ''}` : ''}.` +
-                `\nView it and upload your fix photo here:\n${origin}/c/${snag.contractor.access_token}`
+      <div className="sf-card mt-6 overflow-hidden">
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+            <User className="h-4 w-4 text-slate-400" /> Assigned {terms.contractor.toLowerCase()}
+          </h2>
+          {assignMode === 'view' && localContractor && (
+            <button onClick={() => setAssignMode('picking')} className="text-xs font-medium text-[#1A56DB]">Change</button>
+          )}
+        </div>
+
+        {/* VIEW: assigned */}
+        {assignMode === 'view' && localContractor && (
+          <div className="px-4 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#1A56DB]/10 text-sm font-bold text-[#1A56DB]">
+                {localContractor.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-900">{localContractor.name}</p>
+                {localContractor.trade && <p className="text-xs text-slate-500">{localContractor.trade}</p>}
+                {localContractor.whatsapp
+                  ? <p className="text-xs text-green-600">{localContractor.whatsapp}</p>
+                  : <p className="text-xs text-slate-400">No WhatsApp number</p>}
+              </div>
+            </div>
+            {localContractor.whatsapp && origin && (
+              <a
+                href={waLink(
+                  localContractor.whatsapp,
+                  `Hi ${localContractor.name}, you've been assigned ${terms.issue.toLowerCase()} #${snag.snag_number} (${snag.title})` +
+                    `${snag.project ? ` on ${snag.project.name}` : ''}` +
+                    `${snag.unit ? ` — ${snag.unit.name}${snag.room ? `, ${snag.room.name}` : ''}` : ''}.` +
+                    `\nView it and upload your fix photo here:\n${origin}/c/${localContractor.access_token}`
+                )}
+                target="_blank"
+                rel="noopener"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-bold text-white active:scale-[0.97] transition-[transform,opacity]"
+              >
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Send via WhatsApp
+              </a>
             )}
-            target="_blank"
-            rel="noopener"
-            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-semibold text-white hover:bg-[#1EBE5B] active:scale-[0.97] transition-[transform,opacity]"
-          >
-            <MessageCircle className="h-4 w-4" /> Send via WhatsApp
-          </a>
+          </div>
+        )}
+
+        {/* VIEW: unassigned */}
+        {assignMode === 'view' && !localContractor && (
+          <div className="px-4 pb-4">
+            <button
+              onClick={() => setAssignMode('picking')}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-4 text-sm font-medium text-slate-500 hover:border-[#1A56DB] hover:text-[#1A56DB] transition-colors"
+            >
+              <Plus className="h-4 w-4" /> Assign a {terms.contractor.toLowerCase()}
+            </button>
+          </div>
+        )}
+
+        {/* PICKING from list */}
+        {assignMode === 'picking' && (
+          <div>
+            {allContractors.length > 0 ? (
+              <div className="divide-y divide-slate-100">
+                {allContractors.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => handleAssign(c)}
+                    disabled={contractorBusy}
+                    className="flex w-full items-center gap-3 px-4 py-3.5 hover:bg-slate-50 active:bg-slate-100 transition-colors text-left disabled:opacity-60"
+                  >
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#1A56DB]/10 text-sm font-bold text-[#1A56DB]">
+                      {c.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-900">{c.name}</p>
+                      {c.trade && <p className="text-xs text-slate-500">{c.trade}</p>}
+                    </div>
+                    <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-300" />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="px-4 pb-2 text-sm text-slate-400">No {terms.contractor.toLowerCase()}s yet — add one below.</p>
+            )}
+            <div className="border-t border-slate-100 px-4 py-3 flex gap-2">
+              <button
+                onClick={() => setAssignMode('adding')}
+                className="flex-1 rounded-xl border border-[#1A56DB] py-2.5 text-sm font-medium text-[#1A56DB] hover:bg-[#EEF4FF] transition-colors"
+              >
+                + Add new {terms.contractor.toLowerCase()}
+              </button>
+              <button onClick={() => setAssignMode('view')} className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-500 hover:bg-slate-50 transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ADDING new */}
+        {assignMode === 'adding' && (
+          <div className="px-4 pb-4 space-y-3">
+            <div className="flex rounded-xl border border-slate-200 bg-slate-50 overflow-hidden text-sm font-medium">
+              <button type="button" onClick={() => setNewCIsInternal(false)}
+                className={`flex-1 py-2.5 transition-colors ${!newCIsInternal ? 'bg-[#1A56DB] text-white' : 'text-slate-500'}`}>
+                {terms.externalLabel}
+              </button>
+              <button type="button" onClick={() => setNewCIsInternal(true)}
+                className={`flex-1 py-2.5 transition-colors ${newCIsInternal ? 'bg-[#1A56DB] text-white' : 'text-slate-500'}`}>
+                {terms.internalLabel}
+              </button>
+            </div>
+            <input autoFocus type="text" value={newCName} onChange={e => setNewCName(e.target.value)} placeholder="Name *" className="sf-input" />
+            <input type="text" value={newCTrade} onChange={e => setNewCTrade(e.target.value)} placeholder={terms.contractorTrade} className="sf-input" />
+            <div className="flex gap-2">
+              <input
+                type="tel"
+                value={newCWhatsApp}
+                onChange={e => setNewCWhatsApp(e.target.value)}
+                onBlur={e => { if (e.target.value.trim()) setNewCWhatsApp(formatWhatsApp(e.target.value.trim())) }}
+                placeholder="WhatsApp number"
+                className="sf-input flex-1"
+              />
+              <button type="button" onClick={pickContact} title="Choose from contacts"
+                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 active:bg-slate-100">
+                <BookUser className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button onClick={addAndAssign} disabled={contractorBusy || !newCName.trim()}
+                className="sf-btn-primary flex-1 py-3 text-sm disabled:opacity-60">
+                {contractorBusy ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Add & assign'}
+              </button>
+              <button onClick={() => setAssignMode('picking')} className="sf-btn-secondary px-4 py-3 text-sm">Back</button>
+            </div>
+          </div>
         )}
       </div>
 
