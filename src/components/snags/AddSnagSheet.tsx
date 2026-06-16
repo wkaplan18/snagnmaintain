@@ -54,6 +54,7 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
   const [newContractorName, setNewContractorName] = useState('')
   const [newContractorTrade, setNewContractorTrade] = useState('')
   const [newContractorWhatsApp, setNewContractorWhatsApp] = useState('')
+  const [newContractorIsInternal, setNewContractorIsInternal] = useState(false)
   const [inlineBusy, setInlineBusy] = useState(false)
 
   async function addRoom() {
@@ -94,13 +95,14 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
         name: newContractorName.trim(),
         trade: newContractorTrade.trim() || null,
         whatsapp: newContractorWhatsApp.trim() || null,
+        is_internal: newContractorIsInternal,
       })
       .select('*')
       .single()
     if (!error && data) {
       setLocalContractors(c => [...c, data])
       setContractorId(data.id)
-      setNewContractorName(''); setNewContractorTrade(''); setNewContractorWhatsApp('')
+      setNewContractorName(''); setNewContractorTrade(''); setNewContractorWhatsApp(''); setNewContractorIsInternal(false)
       setAddingContractor(false)
     } else {
       alert(error?.message ?? `Could not add ${terms.contractor.toLowerCase()}`)
@@ -422,11 +424,24 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
                 </div>
                 {addingContractor && (
                   <div className="mt-2 space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    {/* Internal / External toggle */}
+                    <div className="flex rounded-xl border border-slate-200 bg-white overflow-hidden text-sm font-medium">
+                      <button
+                        type="button"
+                        onClick={() => setNewContractorIsInternal(false)}
+                        className={`flex-1 py-2 transition-colors ${!newContractorIsInternal ? 'bg-[#1A56DB] text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+                      >{terms.externalLabel}</button>
+                      <button
+                        type="button"
+                        onClick={() => setNewContractorIsInternal(true)}
+                        className={`flex-1 py-2 transition-colors ${newContractorIsInternal ? 'bg-[#1A56DB] text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+                      >{terms.internalLabel}</button>
+                    </div>
                     <input type="text" autoFocus value={newContractorName} onChange={e => setNewContractorName(e.target.value)}
                       placeholder="Name *" className="sf-input" />
                     <div className="grid grid-cols-2 gap-2">
                       <input type="text" value={newContractorTrade} onChange={e => setNewContractorTrade(e.target.value)}
-                        placeholder="Trade (e.g. Tiler)" className="sf-input" />
+                        placeholder={terms.contractorTrade} className="sf-input" />
                       <input type="tel" value={newContractorWhatsApp} onChange={e => setNewContractorWhatsApp(e.target.value)}
                         placeholder="WhatsApp number" className="sf-input" />
                     </div>
