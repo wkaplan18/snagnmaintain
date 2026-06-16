@@ -26,17 +26,17 @@ const ORG_TYPE_ICONS: Record<OrgType, React.ElementType> = {
 
 const ORG_TYPES = Object.entries(ORG_TYPE_CONFIG) as [OrgType, { label: string; description: string }][]
 
-const ORG_NAME_CONFIG: Record<OrgType, { label: string; placeholder: string; hint: string }> = {
-  builder:           { label: 'Company name',    placeholder: 'Your company name',    hint: 'Your projects, snags and contractors all live under your company.' },
-  hotel:             { label: 'Property name',   placeholder: 'Your property name',   hint: 'Your rooms, maintenance jobs and staff all live under your property.' },
-  homeowner:         { label: 'Household name',  placeholder: 'Your household name',  hint: 'Your home, maintenance tasks and service providers all live here.' },
-  property_manager:  { label: 'Business name',   placeholder: 'Your business name',   hint: 'Your properties, tenants and maintenance jobs all live under your business.' },
-  body_corporate:    { label: 'Complex name',    placeholder: 'Your complex name',    hint: 'Your common areas, maintenance jobs and contractors all live here.' },
-  facilities:        { label: 'Company name',    placeholder: 'Your company name',    hint: 'Your sites, maintenance jobs and teams all live under your company.' },
-  short_term_rental: { label: 'Property name',   placeholder: 'Your property name',   hint: 'Your property, maintenance tasks and service providers all live here.' },
-  restaurant:        { label: 'Restaurant name', placeholder: 'Your restaurant name', hint: 'Your venue, maintenance jobs and contractors all live here.' },
-  school:            { label: 'School name',     placeholder: 'Your school name',     hint: 'Your campus, maintenance tasks and contractors all live under your school.' },
-  retail:            { label: 'Business name',   placeholder: 'Your business name',   hint: 'Your stores, maintenance jobs and contractors all live under your business.' },
+const ORG_NAME_CONFIG: Record<OrgType, { label: string; placeholder: string; hint: string; button: string }> = {
+  builder:           { label: 'Company name',    placeholder: 'Your company name',    hint: 'Your projects, snags and contractors all live under your company.',          button: 'Create company' },
+  hotel:             { label: 'Property name',   placeholder: 'Your property name',   hint: 'Your rooms, maintenance jobs and staff all live under your property.',       button: 'Create property' },
+  homeowner:         { label: 'Household name',  placeholder: 'Your household name',  hint: 'Your home, maintenance tasks and service providers all live here.',          button: 'Create household' },
+  property_manager:  { label: 'Business name',   placeholder: 'Your business name',   hint: 'Your properties, tenants and maintenance jobs all live under your business.',button: 'Create business' },
+  body_corporate:    { label: 'Complex name',    placeholder: 'Your complex name',    hint: 'Your common areas, maintenance jobs and contractors all live here.',         button: 'Create complex' },
+  facilities:        { label: 'Company name',    placeholder: 'Your company name',    hint: 'Your sites, maintenance jobs and teams all live under your company.',        button: 'Create company' },
+  short_term_rental: { label: 'Property name',   placeholder: 'Your property name',   hint: 'Your property, maintenance tasks and service providers all live here.',      button: 'Create property' },
+  restaurant:        { label: 'Restaurant name', placeholder: 'Your restaurant name', hint: 'Your venue, maintenance jobs and contractors all live here.',               button: 'Create restaurant' },
+  school:            { label: 'School name',     placeholder: 'Your school name',     hint: 'Your campus, maintenance tasks and contractors all live under your school.', button: 'Create school' },
+  retail:            { label: 'Business name',   placeholder: 'Your business name',   hint: 'Your stores, maintenance jobs and contractors all live under your business.',button: 'Create business' },
 }
 
 export default function OnboardingClient({ email }: { email: string }) {
@@ -188,7 +188,7 @@ export default function OnboardingClient({ email }: { email: string }) {
                 disabled={loading || orgName.trim().length < 2}
                 className="sf-btn-primary mt-4 w-full disabled:opacity-60"
               >
-                {loading ? 'Setting up…' : 'Create organisation'}
+                {loading ? 'Setting up…' : orgType ? ORG_NAME_CONFIG[orgType].button : 'Create organisation'}
               </button>
             </form>
           </div>
