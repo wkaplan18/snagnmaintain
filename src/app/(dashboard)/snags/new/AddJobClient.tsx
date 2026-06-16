@@ -94,9 +94,10 @@ function PhotoMarkupEditor({ photoUrl, onDone, onCancel }: {
   function onEnd(e: React.TouchEvent | React.MouseEvent) {
     e.preventDefault()
     if (!drawing.current || currentPts.current.length < 2) { drawing.current = false; return }
-    setPaths(p => [...p, { color, pts: currentPts.current }])
+    const pts = [...currentPts.current]
     currentPts.current = []
     drawing.current = false
+    setPaths(p => [...p, { color, pts }])
   }
 
   useEffect(() => { redraw() }, [redraw])
