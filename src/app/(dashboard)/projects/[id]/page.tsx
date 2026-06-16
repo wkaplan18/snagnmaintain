@@ -21,7 +21,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
   const raw = orgMember?.organizations
   const org = Array.isArray(raw) ? raw[0] : raw as { org_type?: string } | null | undefined
-  const terms = DASHBOARD_TERMS[(org?.org_type ?? 'builder') as OrgType]
+  const orgType = (org?.org_type ?? 'builder') as OrgType
+  const terms = DASHBOARD_TERMS[orgType]
 
   const flatUnits = (units ?? []).map(u => ({
     id: u.id,
@@ -31,5 +32,5 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     rooms: ((u.rooms ?? []) as Room[]).sort((a, b) => a.room_order - b.room_order),
   }))
 
-  return <ProjectClient project={project} units={flatUnits} contractors={contractors ?? []} terms={terms} />
+  return <ProjectClient project={project} units={flatUnits} contractors={contractors ?? []} terms={terms} orgType={orgType} />
 }

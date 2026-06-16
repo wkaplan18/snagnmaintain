@@ -5,10 +5,10 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { SA_PROVINCES } from '@/types'
-import type { DashboardTerms } from '@/types'
+import { DEFAULT_ROOMS, SA_PROVINCES } from '@/types'
+import type { DashboardTerms, OrgType } from '@/types'
 
-export default function NewProjectClient({ orgId, terms }: { orgId: string; terms: DashboardTerms }) {
+export default function NewProjectClient({ orgId, terms, orgType }: { orgId: string; terms: DashboardTerms; orgType: OrgType }) {
   const [name, setName] = useState('')
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
@@ -40,6 +40,18 @@ export default function NewProjectClient({ orgId, terms }: { orgId: string; term
       setError(error?.message ?? 'Could not create the project')
       setLoading(false)
     } else {
+      if (orgType === 'homeowner') {
+        const { data: unit } = await supabase
+          .from('units')
+          .insert({ project_id: data.id, name: name.trim(), unit_type: 'house' })
+          .select('id')
+          .single()
+        if (unit) {
+          await supabase.from('rooms').insert(
+            DEFAULT_ROOMS.map((rname, i) => ({ unit_id: unit.id, name: rname, room_order: i }))
+          )
+        }
+      }
       router.push(`/projects/${data.id}`)
       router.refresh()
     }

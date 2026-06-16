@@ -20,7 +20,8 @@ export default async function NewProjectPage() {
 
   const raw = orgMember?.organizations
   const org = Array.isArray(raw) ? raw[0] : raw as { org_type?: string } | null | undefined
-  const terms = DASHBOARD_TERMS[(org?.org_type ?? 'builder') as OrgType]
+  const orgType = (org?.org_type ?? 'builder') as OrgType
+  const terms = DASHBOARD_TERMS[orgType]
 
-  return <NewProjectClient orgId={orgMember.org_id} terms={terms} />
+  return <NewProjectClient orgId={orgMember.org_id} terms={terms} orgType={orgType} />
 }
