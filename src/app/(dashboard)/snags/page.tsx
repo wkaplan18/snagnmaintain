@@ -5,11 +5,10 @@ import { useSearchParams } from 'next/navigation'
 import { AlertCircle, Plus } from 'lucide-react'
 import Link from 'next/link'
 import SnagCard from '@/components/snags/SnagCard'
-import AddSnagSheet from '@/components/snags/AddSnagSheet'
 import { useSnags } from '@/hooks/useSnags'
 import { createClient } from '@/lib/supabase/client'
 import { DASHBOARD_TERMS } from '@/types'
-import type { Contractor, DashboardTerms, OrgType, Room } from '@/types'
+import type { DashboardTerms, OrgType } from '@/types'
 
 const FILTERS = [
   { value: 'open,assigned,rejected', label: 'Open' },
@@ -18,21 +17,7 @@ const FILTERS = [
   { value: '', label: 'All' },
 ]
 
-interface AddContext {
-  projectId: string
-  unitId: string
-  orgId: string
-  rooms: Room[]
-  contractors: Contractor[]
-}
-
-interface InnerProps {
-  terms: DashboardTerms
-  orgType: OrgType
-  addContext: AddContext | null
-}
-
-function SnagsInner({ terms, orgType, addContext }: InnerProps) {
+function SnagsInner({ terms }: { terms: DashboardTerms }) {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab')
   const initialFilter = FILTERS.find(f => f.value === tabParam)?.value ?? 'open,assigned,rejected'
@@ -40,9 +25,10 @@ function SnagsInner({ terms, orgType, addContext }: InnerProps) {
   const [status, setStatus] = useState(initialFilter)
   const [projectId, setProjectId] = useState('')
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([])
-  const [adding, setAdding] = useState(false)
   const { snags, loading, refetch } = useSnags({ ...(status ? { status } : {}), ...(projectId ? { projectId } : {}) })
   const supabase = createClient()
+
+  void refetch // used implicitly via dependency
 
   const issue = terms.issue.toLowerCase()
   const issues = terms.issues.toLowerCase()
@@ -65,21 +51,12 @@ function SnagsInner({ terms, orgType, addContext }: InnerProps) {
     <div className="mx-auto max-w-lg px-4 pb-24 pt-6">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">{terms.issues}</h1>
-        {addContext ? (
-          <button
-            onClick={() => setAdding(true)}
-            className="sf-btn-primary flex items-center gap-1.5 px-3.5 py-2 text-sm"
-          >
-            <Plus className="h-4 w-4" /> Add {terms.issue.toLowerCase()}
-          </button>
-        ) : (
-          <Link
-            href="/projects"
-            className="sf-btn-primary flex items-center gap-1.5 px-3.5 py-2 text-sm"
-          >
-            <Plus className="h-4 w-4" /> Add {terms.issue.toLowerCase()}
-          </Link>
-        )}
+        <Link
+          href="/snags/new"
+          className="sf-btn-primary flex items-center gap-1.5 px-3.5 py-2 text-sm"
+        >
+          <Plus className="h-4 w-4" /> Add {issue}
+        </Link>
       </div>
 
       {projects.length > 1 && (
@@ -118,9 +95,7 @@ function SnagsInner({ terms, orgType, addContext }: InnerProps) {
           <AlertCircle className="mb-3 h-10 w-10 text-slate-300" />
           <p className="text-sm font-medium text-slate-900">{EMPTY_MESSAGES[status] ?? `No ${issues}`}</p>
           <p className="mt-1 text-sm text-slate-500">
-            {addContext
-              ? `Tap "Add ${terms.issue.toLowerCase()}" above to log your first one.`
-              : `Open a ${terms.project.toLowerCase()} to log your first ${issue}.`}
+            Tap &ldquo;Add {issue}&rdquo; above to log your first one.
           </p>
         </div>
       ) : (
@@ -128,82 +103,27 @@ function SnagsInner({ terms, orgType, addContext }: InnerProps) {
           {snags.map(s => <SnagCard key={s.id} snag={s} />)}
         </div>
       )}
-
-      {adding && addContext && (
-        <AddSnagSheet
-          projectId={addContext.projectId}
-          unitId={addContext.unitId}
-          rooms={addContext.rooms}
-          contractors={addContext.contractors}
-          terms={terms}
-          orgType={orgType}
-          orgId={addContext.orgId}
-          onClose={() => setAdding(false)}
-          onSaved={() => { setAdding(false); refetch() }}
-        />
-      )}
     </div>
   )
 }
 
 function SnagsWithTerms() {
   const [terms, setTerms] = useState<DashboardTerms | null>(null)
-  const [orgType, setOrgType] = useState<OrgType>('builder')
-  const [addContext, setAddContext] = useState<AddContext | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
-
       const { data: memberData } = await supabase
         .from('org_members')
         .select('org_id, organizations(org_type)')
         .eq('user_id', user.id)
         .limit(1)
         .maybeSingle()
-
       const raw = memberData?.organizations
       const org = Array.isArray(raw) ? raw[0] : raw as { org_type?: string } | null | undefined
       const type = (org?.org_type ?? 'builder') as OrgType
-      const orgId = memberData?.org_id ?? ''
-
-      setOrgType(type)
       setTerms(DASHBOARD_TERMS[type])
-
-      // For homeowners: pre-fetch project + unit so Add Job opens directly
-      if (type === 'homeowner' && orgId) {
-        const { data: project } = await supabase
-          .from('projects')
-          .select('id')
-          .eq('org_id', orgId)
-          .limit(1)
-          .maybeSingle()
-
-        if (project) {
-          const [unitRes, { data: contractors }] = await Promise.all([
-            supabase.from('units').select('id, rooms(*)').eq('project_id', project.id).limit(1).maybeSingle(),
-            supabase.from('contractors').select('*').eq('org_id', orgId).eq('is_active', true).order('name'),
-          ])
-
-          let unit = unitRes.data
-
-          // Homeowners don't go through a unit-creation step — auto-create one if missing
-          if (!unit) {
-            const { data: created } = await supabase
-              .from('units')
-              .insert({ project_id: project.id, name: 'Main', unit_type: 'house' })
-              .select('id')
-              .single()
-            if (created) unit = { id: created.id, rooms: [] }
-          }
-
-          if (unit) {
-            const rooms = Array.isArray(unit.rooms) ? unit.rooms : []
-            setAddContext({ projectId: project.id, unitId: unit.id, orgId, rooms, contractors: contractors ?? [] })
-          }
-        }
-      }
     })
   }, [])
 
@@ -215,7 +135,7 @@ function SnagsWithTerms() {
 
   return (
     <Suspense>
-      <SnagsInner terms={terms} orgType={orgType} addContext={addContext} />
+      <SnagsInner terms={terms} />
     </Suspense>
   )
 }
