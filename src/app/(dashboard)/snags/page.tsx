@@ -6,6 +6,8 @@ import { AlertCircle } from 'lucide-react'
 import SnagCard from '@/components/snags/SnagCard'
 import { useSnags } from '@/hooks/useSnags'
 import { createClient } from '@/lib/supabase/client'
+import { DASHBOARD_TERMS } from '@/types'
+import type { DashboardTerms, OrgType } from '@/types'
 
 const FILTERS = [
   { value: 'open,assigned,rejected', label: 'Open' },
@@ -14,14 +16,7 @@ const FILTERS = [
   { value: '', label: 'All' },
 ]
 
-const EMPTY_MESSAGES: Record<string, string> = {
-  'open,assigned,rejected': 'No open snags',
-  'fixed': 'No snags awaiting sign-off',
-  'approved': 'No approved snags yet',
-  '': 'No snags yet',
-}
-
-function SnagsInner() {
+function SnagsInner({ terms }: { terms: DashboardTerms }) {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab')
   const initialFilter = FILTERS.find(f => f.value === tabParam)?.value ?? 'open,assigned,rejected'
@@ -32,6 +27,18 @@ function SnagsInner() {
   const { snags, loading } = useSnags({ ...(status ? { status } : {}), ...(projectId ? { projectId } : {}) })
   const supabase = createClient()
 
+  const issue = terms.issue.toLowerCase()
+  const issues = terms.issues.toLowerCase()
+  const project = terms.project.toLowerCase()
+  const projects_term = terms.projects.toLowerCase()
+
+  const EMPTY_MESSAGES: Record<string, string> = {
+    'open,assigned,rejected': `No open ${issues}`,
+    'fixed': `No ${issues} awaiting sign-off`,
+    'approved': `No approved ${issues} yet`,
+    '': `No ${issues} yet`,
+  }
+
   useEffect(() => {
     supabase.from('projects').select('id, name').order('name').then(({ data }) => {
       if (data) setProjects(data)
@@ -40,7 +47,7 @@ function SnagsInner() {
 
   return (
     <div className="mx-auto max-w-lg px-4 pb-24 pt-6">
-      <h1 className="mb-4 text-2xl font-bold tracking-tight text-slate-900">Snags</h1>
+      <h1 className="mb-4 text-2xl font-bold tracking-tight text-slate-900">{terms.issues}</h1>
 
       {projects.length > 1 && (
         <select
@@ -48,7 +55,7 @@ function SnagsInner() {
           onChange={e => setProjectId(e.target.value)}
           className="sf-input mb-3"
         >
-          <option value="">All projects</option>
+          <option value="">All {projects_term}</option>
           {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       )}
@@ -76,8 +83,8 @@ function SnagsInner() {
       ) : snags.length === 0 ? (
         <div className="sf-card flex flex-col items-center p-10 text-center">
           <AlertCircle className="mb-3 h-10 w-10 text-slate-300" />
-          <p className="text-sm font-medium text-slate-900">{EMPTY_MESSAGES[status] ?? 'No snags'}</p>
-          <p className="mt-1 text-sm text-slate-500">Open a project and a unit to log your first snag.</p>
+          <p className="text-sm font-medium text-slate-900">{EMPTY_MESSAGES[status] ?? `No ${issues}`}</p>
+          <p className="mt-1 text-sm text-slate-500">Open a {project} and a unit to log your first {issue}.</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -88,10 +95,32 @@ function SnagsInner() {
   )
 }
 
-export default function SnagsPage() {
+function SnagsWithTerms() {
+  const [terms, setTerms] = useState<DashboardTerms>(DASHBOARD_TERMS['builder'])
+  const supabase = createClient()
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      const { data } = await supabase
+        .from('org_members')
+        .select('organizations(org_type)')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle()
+      const raw = data?.organizations
+      const org = Array.isArray(raw) ? raw[0] : raw as { org_type?: string } | null | undefined
+      if (org?.org_type) setTerms(DASHBOARD_TERMS[org.org_type as OrgType])
+    })
+  }, [])
+
   return (
     <Suspense>
-      <SnagsInner />
+      <SnagsInner terms={terms} />
     </Suspense>
   )
+}
+
+export default function SnagsPage() {
+  return <SnagsWithTerms />
 }

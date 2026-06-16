@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Camera, MapPin, User, CalendarClock, Sparkles, MessageCircle } from 'lucide-react'
 import { waLink } from '@/lib/whatsappLink'
-import { STATUS_CONFIG, PRIORITY_CONFIG, type Attachment, type Contractor, type SnagStatus } from '@/types'
+import { STATUS_CONFIG, PRIORITY_CONFIG, type Attachment, type Contractor, type DashboardTerms, type SnagStatus } from '@/types'
 
 const STATUS_FLOW: SnagStatus[] = ['open', 'assigned', 'fixed', 'approved']
 
@@ -37,7 +37,7 @@ interface SnagDetail {
   project: { id: string; name: string } | null
 }
 
-export default function SnagDetailClient({ snag, contractors }: { snag: SnagDetail; contractors: Contractor[] }) {
+export default function SnagDetailClient({ snag, contractors, terms }: { snag: SnagDetail; contractors: Contractor[]; terms: DashboardTerms }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [origin, setOrigin] = useState('')
@@ -68,7 +68,7 @@ export default function SnagDetailClient({ snag, contractors }: { snag: SnagDeta
   }
 
   async function handleDelete() {
-    if (!confirm(`Delete snag #${snag.snag_number} (${snag.title})? This cannot be undone.`)) return
+    if (!confirm(`Delete ${terms.issue.toLowerCase()} #${snag.snag_number} (${snag.title})? This cannot be undone.`)) return
     setBusy(true)
     const { error } = await supabase.from('snags').delete().eq('id', snag.id)
     if (error) { setError(error.message); setBusy(false) }
@@ -149,7 +149,7 @@ export default function SnagDetailClient({ snag, contractors }: { snag: SnagDeta
       {/* Contractor */}
       <div className="sf-card mt-6 p-4">
         <h2 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-          <User className="h-4 w-4 text-slate-400" /> Assigned contractor
+          <User className="h-4 w-4 text-slate-400" /> Assigned {terms.contractor.toLowerCase()}
         </h2>
         <select
           value={snag.assigned_to ?? ''}
@@ -164,14 +164,14 @@ export default function SnagDetailClient({ snag, contractors }: { snag: SnagDeta
         </select>
         {contractors.length === 0 && (
           <p className="mt-2 text-xs text-slate-400">
-            No contractors yet — <Link href="/contractors" className="text-[#1A56DB]">add your team</Link> first.
+            No {terms.contractor.toLowerCase()}s yet — <Link href="/contractors" className="text-[#1A56DB]">add your team</Link> first.
           </p>
         )}
         {snag.contractor?.whatsapp && origin && (
           <a
             href={waLink(
               snag.contractor.whatsapp,
-              `Hi ${snag.contractor.name}, you've been assigned snag #${snag.snag_number} (${snag.title})` +
+              `Hi ${snag.contractor.name}, you've been assigned ${terms.issue.toLowerCase()} #${snag.snag_number} (${snag.title})` +
                 `${snag.project ? ` on ${snag.project.name}` : ''}` +
                 `${snag.unit ? ` — ${snag.unit.name}${snag.room ? `, ${snag.room.name}` : ''}` : ''}.` +
                 `\nView it and upload your fix photo here:\n${origin}/c/${snag.contractor.access_token}`
@@ -230,7 +230,7 @@ export default function SnagDetailClient({ snag, contractors }: { snag: SnagDeta
       </div>
 
       <button onClick={handleDelete} disabled={busy} className="mt-8 w-full text-center text-xs font-medium text-red-400 hover:text-red-600 disabled:opacity-50">
-        Delete this snag
+        Delete this {terms.issue.toLowerCase()}
       </button>
     </div>
   )
