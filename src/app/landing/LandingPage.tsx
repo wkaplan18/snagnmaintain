@@ -26,7 +26,7 @@ const STEPS = [
   {
     num: '01',
     title: 'Spot it',
-    desc: 'Walk the property, snap a photo, log the issue in seconds. AI suggests the category and priority automatically.',
+    desc: 'Walk the property, snap a photo, log the issue in seconds. Add a title, priority, and category — done.',
     color: '#0EA5E9',
     icon: Camera,
   },
@@ -47,9 +47,9 @@ const STEPS = [
 ]
 
 const FEATURES = [
-  { icon: Camera,      title: 'Photo logging',       desc: 'Snap, annotate, and log defects with before/after photos in under 30 seconds.', color: '#F97316' },
-  { icon: Zap,         title: 'AI triage',           desc: 'Automatic category and severity suggestions from every photo you upload.',       color: '#8B5CF6' },
-  { icon: Bell,        title: 'WhatsApp alerts',     desc: 'Contractors get notified via WhatsApp — no app install, no friction.',           color: '#10B981' },
+  { icon: Camera,      title: 'Photo logging',       desc: 'Snap and log defects with before/after photos in under 30 seconds.', color: '#F97316' },
+  { icon: Zap,         title: 'Instant assignment',  desc: 'Assign to internal staff or an external contractor with a single tap.',  color: '#8B5CF6' },
+  { icon: Bell,        title: 'WhatsApp alerts',     desc: 'Contractors get notified via WhatsApp — no app install, no friction.',   color: '#10B981' },
   { icon: BarChart3,   title: 'Live reports',        desc: 'Track open snags, completion rates, and contractor performance at a glance.',    color: '#0EA5E9' },
   { icon: Users,       title: 'Team & contractors',  desc: 'Manage internal staff and external trades from a single dashboard.',            color: '#F43F5E' },
   { icon: Smartphone,  title: 'Mobile first',        desc: 'Built for the field — works perfectly on any phone, even offline.',              color: '#1A56DB' },
