@@ -191,7 +191,7 @@ export default function SnagDetailClient({ snag, contractors, terms }: { snag: S
 
         {snag.status === 'rejected' && (
           <div className="mb-3 flex items-center gap-2 rounded-xl bg-rose-50 border border-rose-200 px-3 py-2.5">
-            <span className="text-rose-700 text-sm font-medium">Fix rejected — contractor has been notified to redo this.</span>
+            <span className="text-rose-700 text-sm font-medium">Fix rejected — {terms.contractor.toLowerCase()} has been notified to redo this.</span>
           </div>
         )}
 
@@ -218,7 +218,7 @@ export default function SnagDetailClient({ snag, contractors, terms }: { snag: S
 
         {snag.status === 'fixed' && (
           <button
-            onClick={() => { if (confirm('Reject this fix? The contractor will see it as rejected and must redo it.')) setStatus('rejected') }}
+            onClick={() => { if (confirm(`Reject this fix? The ${terms.contractor.toLowerCase()} will see it as rejected and must redo it.`)) setStatus('rejected') }}
             disabled={busy}
             className="mt-3 w-full rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-700 hover:bg-rose-100 transition-colors disabled:opacity-50"
           >

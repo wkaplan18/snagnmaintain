@@ -55,6 +55,7 @@ function UnitSnags({ projectId, unitId, rooms, contractors, orgId, terms, bare =
           unitId={unitId}
           rooms={rooms}
           contractors={contractors}
+          terms={terms}
           orgId={orgId}
           onClose={() => setAdding(false)}
           onSaved={() => { setAdding(false); refetch() }}

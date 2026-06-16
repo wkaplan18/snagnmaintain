@@ -61,8 +61,8 @@ export default function LoginClient() {
             <path d="M21.5 22l2 2 3-3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">SnagandGo</h1>
-        <p className="mt-1 text-sm text-slate-500">Construction snagging made simple</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">snagnmaintain</h1>
+        <p className="mt-1 text-sm text-slate-500">Property maintenance, sorted</p>
       </div>
 
       <div className="sf-card w-full max-w-sm p-6">
@@ -80,7 +80,7 @@ export default function LoginClient() {
           </div>
         ) : (
           <>
-            <h2 className="mb-5 text-lg font-semibold text-slate-900">Sign in to SnagandGo</h2>
+            <h2 className="mb-5 text-lg font-semibold text-slate-900">Sign in to snagnmaintain</h2>
 
             {/* Google OAuth */}
             <button

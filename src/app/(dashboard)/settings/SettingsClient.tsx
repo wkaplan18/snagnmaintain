@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, User, Check, LogOut, Building2 } from 'lucide-react'
 import Link from 'next/link'
-import { ORG_TYPE_CONFIG } from '@/types'
+import { DASHBOARD_TERMS, ORG_TYPE_CONFIG } from '@/types'
 import type { OrgType } from '@/types'
 
 interface Props {
@@ -17,6 +17,7 @@ interface Props {
 
 export default function SettingsClient({ email, profile, orgName, orgType }: Props) {
   const orgTypeConfig = orgType ? ORG_TYPE_CONFIG[orgType as OrgType] : null
+  const terms = DASHBOARD_TERMS[(orgType ?? 'builder') as OrgType]
   const [fullName, setFullName] = useState(profile.full_name ?? '')
   const [whatsapp, setWhatsapp] = useState(profile.whatsapp ?? '')
   const [phone, setPhone] = useState(profile.phone ?? '')
@@ -96,7 +97,7 @@ export default function SettingsClient({ email, profile, orgName, orgType }: Pro
         <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-700">
             WhatsApp number
-            <span className="ml-1.5 text-xs font-normal text-slate-400">— contractors will send fix updates here</span>
+            <span className="ml-1.5 text-xs font-normal text-slate-400">— {terms.contractor.toLowerCase()}s will send fix updates here</span>
           </label>
           <input
             type="tel"

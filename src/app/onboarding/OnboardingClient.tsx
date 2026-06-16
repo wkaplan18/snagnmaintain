@@ -77,7 +77,7 @@ export default function OnboardingClient({ email }: { email: string }) {
             <path d="M21.5 22l2 2 3-3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Welcome to SnagandGo</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Welcome to snagnmaintain</h1>
         <p className="mt-1 text-sm text-slate-500">Signed in as {email}</p>
       </div>
 

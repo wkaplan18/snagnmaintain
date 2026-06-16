@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { X, Camera, Sparkles, Loader2, ChevronDown } from 'lucide-react'
 import PhotoAnnotator from '@/components/snags/PhotoAnnotator'
 import { createClient } from '@/lib/supabase/client'
-import type { AISuggestion, Contractor, Room, SnagPriority } from '@/types'
+import type { AISuggestion, Contractor, DashboardTerms, Room, SnagPriority } from '@/types'
 import { DEFAULT_ROOMS } from '@/types'
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
   unitId: string
   rooms: Room[]
   contractors: Contractor[]
+  terms: DashboardTerms
   orgId?: string // enables inline "add contractor" without leaving the sheet
   onClose: () => void
   onSaved: () => void
@@ -22,7 +23,7 @@ const BASE_CATEGORIES = ['paint', 'crack', 'tile', 'water', 'fitting', 'alignmen
 
 type Step = 'camera' | 'annotate' | 'ai_loading' | 'form'
 
-export default function AddSnagSheet({ projectId, unitId, rooms, contractors, orgId, onClose, onSaved }: Props) {
+export default function AddSnagSheet({ projectId, unitId, rooms, contractors, terms, orgId, onClose, onSaved }: Props) {
   const [step, setStep] = useState<Step>('camera')
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
@@ -100,7 +101,7 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, or
       setNewContractorName(''); setNewContractorTrade(''); setNewContractorWhatsApp('')
       setAddingContractor(false)
     } else {
-      alert(error?.message ?? 'Could not add contractor')
+      alert(error?.message ?? `Could not add ${terms.contractor.toLowerCase()}`)
     }
     setInlineBusy(false)
   }
@@ -201,7 +202,7 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, or
 
       onSaved()
     } catch {
-      alert('Failed to save snag. Please try again.')
+      alert(`Failed to save ${terms.issue.toLowerCase()}. Please try again.`)
     } finally {
       setSaving(false)
     }
@@ -214,7 +215,7 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, or
         <button onClick={onClose} className="rounded-xl p-2 hover:bg-slate-100 active:bg-slate-200 transition-colors">
           <X className="h-5 w-5 text-slate-600" />
         </button>
-        <h2 className="text-base font-semibold text-slate-900">Add Snag</h2>
+        <h2 className="text-base font-semibold text-slate-900">Add {terms.issue}</h2>
         <div className="w-9" />
       </div>
 
@@ -398,7 +399,7 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, or
 
               {/* Assign contractor */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Assign contractor</label>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">Assign {terms.contractor.toLowerCase()}</label>
                 <div className="relative">
                   <select
                     value={contractorId}
@@ -409,7 +410,7 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, or
                     {localContractors.map(c => (
                       <option key={c.id} value={c.id}>{c.name}{c.trade ? ` · ${c.trade}` : ''}</option>
                     ))}
-                    {orgId && <option value={ADD_NEW}>+ Add new contractor…</option>}
+                    {orgId && <option value={ADD_NEW}>+ Add new {terms.contractor.toLowerCase()}…</option>}
                   </select>
                   <ChevronDown className="pointer-events-none absolute right-3 top-3.5 h-4 w-4 text-slate-400" />
                 </div>
@@ -424,14 +425,14 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, or
                         placeholder="WhatsApp number" className="sf-input" />
                     </div>
                     <div className="flex gap-2">
-                      <button type="button" onClick={addContractor} disabled={inlineBusy || !newContractorName.trim()} className="sf-btn-primary flex-1 py-2 text-sm disabled:opacity-60">Add contractor</button>
+                      <button type="button" onClick={addContractor} disabled={inlineBusy || !newContractorName.trim()} className="sf-btn-primary flex-1 py-2 text-sm disabled:opacity-60">Add {terms.contractor.toLowerCase()}</button>
                       <button type="button" onClick={() => setAddingContractor(false)} className="sf-btn-secondary px-3 py-2 text-sm">✕</button>
                     </div>
                   </div>
                 )}
                 {contractorId && !addingContractor && (
                   <p className="mt-1.5 text-xs text-slate-400">
-                    After saving, use the snag's WhatsApp button to notify them
+                    After saving, use the {terms.issue.toLowerCase()}'s WhatsApp button to notify them
                   </p>
                 )}
               </div>
@@ -462,7 +463,7 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, or
                   Saving…
                 </>
               ) : (
-                'Save Snag'
+                `Save ${terms.issue}`
               )}
             </button>
           </div>
