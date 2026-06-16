@@ -1,22 +1,14 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Camera, ChevronRight, Loader2, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { compressImage } from '@/lib/compressImage'
-import type { Contractor, DashboardTerms, Room } from '@/types'
+import { DASHBOARD_TERMS } from '@/types'
+import type { Contractor, DashboardTerms, OrgType, Room } from '@/types'
 
 type Step = 'photo' | 'details' | 'room' | 'assign' | 'whatsapp'
-
-interface Props {
-  projectId: string
-  unitId: string
-  orgId: string
-  terms: DashboardTerms
-  initialRooms: Room[]
-  initialContractors: Contractor[]
-}
 
 function formatWhatsApp(raw: string): string {
   const num = raw.replace(/[\s\-().]/g, '')
@@ -33,29 +25,37 @@ const WA_ICON = (
   </svg>
 )
 
-export default function AddJobClient({ projectId, unitId, orgId, terms, initialRooms, initialContractors }: Props) {
+export default function AddJobClient() {
   const router = useRouter()
   const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Context loaded on mount
+  const [ready, setReady] = useState(false)
+  const [projectId, setProjectId] = useState('')
+  const [unitId, setUnitId] = useState('')
+  const [orgId, setOrgId] = useState('')
+  const [terms, setTerms] = useState<DashboardTerms>(DASHBOARD_TERMS['homeowner'])
+  const [rooms, setRooms] = useState<Room[]>([])
+  const [contractors, setContractors] = useState<Contractor[]>([])
+
+  // Wizard state
   const [step, setStep] = useState<Step>('photo')
   const [savedSnagId, setSavedSnagId] = useState<string | null>(null)
 
-  // Data collected across steps
+  // Step data
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [roomId, setRoomId] = useState('')
 
-  // Rooms
-  const [rooms, setRooms] = useState<Room[]>(initialRooms)
+  // Room add
   const [addingRoom, setAddingRoom] = useState(false)
   const [newRoomName, setNewRoomName] = useState('')
   const [roomBusy, setRoomBusy] = useState(false)
 
-  // Contractors
-  const [contractors, setContractors] = useState<Contractor[]>(initialContractors)
+  // Contractor add
   const [addingContractor, setAddingContractor] = useState(false)
   const [newName, setNewName] = useState('')
   const [newTrade, setNewTrade] = useState('')
@@ -67,6 +67,79 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
   const [waUrl, setWaUrl] = useState<string | null>(null)
   const [waName, setWaName] = useState<string | null>(null)
 
+  useEffect(() => {
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
+
+      const { data: memberData } = await supabase
+        .from('org_members')
+        .select('org_id, organizations(org_type)')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle()
+
+      const raw = memberData?.organizations
+      const org = Array.isArray(raw) ? raw[0] : raw as { org_type?: string } | null | undefined
+      const orgType = (org?.org_type ?? 'homeowner') as OrgType
+      const _orgId = memberData?.org_id ?? ''
+
+      setOrgId(_orgId)
+      setTerms(DASHBOARD_TERMS[orgType])
+
+      // Find or create project + unit
+      const { data: project } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('org_id', _orgId)
+        .limit(1)
+        .maybeSingle()
+
+      if (!project) { router.push('/projects/new'); return }
+      setProjectId(project.id)
+
+      let { data: unit } = await supabase
+        .from('units')
+        .select('id')
+        .eq('project_id', project.id)
+        .limit(1)
+        .maybeSingle()
+
+      if (!unit) {
+        const { data: created } = await supabase
+          .from('units')
+          .insert({ project_id: project.id, name: 'Main', unit_type: 'house' })
+          .select('id')
+          .single()
+        unit = created
+      }
+
+      if (!unit) { router.push('/projects'); return }
+      setUnitId(unit.id)
+
+      const [{ data: _rooms }, { data: _contractors }] = await Promise.all([
+        supabase.from('rooms').select('*').eq('unit_id', unit.id).order('room_order'),
+        supabase.from('contractors').select('*').eq('org_id', _orgId).eq('is_active', true).order('name'),
+      ])
+
+      setRooms(_rooms ?? [])
+      setContractors(_contractors ?? [])
+      setReady(true)
+    }
+    init()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // ─── Loading ─────────────────────────────────────────────────────────────────
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-slate-200 border-t-[#1A56DB]" />
+      </div>
+    )
+  }
+
+  // ─── Handlers ────────────────────────────────────────────────────────────────
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -186,10 +259,7 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
       <div className="flex min-h-screen flex-col bg-white">
         <div className="border-b border-slate-200 px-4 pt-safe pb-4">
           <div className="flex items-center gap-3 pt-3">
-            <button
-              onClick={() => router.push('/snags')}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500"
-            >
+            <button onClick={() => router.push('/snags')} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500">
               <X className="h-4 w-4" />
             </button>
             <div>
@@ -211,10 +281,7 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="mt-2 text-xs font-medium text-[#1A56DB] underline underline-offset-2"
-              >
+              <button onClick={() => fileInputRef.current?.click()} className="mt-2 text-xs font-medium text-[#1A56DB] underline underline-offset-2">
                 Retake photo
               </button>
             </div>
@@ -229,27 +296,14 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
           )}
         </div>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={handlePhotoChange}
-        />
+        <input ref={fileInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoChange} />
 
         <div className="px-4 pb-28 pt-4 space-y-2">
-          <button
-            onClick={() => setStep('details')}
-            className="sf-btn-primary flex w-full items-center justify-center gap-2 py-4 text-base"
-          >
+          <button onClick={() => setStep('details')} className="sf-btn-primary flex w-full items-center justify-center gap-2 py-4 text-base">
             Next <ChevronRight className="h-5 w-5" />
           </button>
           {!photoUrl && (
-            <button
-              onClick={() => setStep('details')}
-              className="w-full py-2 text-sm text-slate-400 underline underline-offset-2"
-            >
+            <button onClick={() => setStep('details')} className="w-full py-2 text-sm text-slate-400 underline underline-offset-2">
               Skip photo
             </button>
           )}
@@ -264,10 +318,7 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
       <div className="flex min-h-screen flex-col bg-white">
         <div className="border-b border-slate-200 px-4 pt-safe pb-4">
           <div className="flex items-center gap-3 pt-3">
-            <button
-              onClick={() => setStep('photo')}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500"
-            >
+            <button onClick={() => setStep('photo')} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500">
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div>
@@ -285,7 +336,7 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
           )}
           <div>
             <label className="mb-2 block text-sm font-semibold text-slate-700">
-              What&apos;s the problem? <span className="text-red-500">*</span>
+              What&apos;s the problem? <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -329,10 +380,7 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
       <div className="flex min-h-screen flex-col bg-white">
         <div className="border-b border-slate-200 px-4 pt-safe pb-4">
           <div className="flex items-center gap-3 pt-3">
-            <button
-              onClick={() => setStep('details')}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500"
-            >
+            <button onClick={() => setStep('details')} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500">
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div>
@@ -391,17 +439,11 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
         </div>
 
         <div className="px-4 pb-28 pt-4 space-y-2">
-          <button
-            onClick={saveJob}
-            disabled={saving}
-            className="sf-btn-primary w-full py-4 text-base disabled:opacity-50"
-          >
-            {saving
-              ? <><Loader2 className="h-5 w-5 animate-spin" /> Saving…</>
-              : `Save ${terms.issue}`}
+          <button onClick={saveJob} disabled={saving} className="sf-btn-primary w-full py-4 text-base disabled:opacity-50">
+            {saving ? <><Loader2 className="h-5 w-5 animate-spin" /> Saving…</> : `Save ${terms.issue}`}
           </button>
-          {!roomId && (
-            <p className="text-center text-xs text-slate-400">Room is optional — you can skip it</p>
+          {!roomId && rooms.length > 0 && (
+            <p className="text-center text-xs text-slate-400">Room is optional</p>
           )}
         </div>
       </div>
@@ -443,9 +485,8 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
                     <p className="text-sm font-semibold text-slate-900">{c.name}</p>
                     {c.trade && <p className="text-xs text-slate-500">{c.trade}</p>}
                     {c.whatsapp
-                      ? <p className="text-xs text-green-600">WhatsApp: {c.whatsapp}</p>
-                      : <p className="text-xs text-slate-400">No WhatsApp number</p>
-                    }
+                      ? <p className="text-xs text-green-600">{c.whatsapp}</p>
+                      : <p className="text-xs text-slate-400">No WhatsApp number</p>}
                   </div>
                   <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-300" />
                 </button>
@@ -454,9 +495,7 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
                 onClick={() => setAddingContractor(true)}
                 className="flex w-full items-center gap-3 px-4 py-4 text-[#1A56DB] hover:bg-[#EEF4FF] transition-colors"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-dashed border-[#1A56DB]/30 text-2xl font-light">
-                  +
-                </div>
+                <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-dashed border-[#1A56DB]/30 text-2xl font-light">+</div>
                 <span className="text-sm font-medium">Add new {terms.contractor.toLowerCase()}</span>
               </button>
             </div>
@@ -467,12 +506,9 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#EEF4FF] text-3xl">👷</div>
               <p className="text-base font-semibold text-slate-900">No {terms.contractor.toLowerCase()}s yet</p>
               <p className="mt-1 text-sm text-slate-500 max-w-xs">
-                Add a {terms.contractor.toLowerCase()} to send them this {terms.issue.toLowerCase()} via WhatsApp.
+                Add one to send this {terms.issue.toLowerCase()} via WhatsApp.
               </p>
-              <button
-                onClick={() => setAddingContractor(true)}
-                className="mt-6 sf-btn-primary px-6 py-3"
-              >
+              <button onClick={() => setAddingContractor(true)} className="mt-6 sf-btn-primary px-6 py-3">
                 + Add {terms.contractor.toLowerCase()}
               </button>
             </div>
@@ -482,70 +518,32 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
             <div className="p-4 space-y-3">
               <p className="text-sm font-semibold text-slate-700">New {terms.contractor.toLowerCase()}</p>
               <div className="flex rounded-xl border border-slate-200 bg-slate-50 overflow-hidden text-sm font-medium">
-                <button
-                  type="button"
-                  onClick={() => setNewIsInternal(false)}
-                  className={`flex-1 py-2.5 transition-colors ${!newIsInternal ? 'bg-[#1A56DB] text-white' : 'text-slate-500'}`}
-                >
+                <button type="button" onClick={() => setNewIsInternal(false)}
+                  className={`flex-1 py-2.5 transition-colors ${!newIsInternal ? 'bg-[#1A56DB] text-white' : 'text-slate-500'}`}>
                   {terms.externalLabel}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setNewIsInternal(true)}
-                  className={`flex-1 py-2.5 transition-colors ${newIsInternal ? 'bg-[#1A56DB] text-white' : 'text-slate-500'}`}
-                >
+                <button type="button" onClick={() => setNewIsInternal(true)}
+                  className={`flex-1 py-2.5 transition-colors ${newIsInternal ? 'bg-[#1A56DB] text-white' : 'text-slate-500'}`}>
                   {terms.internalLabel}
                 </button>
               </div>
-              <input
-                type="text"
-                autoFocus
-                value={newName}
-                onChange={e => setNewName(e.target.value)}
-                placeholder="Name *"
-                className="sf-input"
-              />
-              <input
-                type="text"
-                value={newTrade}
-                onChange={e => setNewTrade(e.target.value)}
-                placeholder={terms.contractorTrade}
-                className="sf-input"
-              />
-              <input
-                type="tel"
-                value={newWhatsApp}
-                onChange={e => setNewWhatsApp(e.target.value)}
+              <input type="text" autoFocus value={newName} onChange={e => setNewName(e.target.value)} placeholder="Name *" className="sf-input" />
+              <input type="text" value={newTrade} onChange={e => setNewTrade(e.target.value)} placeholder={terms.contractorTrade} className="sf-input" />
+              <input type="tel" value={newWhatsApp} onChange={e => setNewWhatsApp(e.target.value)}
                 onBlur={e => { if (e.target.value.trim()) setNewWhatsApp(formatWhatsApp(e.target.value.trim())) }}
-                placeholder="WhatsApp number"
-                className="sf-input"
-              />
+                placeholder="WhatsApp number" className="sf-input" />
               <div className="flex gap-2 pt-1">
-                <button
-                  onClick={addAndAssignContractor}
-                  disabled={contractorBusy || !newName.trim()}
-                  className="sf-btn-primary flex-1 py-3 text-sm disabled:opacity-60"
-                >
-                  {contractorBusy
-                    ? <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                    : 'Add & assign'}
+                <button onClick={addAndAssignContractor} disabled={contractorBusy || !newName.trim()} className="sf-btn-primary flex-1 py-3 text-sm disabled:opacity-60">
+                  {contractorBusy ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Add & assign'}
                 </button>
-                <button
-                  onClick={() => setAddingContractor(false)}
-                  className="sf-btn-secondary px-4 py-3 text-sm"
-                >
-                  Cancel
-                </button>
+                <button onClick={() => setAddingContractor(false)} className="sf-btn-secondary px-4 py-3 text-sm">Cancel</button>
               </div>
             </div>
           )}
         </div>
 
         <div className="border-t border-slate-100 px-4 pb-28 pt-3">
-          <button
-            onClick={() => router.push('/snags')}
-            className="w-full py-2 text-sm text-slate-400 underline underline-offset-2"
-          >
+          <button onClick={() => router.push('/snags')} className="w-full py-2 text-sm text-slate-400 underline underline-offset-2">
             Skip — assign later
           </button>
         </div>
@@ -564,7 +562,7 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
       <div>
         <p className="text-xl font-bold text-slate-900">Ready to send!</p>
         <p className="mt-2 text-sm text-slate-500 max-w-xs">
-          Send {waName} the link — they can view the job and mark it as done from their phone.
+          Send {waName} the link — they can view and update the {terms.issue.toLowerCase()} from their phone.
         </p>
       </div>
       {waUrl && (
@@ -579,10 +577,7 @@ export default function AddJobClient({ projectId, unitId, orgId, terms, initialR
           Send to {waName} via WhatsApp
         </a>
       )}
-      <button
-        onClick={() => router.push('/snags')}
-        className="text-sm text-slate-400 underline underline-offset-2"
-      >
+      <button onClick={() => router.push('/snags')} className="text-sm text-slate-400 underline underline-offset-2">
         Done
       </button>
     </div>
