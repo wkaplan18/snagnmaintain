@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Camera, MapPin, User, CalendarClock, Sparkles, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Camera, Loader2, MapPin, User, CalendarClock, Sparkles, MessageCircle } from 'lucide-react'
 import { waLink } from '@/lib/whatsappLink'
 import { STATUS_CONFIG, PRIORITY_CONFIG, type Attachment, type Contractor, type DashboardTerms, type SnagStatus } from '@/types'
 
@@ -42,10 +42,31 @@ export default function SnagDetailClient({ snag, contractors, terms }: { snag: S
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [origin, setOrigin] = useState('')
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const photoInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => setOrigin(window.location.origin), [])
+
+  async function handleAddPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingPhoto(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('snagId', snag.id)
+      const res = await fetch('/api/uploads/snag-photo', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error('Upload failed')
+      router.refresh()
+    } catch {
+      alert('Could not upload photo. Please try again.')
+    } finally {
+      setUploadingPhoto(false)
+      if (photoInputRef.current) photoInputRef.current.value = ''
+    }
+  }
 
   const status = STATUS_CONFIG[snag.status]
   const priority = PRIORITY_CONFIG[snag.priority]
@@ -133,6 +154,15 @@ export default function SnagDetailClient({ snag, contractors, terms }: { snag: S
           <Camera className="h-4 w-4" /> No photos attached
         </div>
       )}
+      <button
+        onClick={() => photoInputRef.current?.click()}
+        disabled={uploadingPhoto}
+        className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#1A56DB] hover:underline disabled:opacity-50"
+      >
+        {uploadingPhoto ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
+        {uploadingPhoto ? 'Uploading…' : '+ Add photo'}
+      </button>
+      <input ref={photoInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleAddPhoto} />
 
       {resolutionPhotos.length > 0 && (
         <>
