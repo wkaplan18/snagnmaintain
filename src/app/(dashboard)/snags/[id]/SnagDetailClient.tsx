@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Camera, Loader2, MapPin, User, CalendarClock, Sparkles, MessageCircle } from 'lucide-react'
 import { waLink } from '@/lib/whatsappLink'
+import { compressImage } from '@/lib/compressImage'
 import { STATUS_CONFIG, PRIORITY_CONFIG, type Attachment, type Contractor, type DashboardTerms, type SnagStatus } from '@/types'
 
 const STATUS_FLOW: SnagStatus[] = ['open', 'assigned', 'fixed', 'approved']
@@ -54,8 +55,9 @@ export default function SnagDetailClient({ snag, contractors, terms }: { snag: S
     if (!file) return
     setUploadingPhoto(true)
     try {
+      const compressed = await compressImage(file)
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', compressed)
       formData.append('snagId', snag.id)
       const res = await fetch('/api/uploads/snag-photo', { method: 'POST', body: formData })
       if (!res.ok) throw new Error('Upload failed')

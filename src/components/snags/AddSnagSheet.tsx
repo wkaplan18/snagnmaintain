@@ -6,6 +6,7 @@ import PhotoAnnotator from '@/components/snags/PhotoAnnotator'
 import { createClient } from '@/lib/supabase/client'
 import type { AISuggestion, Contractor, DashboardTerms, OrgType, Room, SnagPriority } from '@/types'
 import { DEFAULT_ROOMS } from '@/types'
+import { compressImage } from '@/lib/compressImage'
 
 interface Props {
   projectId: string
@@ -176,9 +177,9 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
     setStep('form')
   }, [AI_ANALYSIS_ENABLED])
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) handlePhotoTaken(file)
+    if (file) handlePhotoTaken(await compressImage(file))
   }
 
   const handleSave = async () => {

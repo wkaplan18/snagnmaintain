@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Camera, CheckCircle, Clock, AlertTriangle, Loader2, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react'
 import { PRIORITY_CONFIG } from '@/types'
+import { compressImage } from '@/lib/compressImage'
 
 function buildWhatsAppUrl(managerWhatsapp: string | null, message: string) {
   if (managerWhatsapp) {
@@ -88,11 +89,12 @@ export default function ContractorPortal({ contractor, snags, token, managerWhat
     setResolvePhotoPreview(null)
   }
 
-  function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setResolvePhoto(file)
-    setResolvePhotoPreview(URL.createObjectURL(file))
+    const compressed = await compressImage(file)
+    setResolvePhoto(compressed)
+    setResolvePhotoPreview(URL.createObjectURL(compressed))
   }
 
   async function handleSubmitResolve(snagId: string) {
