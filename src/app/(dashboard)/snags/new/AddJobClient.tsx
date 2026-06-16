@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, Camera, ChevronRight, Loader2, X } from 'lucide-react'
+import { ArrowLeft, BookUser, Camera, ChevronRight, Loader2, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { compressImage } from '@/lib/compressImage'
 import { DASHBOARD_TERMS } from '@/types'
@@ -239,6 +239,20 @@ export default function AddJobClient() {
       router.refresh()
     }
     setContractorBusy(false)
+  }
+
+  async function pickContact() {
+    // Web Contacts API — available on Android Chrome, not on iOS
+    const nav = navigator as Navigator & { contacts?: { select: (props: string[], opts?: object) => Promise<Array<{ tel?: string[]; name?: string[] }>> } }
+    if (!nav.contacts) return
+    try {
+      const results = await nav.contacts.select(['name', 'tel'], { multiple: false })
+      const picked = results?.[0]
+      if (picked?.tel?.[0]) setNewWhatsApp(formatWhatsApp(picked.tel[0]))
+      if (picked?.name?.[0] && !newName.trim()) setNewName(picked.name[0])
+    } catch {
+      // user cancelled
+    }
   }
 
   async function addAndAssignContractor() {
@@ -540,9 +554,24 @@ export default function AddJobClient() {
               </div>
               <input type="text" autoFocus value={newName} onChange={e => setNewName(e.target.value)} placeholder="Name *" className="sf-input" />
               <input type="text" value={newTrade} onChange={e => setNewTrade(e.target.value)} placeholder={terms.contractorTrade} className="sf-input" />
-              <input type="tel" value={newWhatsApp} onChange={e => setNewWhatsApp(e.target.value)}
-                onBlur={e => { if (e.target.value.trim()) setNewWhatsApp(formatWhatsApp(e.target.value.trim())) }}
-                placeholder="WhatsApp number" className="sf-input" />
+              <div className="flex gap-2">
+                <input
+                  type="tel"
+                  value={newWhatsApp}
+                  onChange={e => setNewWhatsApp(e.target.value)}
+                  onBlur={e => { if (e.target.value.trim()) setNewWhatsApp(formatWhatsApp(e.target.value.trim())) }}
+                  placeholder="WhatsApp number"
+                  className="sf-input flex-1"
+                />
+                <button
+                  type="button"
+                  onClick={pickContact}
+                  title="Choose from contacts"
+                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 active:bg-slate-100"
+                >
+                  <BookUser className="h-5 w-5" />
+                </button>
+              </div>
               <div className="flex gap-2 pt-1">
                 <button onClick={addAndAssignContractor} disabled={contractorBusy || !newName.trim()} className="sf-btn-primary flex-1 py-3 text-sm disabled:opacity-60">
                   {contractorBusy ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Add & assign'}
