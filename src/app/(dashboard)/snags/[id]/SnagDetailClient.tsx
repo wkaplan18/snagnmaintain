@@ -270,7 +270,7 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId }: { 
                   `Hi ${localContractor.name}, you've been assigned ${terms.issue.toLowerCase()} #${snag.snag_number} (${snag.title})` +
                     `${snag.project ? ` on ${snag.project.name}` : ''}` +
                     `${snag.unit ? ` — ${snag.unit.name}${snag.room ? `, ${snag.room.name}` : ''}` : ''}.` +
-                    `\nView it and upload your fix photo here:\n${origin}/c/${localContractor.access_token}`
+                    `\nView it and upload your fix photo here:\n${origin}/c/${localContractor.access_token}?t=${Date.now()}`
                 )}
                 target="_blank"
                 rel="noopener"

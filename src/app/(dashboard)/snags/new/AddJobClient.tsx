@@ -230,7 +230,7 @@ export default function AddJobClient() {
     if (contractor.whatsapp) {
       const digits = contractor.whatsapp.replace(/\D/g, '')
       const e164 = digits.startsWith('0') ? '27' + digits.slice(1) : digits
-      const msg = `Hi ${contractor.name}, you've been assigned a new ${terms.issue.toLowerCase()}: "${title}". View and update it here:\n${window.location.origin}/c/${contractor.access_token}`
+      const msg = `Hi ${contractor.name}, you've been assigned a new ${terms.issue.toLowerCase()}: "${title}". View and update it here:\n${window.location.origin}/c/${contractor.access_token}?t=${Date.now()}`
       setWaUrl(`https://wa.me/${e164}?text=${encodeURIComponent(msg)}`)
       setWaName(contractor.name)
       setStep('whatsapp')

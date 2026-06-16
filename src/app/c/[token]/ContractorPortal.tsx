@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Camera, CheckCircle, Clock, AlertTriangle, Loader2, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react'
+import { Camera, CheckCircle, Clock, AlertTriangle, Loader2, ChevronDown, ChevronUp, MessageCircle, RefreshCw } from 'lucide-react'
 import { PRIORITY_CONFIG } from '@/types'
 import { compressImage } from '@/lib/compressImage'
 
@@ -295,14 +295,22 @@ export default function ContractorPortal({ contractor, snags, token, managerWhat
       {/* Header */}
       <div className="bg-[#1A56DB] px-4 pt-safe pb-4">
         <div className="mx-auto max-w-lg pt-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 text-white font-bold text-lg">
-              {contractor.name.charAt(0)}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 text-white font-bold text-lg">
+                {contractor.name.charAt(0)}
+              </div>
+              <div>
+                <p className="text-white font-semibold">{contractor.name}</p>
+                <p className="text-blue-200 text-sm">{contractor.company ?? contractor.trade ?? 'Contractor'}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-white font-semibold">{contractor.name}</p>
-              <p className="text-blue-200 text-sm">{contractor.company ?? contractor.trade ?? 'Contractor'}</p>
-            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="flex items-center gap-1.5 rounded-xl bg-white/15 px-3 py-2 text-xs font-medium text-white hover:bg-white/25 active:scale-95 transition-[transform,background-color]"
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Refresh
+            </button>
           </div>
 
           {/* Tabs */}

@@ -313,7 +313,7 @@ export default function ContractorsClient({ orgId, contractors, terms }: { orgId
                 <div className="flex flex-shrink-0 flex-col gap-1.5">
                   {c.whatsapp && origin && (
                     <a
-                      href={waLink(c.whatsapp, `Hi ${c.name}, here's your SnagandGo link — it shows all snags assigned to you, now and in future:\n${origin}/c/${c.access_token}`)}
+                      href={waLink(c.whatsapp, `Hi ${c.name}, here's your SnagandGo link — it shows all jobs assigned to you, now and in future:\n${origin}/c/${c.access_token}?t=${Date.now()}`)}
                       target="_blank"
                       rel="noopener"
                       className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1EBE5B] active:scale-[0.97] transition-[transform,opacity]"
