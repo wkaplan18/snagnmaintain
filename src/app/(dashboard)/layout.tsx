@@ -25,7 +25,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen pt-safe">
       {children}
       <BottomNav terms={terms} />
     </div>
