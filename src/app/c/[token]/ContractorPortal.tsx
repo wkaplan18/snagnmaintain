@@ -250,7 +250,10 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
       if (resolvePhoto) formData.append('resolutionPhoto', resolvePhoto)
       if (resolveNote.trim()) formData.append('resolutionNote', resolveNote.trim())
       const res = await fetch('/api/contractor/resolve', { method: 'POST', body: formData })
-      if (!res.ok) throw new Error('Failed')
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error ?? 'Failed')
+      }
       setLocalSnags(prev => prev.map(s => s.id === snagId ? { ...s, status: 'fixed' } : s))
       setResolvingId(null)
       setActiveTab('completed')
