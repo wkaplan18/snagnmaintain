@@ -93,10 +93,10 @@ export default function LandingPage() {
     <div className="font-display overflow-x-hidden bg-white" style={{ fontFamily: 'var(--font-display), system-ui, sans-serif' }}>
 
       {/* ── NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4" style={{ background: 'rgba(5,14,31,0.7)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: '#1A56DB' }}>
-            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-5" style={{ background: 'rgba(5,14,31,0.7)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: '#1A56DB' }}>
+            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
               <circle cx="12" cy="12" r="6.5" stroke="white" strokeWidth="1.5" opacity="0.9"/>
               <circle cx="12" cy="12" r="2" fill="white"/>
               <line x1="12" y1="3" x2="12" y2="7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
@@ -105,14 +105,17 @@ export default function LandingPage() {
               <line x1="17" y1="12" x2="21" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </div>
-          <span className="text-base font-bold tracking-tight text-white">Snag<span style={{ color: '#22C55E' }}>IT</span></span>
+          <span className="text-lg font-bold tracking-tight text-white">Snag<span style={{ color: '#22C55E' }}>IT</span></span>
         </div>
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="hidden text-sm font-medium text-white/70 hover:text-white transition-colors sm:block">Sign in</Link>
-          <Link href="/register" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95" style={{ background: '#1A56DB', boxShadow: '0 0 20px rgba(26,86,219,0.4)' }}>
-            Get started free
-          </Link>
+        <div className="hidden items-center gap-7 sm:flex">
+          <a href="#how" className="text-sm font-medium text-white/60 hover:text-white transition-colors">How it works</a>
+          <a href="#features" className="text-sm font-medium text-white/60 hover:text-white transition-colors">Features</a>
+          <a href="#pricing" className="text-sm font-medium text-white/60 hover:text-white transition-colors">Pricing</a>
+          <Link href="/login" className="text-sm font-medium text-white/60 hover:text-white transition-colors">Sign in</Link>
         </div>
+        <Link href="/register" className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95" style={{ background: '#1A56DB', boxShadow: '0 0 20px rgba(26,86,219,0.4)' }}>
+          Get started free
+        </Link>
       </nav>
 
       {/* ── HERO ── */}
@@ -220,7 +223,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section className="px-6 py-24" style={{ background: '#F8FAFC' }}>
+      <section id="features" className="px-6 py-24" style={{ background: '#F8FAFC' }}>
         <FadeUp className="mb-16 text-center">
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: '#1A56DB' }}>Features</p>
           <h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Everything you need</h2>
