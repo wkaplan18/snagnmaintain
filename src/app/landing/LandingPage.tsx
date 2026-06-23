@@ -97,12 +97,13 @@ export default function LandingPage() {
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: '#1A56DB' }}>
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-              <path d="M4 5h16v3H4zM3 10h18v3H3zM7 15h10v3H7z" fill="white" opacity=".9"/>
-              <circle cx="18" cy="17" r="4" fill="#22C55E"/>
-              <path d="M16.3 17l1.3 1.3 2-2" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              <line x1="7" y1="3" x2="7" y2="21" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M7 3 L19 7.5 L7 12 Z" fill="white" opacity="0.9"/>
+              <circle cx="18" cy="19" r="4" fill="#22C55E"/>
+              <path d="M16.2 19l1.3 1.3 2.3-2.3" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="text-base font-bold tracking-tight text-white">snagnmaintain</span>
+          <span className="text-base font-bold tracking-tight text-white">Snag<span style={{ color: '#22C55E' }}>IT</span></span>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/login" className="hidden text-sm font-medium text-white/70 hover:text-white transition-colors sm:block">Sign in</Link>
@@ -133,12 +134,12 @@ export default function LandingPage() {
 
         {/* Headline */}
         <h1 className="animate-fade-up mb-6 max-w-3xl text-5xl font-bold leading-[1.1] tracking-tight text-white sm:text-6xl lg:text-7xl" style={{ opacity: 0, animationDelay: '200ms' }}>
-          Property maintenance,{' '}
-          <span className="text-gradient-vivid">finally sorted.</span>
+          Log it. Assign it.{' '}
+          <span className="text-gradient-vivid">Fixed.</span>
         </h1>
 
         <p className="animate-fade-up mb-10 max-w-xl text-lg leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)', opacity: 0, animationDelay: '350ms' }}>
-          Spot it. Assign it. Fixed. One platform for builders, hotel managers, homeowners, and every property type in between.
+          The fault-logging platform for construction sites, hotel teams, and property managers. Snag a fault in 30 seconds — assign, track, and close it from your phone.
         </p>
 
         {/* CTAs */}
@@ -239,6 +240,55 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── PRICING ── */}
+      <section id="pricing" className="px-6 py-24 bg-white">
+        <FadeUp className="mb-16 text-center">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: '#1A56DB' }}>Pricing</p>
+          <h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">One price. Everything included.</h2>
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-500">No per-user fees. No setup costs. One flat rate per property — whether it's a hotel, construction site, or rental.</p>
+        </FadeUp>
+
+        <div className="mx-auto max-w-sm">
+          <FadeUp>
+            <div className="relative rounded-3xl p-8 text-center" style={{ background: '#0F172A', border: '1px solid rgba(26,86,219,0.4)', boxShadow: '0 0 60px rgba(26,86,219,0.15)' }}>
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full px-4 py-1 text-xs font-bold text-white" style={{ background: '#1A56DB' }}>All features included</div>
+              <p className="mb-2 mt-2 text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>Per property · Per month</p>
+              <div className="mb-6 flex items-baseline justify-center gap-1">
+                <span className="text-2xl font-bold text-white">R</span>
+                <span className="text-6xl font-black text-white">1,499</span>
+                <span className="text-white/40 text-lg">/mo</span>
+              </div>
+              <ul className="mb-8 space-y-3 text-left">
+                {[
+                  'Unlimited users per property',
+                  'Unlimited snag & fault logs',
+                  'Photo before & after logging',
+                  'WhatsApp contractor alerts',
+                  'Live dashboard & reports',
+                  'Full audit trail for every job',
+                  'Construction, hotel & property ready',
+                ].map(f => (
+                  <li key={f} className="flex items-center gap-3 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                    <CheckCircle className="h-4 w-4 shrink-0" style={{ color: '#22C55E' }} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/register" className="block w-full rounded-xl py-3.5 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95" style={{ background: 'linear-gradient(135deg, #1A56DB, #6366F1)', boxShadow: '0 4px 20px rgba(26,86,219,0.4)' }}>
+                Start 14-day free trial
+              </Link>
+              <p className="mt-3 text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>No credit card required · Cancel anytime</p>
+            </div>
+          </FadeUp>
+          <FadeUp delay={100}>
+            <p className="mt-6 text-center text-xs text-slate-400">
+              Managing a portfolio of properties?{' '}
+              <a href="mailto:hello@snagit.app" className="text-slate-600 underline hover:text-slate-900">Contact us</a> for volume pricing.
+            </p>
+          </FadeUp>
+        </div>
+      </section>
+
       {/* ── CTA ── */}
       <section className="relative overflow-hidden px-6 py-28 text-center animate-gradient" style={{ background: 'linear-gradient(135deg, #050E1F, #1A56DB, #8B5CF6, #0EA5E9)' }}>
         {/* Background orbs */}
@@ -254,7 +304,7 @@ export default function LandingPage() {
             Join builders, hotel managers, homeowners and facilities teams who log, assign, and close maintenance faster.
           </p>
           <Link href="/register" className="group inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-bold transition-all hover:scale-105 active:scale-95" style={{ color: '#1A56DB', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
-            Start free — no credit card
+            Start 14-day free trial
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </FadeUp>
@@ -265,12 +315,13 @@ export default function LandingPage() {
         <div className="flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-md" style={{ background: '#1A56DB' }}>
             <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
-              <path d="M4 5h16v3H4zM3 10h18v3H3zM7 15h10v3H7z" fill="white" opacity=".9"/>
-              <circle cx="18" cy="17" r="4" fill="#22C55E"/>
-              <path d="M16.3 17l1.3 1.3 2-2" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              <line x1="7" y1="3" x2="7" y2="21" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M7 3 L19 7.5 L7 12 Z" fill="white" opacity="0.9"/>
+              <circle cx="18" cy="19" r="4" fill="#22C55E"/>
+              <path d="M16.2 19l1.3 1.3 2.3-2.3" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          <span className="text-sm font-semibold text-white/70">snagnmaintain</span>
+          <span className="text-sm font-semibold text-white/70">Snag<span style={{ color: '#22C55E' }}>IT</span></span>
         </div>
         <p className="text-xs text-white/30">POPIA compliant · Data stored securely · Built in South Africa</p>
         <Link href="/login" className="text-sm font-medium text-white/50 hover:text-white transition-colors">Sign in →</Link>

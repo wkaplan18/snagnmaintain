@@ -8,13 +8,13 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-display' })
 
 export const metadata: Metadata = {
-  title: 'snagnmaintain — Property Maintenance, Sorted',
-  description: 'Spot it. Assign it. Fixed. The maintenance platform for builders, hotels, homeowners and more.',
+  title: 'SnagIT — Log it. Assign it. Fixed.',
+  description: 'The fault-logging platform for construction sites, hotel teams, and property managers. Snag a fault in 30 seconds.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'snagnmaintain',
+    title: 'SnagIT',
   },
 }
 
