@@ -97,10 +97,12 @@ export default function LandingPage() {
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: '#1A56DB' }}>
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-              <line x1="7" y1="3" x2="7" y2="21" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M7 3 L19 7.5 L7 12 Z" fill="white" opacity="0.9"/>
-              <circle cx="18" cy="19" r="4" fill="#22C55E"/>
-              <path d="M16.2 19l1.3 1.3 2.3-2.3" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="12" r="6.5" stroke="white" strokeWidth="1.5" opacity="0.9"/>
+              <circle cx="12" cy="12" r="2" fill="white"/>
+              <line x1="12" y1="3" x2="12" y2="7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="12" y1="17" x2="12" y2="21" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="3" y1="12" x2="7" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="17" y1="12" x2="21" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </div>
           <span className="text-base font-bold tracking-tight text-white">Snag<span style={{ color: '#22C55E' }}>IT</span></span>
@@ -315,10 +317,12 @@ export default function LandingPage() {
         <div className="flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-md" style={{ background: '#1A56DB' }}>
             <svg viewBox="0 0 24 24" fill="none" className="h-3.5 w-3.5">
-              <line x1="7" y1="3" x2="7" y2="21" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M7 3 L19 7.5 L7 12 Z" fill="white" opacity="0.9"/>
-              <circle cx="18" cy="19" r="4" fill="#22C55E"/>
-              <path d="M16.2 19l1.3 1.3 2.3-2.3" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="12" r="6.5" stroke="white" strokeWidth="1.5" opacity="0.9"/>
+              <circle cx="12" cy="12" r="2" fill="white"/>
+              <line x1="12" y1="3" x2="12" y2="7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="12" y1="17" x2="12" y2="21" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="3" y1="12" x2="7" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              <line x1="17" y1="12" x2="21" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </div>
           <span className="text-sm font-semibold text-white/70">Snag<span style={{ color: '#22C55E' }}>IT</span></span>
