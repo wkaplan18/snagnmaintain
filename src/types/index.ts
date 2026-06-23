@@ -1,4 +1,4 @@
-// SnagandGo — Core TypeScript Types
+// SnagIT — Core TypeScript Types
 
 export type OrgType =
   | 'builder'
