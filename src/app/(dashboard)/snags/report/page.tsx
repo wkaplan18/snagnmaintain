@@ -203,10 +203,10 @@ export default async function SnagReportPage({
                       <img
                         src={photo.public_url}
                         alt={s.title}
-                        className={`h-40 w-40 rounded-lg object-cover ${!done ? 'ring-4 ring-[#1A56DB]' : ''}`}
+                        className="h-40 w-40 rounded-lg object-cover"
                       />
                     ) : (
-                      <div className={`flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100 ${!done ? 'ring-4 ring-[#1A56DB]' : ''}`}>
+                      <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100">
                         <span className="text-xs text-slate-300">No photo</span>
                       </div>
                     )}
