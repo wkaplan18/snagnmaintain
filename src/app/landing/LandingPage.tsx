@@ -26,7 +26,7 @@ const STEPS = [
   {
     num: '02',
     title: 'Assign it',
-    desc: 'Send it to an internal team member or an external contractor with one tap. They get a WhatsApp link — no app needed.',
+    desc: 'Send it to an internal team member or an external contractor with one tap. They get notified instantly — no app needed.',
     color: '#8B5CF6',
     icon: Zap,
   },
@@ -42,7 +42,7 @@ const STEPS = [
 const FEATURES = [
   { icon: Camera,      title: 'Photo logging',       desc: 'Snap and log defects with before/after photos in under 30 seconds.', color: '#F97316' },
   { icon: Zap,         title: 'Instant assignment',  desc: 'Assign to internal staff or an external contractor with a single tap.',  color: '#8B5CF6' },
-  { icon: Bell,        title: 'WhatsApp alerts',     desc: 'Contractors get notified via WhatsApp — no app install, no friction.',   color: '#10B981' },
+  { icon: Bell,        title: 'Instant alerts',      desc: 'Contractors get notified the moment a job is assigned — no app install, no friction.',   color: '#10B981' },
   { icon: BarChart3,   title: 'Live reports',        desc: 'Track open snags, completion rates, and contractor performance at a glance.',    color: '#0EA5E9' },
   { icon: Users,       title: 'Team & contractors',  desc: 'Manage internal staff and external trades from a single dashboard.',            color: '#F43F5E' },
   { icon: Smartphone,  title: 'Mobile first',        desc: 'Built for the field — works perfectly on any phone, even offline.',              color: '#1A56DB' },
@@ -262,7 +262,7 @@ export default function LandingPage() {
                 {[
                   '1 property',
                   'You manage — contractors just fix',
-                  'Unlimited contractors via WhatsApp',
+                  'Unlimited contractors — no app needed',
                   'Photo before & after logging',
                   'Live dashboard & reports',
                   'Full audit trail for every job',
@@ -294,7 +294,7 @@ export default function LandingPage() {
                 {[
                   'Unlimited properties & sites',
                   'You manage — contractors just fix',
-                  'Unlimited contractors via WhatsApp',
+                  'Unlimited contractors — no app needed',
                   'Photo before & after logging',
                   'Live dashboard & reports',
                   'Full audit trail for every job',
