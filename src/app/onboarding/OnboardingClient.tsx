@@ -4,39 +4,26 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import {
-  HardHat, BedDouble, Home, Building, Users, Warehouse,
-  Key, UtensilsCrossed, GraduationCap, ShoppingBag,
+  HardHat, BedDouble, Building, Users,
   ArrowLeft, ArrowRight, Check,
 } from 'lucide-react'
 import type { OrgType } from '@/types'
 import { ORG_TYPE_CONFIG } from '@/types'
 
 const ORG_TYPE_ICONS: Record<OrgType, React.ElementType> = {
-  builder:           HardHat,
-  hotel:             BedDouble,
-  homeowner:         Home,
-  property_manager:  Building,
-  body_corporate:    Users,
-  facilities:        Warehouse,
-  short_term_rental: Key,
-  restaurant:        UtensilsCrossed,
-  school:            GraduationCap,
-  retail:            ShoppingBag,
+  builder:          HardHat,
+  hotel:            BedDouble,
+  property_manager: Building,
+  body_corporate:   Users,
 }
 
 const ORG_TYPES = Object.entries(ORG_TYPE_CONFIG) as [OrgType, { label: string; description: string }][]
 
 const ORG_NAME_CONFIG: Record<OrgType, { label: string; placeholder: string; hint: string; button: string }> = {
-  builder:           { label: 'Company name',    placeholder: 'Your company name',    hint: 'Your projects, snags and contractors all live under your company.',          button: 'Create company' },
-  hotel:             { label: 'Property name',   placeholder: 'Your property name',   hint: 'Your rooms, maintenance jobs and staff all live under your property.',       button: 'Create property' },
-  homeowner:         { label: 'Household name',  placeholder: 'Your household name',  hint: 'Your home, maintenance tasks and service providers all live here.',          button: 'Create household' },
-  property_manager:  { label: 'Business name',   placeholder: 'Your business name',   hint: 'Your properties, tenants and maintenance jobs all live under your business.',button: 'Create business' },
-  body_corporate:    { label: 'Complex name',    placeholder: 'Your complex name',    hint: 'Your common areas, maintenance jobs and contractors all live here.',         button: 'Create complex' },
-  facilities:        { label: 'Company name',    placeholder: 'Your company name',    hint: 'Your sites, maintenance jobs and teams all live under your company.',        button: 'Create company' },
-  short_term_rental: { label: 'Property name',   placeholder: 'Your property name',   hint: 'Your property, maintenance tasks and service providers all live here.',      button: 'Create property' },
-  restaurant:        { label: 'Restaurant name', placeholder: 'Your restaurant name', hint: 'Your venue, maintenance jobs and contractors all live here.',               button: 'Create restaurant' },
-  school:            { label: 'School name',     placeholder: 'Your school name',     hint: 'Your campus, maintenance tasks and contractors all live under your school.', button: 'Create school' },
-  retail:            { label: 'Business name',   placeholder: 'Your business name',   hint: 'Your stores, maintenance jobs and contractors all live under your business.',button: 'Create business' },
+  builder:          { label: 'Company name',  placeholder: 'Your company name',  hint: 'Your projects, snags and contractors all live under your company.',           button: 'Create company' },
+  hotel:            { label: 'Property name', placeholder: 'Your property name', hint: 'Your rooms, maintenance jobs and staff all live under your property.',        button: 'Create property' },
+  property_manager: { label: 'Business name', placeholder: 'Your business name', hint: 'Your properties, tenants and maintenance jobs all live under your business.', button: 'Create business' },
+  body_corporate:   { label: 'Complex name',  placeholder: 'Your complex name',  hint: 'Your common areas, maintenance jobs and contractors all live here.',          button: 'Create complex' },
 }
 
 export default function OnboardingClient({ email }: { email: string }) {

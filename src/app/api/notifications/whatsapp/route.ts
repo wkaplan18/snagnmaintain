@@ -33,7 +33,6 @@ export async function POST(req: NextRequest) {
       projectName: snag.project?.name ?? 'Project',
       unitName: snag.unit?.name ?? 'Unit',
       roomName: snag.room?.name ?? 'Room',
-      priority: snag.priority,
       description: snag.description ?? snag.title,
       contractorToken: snag.contractor.access_token,
     })

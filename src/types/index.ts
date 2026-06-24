@@ -3,26 +3,14 @@
 export type OrgType =
   | 'builder'
   | 'hotel'
-  | 'homeowner'
   | 'property_manager'
   | 'body_corporate'
-  | 'facilities'
-  | 'short_term_rental'
-  | 'restaurant'
-  | 'school'
-  | 'retail'
 
 export const ORG_TYPE_CONFIG: Record<OrgType, { label: string; description: string }> = {
-  builder:           { label: 'Builder / Developer',  description: 'Construction projects & defect snagging' },
-  hotel:             { label: 'Hotel / Hospitality',  description: 'Room maintenance & guest experience' },
-  homeowner:         { label: 'Home Owner',           description: 'Household maintenance, staff & trades' },
-  property_manager:  { label: 'Property Manager',     description: 'Rental portfolio & tenant maintenance' },
-  body_corporate:    { label: 'Body Corporate / HOA', description: 'Common areas & complex maintenance' },
-  facilities:        { label: 'Facilities Manager',   description: 'Commercial buildings & office parks' },
-  short_term_rental: { label: 'Short-term Rental',    description: 'Airbnb / VRBO turnover & maintenance' },
-  restaurant:        { label: 'Restaurant / F&B',     description: 'Kitchen & dining area maintenance' },
-  school:            { label: 'School / Campus',      description: 'Education facility maintenance' },
-  retail:            { label: 'Retail / Multi-store', description: 'Store maintenance across locations' },
+  builder:          { label: 'Builder / Developer',  description: 'Construction projects & defect snagging' },
+  hotel:            { label: 'Hotel / Hospitality',  description: 'Room maintenance & guest experience' },
+  property_manager: { label: 'Property Manager',     description: 'Rental portfolio & tenant maintenance' },
+  body_corporate:   { label: 'Body Corporate / HOA', description: 'Common areas & complex maintenance' },
 }
 
 export interface DashboardTerms {
@@ -37,22 +25,15 @@ export interface DashboardTerms {
 }
 
 export const DASHBOARD_TERMS: Record<OrgType, DashboardTerms> = {
-  builder:           { project: 'Project',  projects: 'Projects',   issue: 'Snag',  issues: 'Snags',  contractor: 'Contractor',       contractorTrade: 'Trade',     internalLabel: 'Staff',            externalLabel: 'Subcontractor' },
-  hotel:             { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Staff member',     contractorTrade: 'Role',      internalLabel: 'Maintenance Staff', externalLabel: 'Contractor' },
-  homeowner:         { project: 'Home',     projects: 'Homes',      issue: 'Job',   issues: 'Jobs',   contractor: 'Service provider', contractorTrade: 'Specialty', internalLabel: 'Household Staff',   externalLabel: 'Tradesperson' },
-  property_manager:  { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Contractor',       contractorTrade: 'Trade',     internalLabel: 'Staff',            externalLabel: 'Contractor' },
-  body_corporate:    { project: 'Complex',  projects: 'Complexes',  issue: 'Issue', issues: 'Issues', contractor: 'Contractor',       contractorTrade: 'Trade',     internalLabel: 'Building Staff',   externalLabel: 'Contractor' },
-  facilities:        { project: 'Site',     projects: 'Sites',      issue: 'Job',   issues: 'Jobs',   contractor: 'Contractor',       contractorTrade: 'Role',      internalLabel: 'In-house Team',    externalLabel: 'Contractor' },
-  short_term_rental: { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Service provider', contractorTrade: 'Specialty', internalLabel: 'Housekeeper',      externalLabel: 'Tradesperson' },
-  restaurant:        { project: 'Venue',    projects: 'Venues',     issue: 'Issue', issues: 'Issues', contractor: 'Contractor',       contractorTrade: 'Role',      internalLabel: 'Staff',            externalLabel: 'Contractor' },
-  school:            { project: 'Campus',   projects: 'Campuses',   issue: 'Job',   issues: 'Jobs',   contractor: 'Contractor',       contractorTrade: 'Role',      internalLabel: 'Maintenance Staff', externalLabel: 'Contractor' },
-  retail:            { project: 'Store',    projects: 'Stores',     issue: 'Issue', issues: 'Issues', contractor: 'Contractor',       contractorTrade: 'Trade',     internalLabel: 'Staff',            externalLabel: 'Contractor' },
+  builder:          { project: 'Project',  projects: 'Projects',   issue: 'Snag',  issues: 'Snags',  contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Staff',            externalLabel: 'Subcontractor' },
+  hotel:            { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Staff member', contractorTrade: 'Role',  internalLabel: 'Maintenance Staff', externalLabel: 'Contractor' },
+  property_manager: { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Staff',            externalLabel: 'Contractor' },
+  body_corporate:   { project: 'Complex',  projects: 'Complexes',  issue: 'Issue', issues: 'Issues', contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Building Staff',   externalLabel: 'Contractor' },
 }
 
 export type SnagStatus = 'open' | 'assigned' | 'in_progress' | 'fixed' | 'approved' | 'closed' | 'rejected'
 // Active statuses in the current workflow (in_progress / closed kept for legacy data)
 export const ACTIVE_STATUSES: SnagStatus[] = ['open', 'assigned', 'rejected']
-export type SnagPriority = 'low' | 'medium' | 'high' | 'critical'
 export type ProjectStatus = 'active' | 'completed' | 'on_hold' | 'archived'
 export type UnitType = 'house' | 'apartment' | 'villa' | 'office' | 'townhouse' | 'penthouse' | 'retail' | 'other'
 export type DefectCategory = 'paint' | 'crack' | 'tile' | 'water' | 'fitting' | 'alignment' | 'finishing' | 'electrical' | 'plumbing' | 'structural' | 'carpentry' | 'glazing' | 'hvac' | 'other'
@@ -177,7 +158,6 @@ export interface Snag {
   description: string | null
   category: DefectCategory
   status: SnagStatus
-  priority: SnagPriority
   assigned_to: string | null
   assigned_at: string | null
   due_date: string | null
@@ -253,7 +233,6 @@ export interface AISuggestion {
   title: string
   category: DefectCategory
   description: string
-  severity: SnagPriority
   confidence: number
 }
 
@@ -266,13 +245,6 @@ export const STATUS_CONFIG: Record<SnagStatus, { label: string; color: string; b
   approved:    { label: 'Approved',    color: 'text-green-700',  bg: 'bg-green-50 border-green-200' },
   closed:      { label: 'Closed',      color: 'text-gray-600',   bg: 'bg-gray-50 border-gray-200' },
   rejected:    { label: 'Rejected',    color: 'text-rose-700',   bg: 'bg-rose-50 border-rose-200' },
-}
-
-export const PRIORITY_CONFIG: Record<SnagPriority, { label: string; color: string; dot: string }> = {
-  low:      { label: 'Low',      color: 'text-gray-500',  dot: 'bg-gray-400' },
-  medium:   { label: 'Medium',   color: 'text-yellow-700', dot: 'bg-yellow-500' },
-  high:     { label: 'High',     color: 'text-orange-700', dot: 'bg-orange-500' },
-  critical: { label: 'Critical', color: 'text-red-700',   dot: 'bg-red-500' },
 }
 
 export const DEFAULT_ROOMS = [

@@ -1,24 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { DASHBOARD_TERMS, STATUS_CONFIG, PRIORITY_CONFIG } from '@/types'
+import { DASHBOARD_TERMS, STATUS_CONFIG } from '@/types'
 import type { OrgType, Snag } from '@/types'
 import ReportClient from './ReportClient'
 
 const DONE_STATUSES = new Set(['fixed', 'approved', 'closed'])
 
-const PRIORITY_BORDER: Record<string, string> = {
-  critical: 'border-l-4 border-l-red-500',
-  high:     'border-l-4 border-l-orange-500',
-  medium:   'border-l-4 border-l-yellow-400',
-  low:      'border-l-4 border-l-slate-300',
-}
-
-const PRIORITY_PHOTO_RING: Record<string, string> = {
-  critical: 'ring-4 ring-red-500',
-  high:     'ring-4 ring-orange-400',
-  medium:   'ring-4 ring-yellow-400',
-  low:      'ring-2 ring-slate-300',
-}
 
 const SnagITLogo = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="36" height="36">
@@ -184,7 +171,7 @@ export default async function SnagReportPage({
               <span>Fix was inspected and not accepted — needs redo</span>
             </div>
           </div>
-          <p className="mt-3 text-[10px] text-slate-400">Items shown with strikethrough are resolved (Fixed / Approved).</p>
+          <p className="mt-3 text-[10px] text-slate-400">Items with a blue left border still need action. Strikethrough items are resolved.</p>
         </div>
 
         {/* Snag list */}
@@ -196,7 +183,6 @@ export default async function SnagReportPage({
           <div className="space-y-3">
             {allSnags.map((s, i) => {
               const status = STATUS_CONFIG[s.status]
-              const priority = PRIORITY_CONFIG[s.priority]
               const photo = s.attachments?.find(a => !a.is_resolution)
               const c = s.contractor
               const done = DONE_STATUSES.has(s.status)
@@ -204,10 +190,10 @@ export default async function SnagReportPage({
                 <div
                   key={s.id}
                   style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}
-                  className={`flex gap-4 overflow-hidden rounded-xl border border-slate-200 p-4 ${
+                  className={`flex gap-4 overflow-hidden rounded-xl border p-4 ${
                     done
-                      ? 'bg-slate-50 opacity-60'
-                      : `bg-white ${PRIORITY_BORDER[s.priority]}`
+                      ? 'border-slate-200 bg-slate-50 opacity-60'
+                      : 'border-slate-200 bg-white border-l-4 border-l-[#1A56DB]'
                   }`}
                 >
                   {/* Photo */}
@@ -217,10 +203,10 @@ export default async function SnagReportPage({
                       <img
                         src={photo.public_url}
                         alt={s.title}
-                        className={`h-40 w-40 rounded-lg object-cover ${!done ? PRIORITY_PHOTO_RING[s.priority] : ''}`}
+                        className={`h-40 w-40 rounded-lg object-cover ${!done ? 'ring-4 ring-[#1A56DB]' : ''}`}
                       />
                     ) : (
-                      <div className={`flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100 ${!done ? PRIORITY_PHOTO_RING[s.priority] : ''}`}>
+                      <div className={`flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100 ${!done ? 'ring-4 ring-[#1A56DB]' : ''}`}>
                         <span className="text-xs text-slate-300">No photo</span>
                       </div>
                     )}
@@ -250,7 +236,6 @@ export default async function SnagReportPage({
                       <span className={`inline-flex rounded-full border px-2 py-0.5 font-medium ${status.bg} ${status.color}`}>
                         {status.label}
                       </span>
-                      <span className={`font-medium ${priority.color}`}>{priority.label}</span>
                       {s.room?.name && <span>{s.room.name}</span>}
                       {c && (
                         <span>

@@ -27,14 +27,13 @@ export default async function ContractorPage({ params }: { params: Promise<{ tok
   const { data: snags } = await supabase
     .from('snags')
     .select(`
-      id, snag_number, title, description, status, priority, due_date, created_at,
+      id, snag_number, title, description, status, due_date, created_at,
       attachments(id, public_url, is_resolution),
       unit:units(name),
       room:rooms(name),
       project:projects(name, address, city)
     `)
     .eq('assigned_to', contractor.id)
-    .order('priority', { ascending: false })
     .order('created_at', { ascending: false })
 
   // Supabase types FK joins as arrays — flatten each to a single object

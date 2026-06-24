@@ -33,7 +33,7 @@ export default async function DashboardPage() {
     supabase
       .from('snags')
       .select(`
-        id, snag_number, title, status, priority, created_at,
+        id, snag_number, title, status, created_at,
         project:projects(name),
         unit:units(name),
         room:rooms(name),

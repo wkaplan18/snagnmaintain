@@ -167,7 +167,7 @@ export default function AddJobClient() {
   const [projectId, setProjectId] = useState('')
   const [unitId, setUnitId] = useState('')
   const [orgId, setOrgId] = useState('')
-  const [terms, setTerms] = useState<DashboardTerms>(DASHBOARD_TERMS['homeowner'])
+  const [terms, setTerms] = useState<DashboardTerms>(DASHBOARD_TERMS['builder'])
   const [rooms, setRooms] = useState<Room[]>([])
   const [contractors, setContractors] = useState<Contractor[]>([])
   const [allProjects, setAllProjects] = useState<{ id: string; name: string }[]>([])
@@ -218,7 +218,7 @@ export default function AddJobClient() {
 
       const raw = memberData?.organizations
       const org = Array.isArray(raw) ? raw[0] : raw as { org_type?: string } | null | undefined
-      const orgType = (org?.org_type ?? 'homeowner') as OrgType
+      const orgType = (org?.org_type ?? 'builder') as OrgType
       const _orgId = memberData?.org_id ?? ''
 
       setOrgId(_orgId)

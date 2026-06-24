@@ -100,49 +100,6 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
     router.refresh()
   }
 
-  // Homeowner: no unit concept — show jobs directly
-  if (orgType === 'homeowner') {
-    const unit = units[0]
-    return (
-      <div className="mx-auto max-w-lg px-4 pb-24 pt-6">
-        <Link href="/projects" className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700">
-          <ArrowLeft className="h-4 w-4" /> {terms.projects}
-        </Link>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">{project.name}</h1>
-            {(project.address || project.city) && (
-              <p className="mt-1 flex items-center gap-1 text-sm text-slate-500">
-                <MapPin className="h-3.5 w-3.5" /> {[project.address, project.city, project.province].filter(Boolean).join(', ')}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="sf-badge bg-slate-50 border-slate-200 text-slate-600 capitalize">{project.status}</span>
-            <Link
-              href={`/snags/report?project_id=${project.id}`}
-              target="_blank"
-              title="Print / Save PDF report"
-              className="sf-btn-secondary flex items-center gap-1.5 px-2.5 py-1.5 text-sm"
-            >
-              <Printer className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-        {unit ? (
-          <div className="mt-6">
-            <UnitSnags projectId={project.id} unitId={unit.id} terms={terms} bare />
-          </div>
-        ) : (
-          <p className="mt-6 text-sm text-slate-400">Setting up your home…</p>
-        )}
-        <button onClick={handleDeleteProject} className="mt-10 w-full text-center text-xs font-medium text-red-400 hover:text-red-600">
-          Delete this {terms.project.toLowerCase()}
-        </button>
-      </div>
-    )
-  }
-
   return (
     <div className="mx-auto max-w-lg px-4 pb-24 pt-6">
       <Link href="/projects" className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700">

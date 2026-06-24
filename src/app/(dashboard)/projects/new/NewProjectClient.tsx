@@ -40,18 +40,6 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
       setError(error?.message ?? 'Could not create the project')
       setLoading(false)
     } else {
-      if (orgType === 'homeowner') {
-        const { data: unit } = await supabase
-          .from('units')
-          .insert({ project_id: data.id, name: name.trim(), unit_type: 'house' })
-          .select('id')
-          .single()
-        if (unit) {
-          await supabase.from('rooms').insert(
-            DEFAULT_ROOMS.map((rname, i) => ({ unit_id: unit.id, name: rname, room_order: i }))
-          )
-        }
-      }
       router.push(`/projects/${data.id}`)
       router.refresh()
     }

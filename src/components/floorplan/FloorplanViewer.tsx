@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react'
 import type { Floorplan, Snag } from '@/types'
-import { PRIORITY_CONFIG } from '@/types'
 
 interface Props {
   floorplan: Floorplan
@@ -43,14 +42,12 @@ export default function FloorplanViewer({ floorplan, snags, onPinClick, onMapCli
 
         {/* Snag pins */}
         {pinSnags.map(snag => {
-          const cfg = PRIORITY_CONFIG[snag.priority]
           const isHovered = hoveredSnag?.id === snag.id
           const pinColor =
-            snag.status === 'closed' || snag.status === 'approved' ? '#16A34A' :
-            snag.priority === 'critical' ? '#DC2626' :
-            snag.priority === 'high' ? '#EA580C' :
-            snag.priority === 'medium' ? '#D97706' :
-            '#64748B'
+            snag.status === 'approved' || snag.status === 'closed' ? '#16A34A' :
+            snag.status === 'fixed' ? '#0D9488' :
+            snag.status === 'rejected' ? '#E11D48' :
+            '#1A56DB'
 
           return (
             <button

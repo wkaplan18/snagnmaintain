@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { AlertTriangle, Camera, User } from 'lucide-react'
+import { Camera, User } from 'lucide-react'
 import type { Snag } from '@/types'
-import { STATUS_CONFIG, PRIORITY_CONFIG } from '@/types'
+import { STATUS_CONFIG } from '@/types'
 
 const WA_SVG = (
   <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -15,7 +15,6 @@ const INCOMPLETE = new Set(['open', 'assigned', 'in_progress', 'rejected'])
 
 export default function SnagCard({ snag }: { snag: Snag }) {
   const status = STATUS_CONFIG[snag.status]
-  const priority = PRIORITY_CONFIG[snag.priority]
   const coverPhoto = snag.attachments?.find(a => !a.is_resolution)
   const c = snag.contractor
   const showWa = !!(c?.whatsapp && c?.access_token && INCOMPLETE.has(snag.status))
@@ -59,17 +58,10 @@ export default function SnagCard({ snag }: { snag: Snag }) {
             <p className="text-sm font-medium text-slate-900 leading-tight truncate">
               #{snag.snag_number} {snag.title}
             </p>
-            {snag.priority === 'critical' && (
-              <AlertTriangle className="h-4 w-4 flex-shrink-0 text-red-500 mt-0.5" />
-            )}
           </div>
 
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <span className={`sf-badge ${status.bg} ${status.color}`}>{status.label}</span>
-            <span className={`inline-flex items-center gap-1 text-xs ${priority.color}`}>
-              <span className={`sf-priority-dot ${priority.dot}`} />
-              {priority.label}
-            </span>
             {snag.room && <span className="text-xs text-slate-400">{snag.room.name}</span>}
           </div>
 

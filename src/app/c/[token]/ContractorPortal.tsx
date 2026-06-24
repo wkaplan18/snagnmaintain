@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react'
 import { Camera, CheckCircle, Clock, AlertTriangle, Loader2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
-import { PRIORITY_CONFIG } from '@/types'
 import { compressImage } from '@/lib/compressImage'
 
 function groupByProject(snags: ContractorSnag[]) {
@@ -20,7 +19,6 @@ interface ContractorSnag {
   title: string
   description: string | null
   status: string
-  priority: string
   due_date: string | null
   created_at: string
   attachments: Array<{ id: string; public_url: string; is_resolution: boolean }>
@@ -56,7 +54,6 @@ function SnagCard({
   const isDone = snag.status === 'approved' || snag.status === 'closed'
   const isFixed = snag.status === 'fixed'
   const canResolve = snag.status === 'assigned' || snag.status === 'in_progress' || isRejected
-  const priority = PRIORITY_CONFIG[snag.priority as keyof typeof PRIORITY_CONFIG]
   const problemPhoto = snag.attachments.find(a => !a.is_resolution)
   const fixPhoto = snag.attachments.find(a => a.is_resolution)
 
@@ -66,7 +63,7 @@ function SnagCard({
         onClick={onToggleExpand}
         className="flex w-full items-start gap-3 p-4 text-left"
       >
-        <div className={`mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full ${priority?.dot ?? 'bg-slate-400'}`} />
+        <div className="mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[#1A56DB]" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-slate-900">#{snag.snag_number} {snag.title}</p>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -84,7 +81,6 @@ function SnagCard({
           {isDone ? <CheckCircle className="h-4 w-4 text-green-500" />
             : isFixed ? <CheckCircle className="h-4 w-4 text-teal-500" />
             : isRejected ? <AlertTriangle className="h-4 w-4 text-rose-500" />
-            : snag.priority === 'critical' ? <AlertTriangle className="h-4 w-4 text-red-500" />
             : <Clock className="h-4 w-4 text-slate-300" />}
           {isExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
         </div>

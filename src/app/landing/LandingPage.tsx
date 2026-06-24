@@ -306,7 +306,7 @@ export default function LandingPage() {
             Your property.<br />Under control.
           </h2>
           <p className="mx-auto mb-10 max-w-md text-lg leading-relaxed text-white/60">
-            Join builders, hotel managers, homeowners and facilities teams who log, assign, and close maintenance faster.
+            Join builders, hotel managers, property managers and body corporates who log, assign, and close maintenance faster.
           </p>
           <Link href="/register" className="group inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-bold transition-all hover:scale-105 active:scale-95" style={{ color: '#1A56DB', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
             Start 14-day free trial

@@ -11,7 +11,7 @@ interface Props {
   projects: Array<{ id: string; name: string; status: string; image_url: string | null; city: string | null }>
   projectStats: Array<ProjectStats & { project_name: string; project_id: string }>
   recentSnags: Array<{
-    id: string; snag_number: number; title: string; status: string; priority: string; created_at: string
+    id: string; snag_number: number; title: string; status: string; created_at: string
     project?: { name: string } | null
     unit?: { name: string } | null
     room?: { name: string } | null
@@ -247,11 +247,7 @@ export default function DashboardClient({ orgName, terms, projects, projectStats
           <div className="divide-y divide-slate-100">
             {recentSnags.map(snag => (
               <Link key={snag.id} href={`/snags/${snag.id}`} className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
-                <div className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${
-                  snag.priority === 'critical' ? 'bg-red-500' :
-                  snag.priority === 'high' ? 'bg-orange-500' :
-                  snag.priority === 'medium' ? 'bg-yellow-500' : 'bg-slate-300'
-                }`} />
+                <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-[#1A56DB]" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-900 truncate">#{snag.snag_number} {snag.title}</p>
                   <p className="text-xs text-slate-400 truncate">

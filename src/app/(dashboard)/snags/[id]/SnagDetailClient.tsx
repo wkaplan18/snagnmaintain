@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft, BookUser, Camera, ChevronRight, Loader2, MapPin, Pencil, Plus, User, CalendarClock, Sparkles } from 'lucide-react'
 import { waLink } from '@/lib/whatsappLink'
 import { compressImage } from '@/lib/compressImage'
-import { STATUS_CONFIG, PRIORITY_CONFIG, type Attachment, type Contractor, type DashboardTerms, type SnagStatus } from '@/types'
+import { STATUS_CONFIG, type Attachment, type Contractor, type DashboardTerms, type SnagStatus } from '@/types'
 
 const STATUS_FLOW: SnagStatus[] = ['open', 'assigned', 'fixed', 'approved']
 
@@ -26,7 +26,6 @@ interface SnagDetail {
   description: string | null
   category: string
   status: SnagStatus
-  priority: keyof typeof PRIORITY_CONFIG
   due_date: string | null
   assigned_to: string | null
   ai_suggested: boolean
@@ -97,7 +96,7 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
   }
 
   const status = STATUS_CONFIG[snag.status]
-  const priority = PRIORITY_CONFIG[snag.priority]
+
   const photos = (snag.attachments ?? []).filter(a => !a.is_resolution)
   const resolutionPhotos = (snag.attachments ?? []).filter(a => a.is_resolution)
 
@@ -254,9 +253,6 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
           </div>
 
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-            <span className={`inline-flex items-center gap-1 ${priority.color}`}>
-              <span className={`sf-priority-dot ${priority.dot}`} /> {priority.label}
-            </span>
             {snag.unit && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {snag.unit.name}{snag.room ? ` · ${snag.room.name}` : ''}</span>}
             {snag.due_date && <span className="flex items-center gap-1"><CalendarClock className="h-3 w-3" /> due {new Date(snag.due_date).toLocaleDateString('en-ZA')}</span>}
             {snag.ai_suggested && <span className="flex items-center gap-1 text-violet-600"><Sparkles className="h-3 w-3" /> AI suggested</span>}

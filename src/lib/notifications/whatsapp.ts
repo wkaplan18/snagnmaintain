@@ -11,7 +11,6 @@ interface WhatsAppSnagPayload {
   projectName: string
   unitName: string
   roomName: string
-  priority: string
   description: string
   contractorToken: string
 }
@@ -31,7 +30,6 @@ export async function sendSnagAssignedWhatsApp(payload: WhatsAppSnagPayload) {
         payload.contractorName,
         payload.projectName,
         `${payload.unitName} → ${payload.roomName}`,
-        payload.priority.toUpperCase(),
         payload.description,
         link,
       ],
