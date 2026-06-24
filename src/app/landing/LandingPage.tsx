@@ -242,29 +242,30 @@ export default function LandingPage() {
       <section id="pricing" className="px-6 py-24 bg-white">
         <FadeUp className="mb-16 text-center">
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: '#1A56DB' }}>Pricing</p>
-          <h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">One price. Everything included.</h2>
-          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-500">No per-user fees. No setup costs. One flat rate per property — whether it's a hotel, construction site, or rental.</p>
+          <h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Simple, flat pricing.</h2>
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-500">You manage everything. Your contractors just fix things — no logins, no app installs, no per-user fees. Ever.</p>
         </FadeUp>
 
-        <div className="mx-auto max-w-sm">
+        <div className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-2">
+
+          {/* Property plan */}
           <FadeUp>
-            <div className="relative rounded-3xl p-8 text-center" style={{ background: '#0F172A', border: '1px solid rgba(26,86,219,0.4)', boxShadow: '0 0 60px rgba(26,86,219,0.15)' }}>
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full px-4 py-1 text-xs font-bold text-white" style={{ background: '#1A56DB' }}>All features included</div>
-              <p className="mb-2 mt-2 text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>Per property · Per month</p>
-              <div className="mb-6 flex items-baseline justify-center gap-1">
-                <span className="text-2xl font-bold text-white">R</span>
-                <span className="text-6xl font-black text-white">1,499</span>
-                <span className="text-white/40 text-lg">/mo</span>
+            <div className="flex h-full flex-col rounded-3xl p-8" style={{ background: '#0F172A', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>Property</p>
+              <p className="mb-5 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>Hotels, homeowners & property managers — one site, fully managed.</p>
+              <div className="mb-6 flex items-baseline gap-1">
+                <span className="text-xl font-bold text-white">R</span>
+                <span className="text-5xl font-black text-white">1,499</span>
+                <span className="text-lg" style={{ color: 'rgba(255,255,255,0.3)' }}>/mo</span>
               </div>
-              <ul className="mb-8 space-y-3 text-left">
+              <ul className="mb-8 flex-1 space-y-3">
                 {[
-                  'Unlimited users per property',
-                  'Unlimited snag & fault logs',
+                  '1 property',
+                  'You manage — contractors just fix',
+                  'Unlimited contractors via WhatsApp',
                   'Photo before & after logging',
-                  'WhatsApp contractor alerts',
                   'Live dashboard & reports',
                   'Full audit trail for every job',
-                  'Construction, hotel & property ready',
                 ].map(f => (
                   <li key={f} className="flex items-center gap-3 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
                     <CheckCircle className="h-4 w-4 shrink-0" style={{ color: '#22C55E' }} />
@@ -272,18 +273,45 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/register" className="block w-full rounded-xl py-3.5 text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95" style={{ background: 'linear-gradient(135deg, #1A56DB, #6366F1)', boxShadow: '0 4px 20px rgba(26,86,219,0.4)' }}>
+              <Link href="/register" className="block w-full rounded-xl py-3.5 text-center text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}>
                 Start 14-day free trial
               </Link>
-              <p className="mt-3 text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>No credit card required · Cancel anytime</p>
             </div>
           </FadeUp>
+
+          {/* Contractor plan */}
           <FadeUp delay={100}>
-            <p className="mt-6 text-center text-xs text-slate-400">
-              Managing a portfolio of properties?{' '}
-              <a href="mailto:hello@snagit.app" className="text-slate-600 underline hover:text-slate-900">Contact us</a> for volume pricing.
-            </p>
+            <div className="relative flex h-full flex-col rounded-3xl p-8" style={{ background: '#0F172A', border: '1px solid rgba(26,86,219,0.5)', boxShadow: '0 0 60px rgba(26,86,219,0.15)' }}>
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full px-4 py-1 text-xs font-bold text-white" style={{ background: '#1A56DB' }}>Best for contractors</div>
+              <p className="mb-1 mt-2 text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>Contractor</p>
+              <p className="mb-5 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>Builders & contractors running multiple sites — one account, every project.</p>
+              <div className="mb-6 flex items-baseline gap-1">
+                <span className="text-xl font-bold text-white">R</span>
+                <span className="text-5xl font-black text-white">2,699</span>
+                <span className="text-lg" style={{ color: 'rgba(255,255,255,0.3)' }}>/mo</span>
+              </div>
+              <ul className="mb-8 flex-1 space-y-3">
+                {[
+                  'Unlimited properties & sites',
+                  'You manage — contractors just fix',
+                  'Unlimited contractors via WhatsApp',
+                  'Photo before & after logging',
+                  'Live dashboard & reports',
+                  'Full audit trail for every job',
+                ].map(f => (
+                  <li key={f} className="flex items-center gap-3 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                    <CheckCircle className="h-4 w-4 shrink-0" style={{ color: '#22C55E' }} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/register" className="block w-full rounded-xl py-3.5 text-center text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95" style={{ background: 'linear-gradient(135deg, #1A56DB, #6366F1)', boxShadow: '0 4px 20px rgba(26,86,219,0.4)' }}>
+                Start 14-day free trial
+              </Link>
+              <p className="mt-3 text-center text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>No credit card required · Cancel anytime</p>
+            </div>
           </FadeUp>
+
         </div>
       </section>
 
