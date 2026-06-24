@@ -6,6 +6,20 @@ import ReportClient from './ReportClient'
 
 const DONE_STATUSES = new Set(['fixed', 'approved', 'closed'])
 
+const PRIORITY_BORDER: Record<string, string> = {
+  critical: 'border-l-4 border-l-red-500',
+  high:     'border-l-4 border-l-orange-500',
+  medium:   'border-l-4 border-l-yellow-400',
+  low:      'border-l-4 border-l-slate-300',
+}
+
+const PRIORITY_PHOTO_RING: Record<string, string> = {
+  critical: 'ring-4 ring-red-500',
+  high:     'ring-4 ring-orange-400',
+  medium:   'ring-4 ring-yellow-400',
+  low:      'ring-2 ring-slate-300',
+}
+
 const SnagITLogo = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="36" height="36">
     <rect width="32" height="32" rx="7" fill="#1A56DB"/>
@@ -190,7 +204,11 @@ export default async function SnagReportPage({
                 <div
                   key={s.id}
                   style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}
-                  className={`flex gap-4 rounded-xl border border-slate-200 p-4 ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
+                  className={`flex gap-4 overflow-hidden rounded-xl border border-slate-200 p-4 ${
+                    done
+                      ? 'bg-slate-50 opacity-60'
+                      : `bg-white ${PRIORITY_BORDER[s.priority]}`
+                  }`}
                 >
                   {/* Photo */}
                   <div className="flex-shrink-0">
@@ -199,10 +217,10 @@ export default async function SnagReportPage({
                       <img
                         src={photo.public_url}
                         alt={s.title}
-                        className="h-40 w-40 rounded-lg object-cover"
+                        className={`h-40 w-40 rounded-lg object-cover ${!done ? PRIORITY_PHOTO_RING[s.priority] : ''}`}
                       />
                     ) : (
-                      <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100">
+                      <div className={`flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100 ${!done ? PRIORITY_PHOTO_RING[s.priority] : ''}`}>
                         <span className="text-xs text-slate-300">No photo</span>
                       </div>
                     )}
