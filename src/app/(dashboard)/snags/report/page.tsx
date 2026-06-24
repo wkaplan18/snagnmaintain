@@ -173,103 +173,85 @@ export default async function SnagReportPage({
           <p className="mt-3 text-[10px] text-slate-400">Items shown with strikethrough are resolved (Fixed / Approved).</p>
         </div>
 
-        {/* Snag table */}
+        {/* Snag list */}
         {allSnags.length === 0 ? (
           <p className="py-16 text-center text-slate-500">
             No {terms.issues.toLowerCase()} found for the selected filters.
           </p>
         ) : (
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b-2 border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-                <th className="pb-3 pr-3 font-medium">#</th>
-                <th className="pb-3 pr-3 font-medium">Photo</th>
-                <th className="pb-3 pr-3 font-medium">{terms.issue}</th>
-                <th className="pb-3 pr-3 font-medium">Status</th>
-                <th className="pb-3 pr-3 font-medium">Priority</th>
-                <th className="pb-3 pr-3 font-medium">Room</th>
-                <th className="pb-3 pr-3 font-medium">Assigned To</th>
-                <th className="pb-3 font-medium">Logged</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allSnags.map((s, i) => {
-                const status = STATUS_CONFIG[s.status]
-                const priority = PRIORITY_CONFIG[s.priority]
-                const photo = s.attachments?.find(a => !a.is_resolution)
-                const c = s.contractor
-                const done = DONE_STATUSES.has(s.status)
-                return (
-                  <tr
-                    key={s.id}
-                    className={`border-b border-slate-100 break-inside-avoid ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}`}
-                  >
-                    <td className="py-3 pr-3 align-top font-mono text-xs text-slate-400">
-                      #{s.snag_number}
-                    </td>
-                    <td className="py-3 pr-3 align-top">
-                      {photo ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={photo.public_url}
-                          alt={s.title}
-                          className="h-40 w-40 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100">
-                          <span className="text-sm text-slate-300">No photo</span>
-                        </div>
-                      )}
-                    </td>
-                    <td className="py-3 pr-3 align-top">
-                      <p className={`font-medium ${done ? 'text-slate-400 line-through' : 'text-slate-900'}`}>
+          <div className="space-y-3">
+            {allSnags.map((s, i) => {
+              const status = STATUS_CONFIG[s.status]
+              const priority = PRIORITY_CONFIG[s.priority]
+              const photo = s.attachments?.find(a => !a.is_resolution)
+              const c = s.contractor
+              const done = DONE_STATUSES.has(s.status)
+              return (
+                <div
+                  key={s.id}
+                  style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}
+                  className={`flex gap-4 rounded-xl border border-slate-200 p-4 ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}
+                >
+                  {/* Photo */}
+                  <div className="flex-shrink-0">
+                    {photo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={photo.public_url}
+                        alt={s.title}
+                        className="h-40 w-40 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100">
+                        <span className="text-xs text-slate-300">No photo</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex flex-1 flex-col justify-between min-w-0">
+                    <div>
+                      <div className="mb-1.5 flex items-center gap-2">
+                        <span className="font-mono text-xs text-slate-400">#{s.snag_number}</span>
+                        {s.project && (
+                          <span className="text-xs font-medium text-[#1A56DB]">{s.project.name}</span>
+                        )}
+                      </div>
+                      <p className={`text-base font-semibold leading-snug ${done ? 'text-slate-400 line-through' : 'text-slate-900'}`}>
                         {s.title}
                       </p>
                       {s.description && (
-                        <p className={`mt-0.5 line-clamp-3 text-xs leading-relaxed ${done ? 'text-slate-300 line-through' : 'text-slate-500'}`}>
+                        <p className={`mt-1 text-sm leading-relaxed ${done ? 'text-slate-300 line-through' : 'text-slate-500'}`}>
                           {s.description}
                         </p>
                       )}
-                      {s.project && (
-                        <p className="mt-0.5 text-xs font-medium text-[#1A56DB]">
-                          {s.project.name}
-                        </p>
-                      )}
-                    </td>
-                    <td className="py-3 pr-3 align-top">
-                      <span
-                        className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-medium ${status.bg} ${status.color}`}
-                      >
+                    </div>
+
+                    {/* Meta row */}
+                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500">
+                      <span className={`inline-flex rounded-full border px-2 py-0.5 font-medium ${status.bg} ${status.color}`}>
                         {status.label}
                       </span>
-                    </td>
-                    <td className="py-3 pr-3 align-top">
-                      <span className={`text-xs font-medium ${priority.color}`}>
-                        {priority.label}
+                      <span className={`font-medium ${priority.color}`}>{priority.label}</span>
+                      {s.room?.name && <span>{s.room.name}</span>}
+                      {c && (
+                        <span>
+                          {c.company ? `${c.name} (${c.company})` : c.name}
+                        </span>
+                      )}
+                      <span className="ml-auto text-slate-400">
+                        {new Date(s.created_at).toLocaleDateString('en-ZA', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
                       </span>
-                    </td>
-                    <td className="py-3 pr-3 align-top text-xs text-slate-600">
-                      {s.room?.name ?? '—'}
-                    </td>
-                    <td className="py-3 pr-3 align-top text-xs text-slate-600">
-                      {c
-                        ? c.company
-                          ? `${c.name} (${c.company})`
-                          : c.name
-                        : '—'}
-                    </td>
-                    <td className="py-3 align-top text-xs text-slate-500">
-                      {new Date(s.created_at).toLocaleDateString('en-ZA', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         )}
 
         <div className="mt-10 border-t border-slate-100 pt-4 text-center text-xs text-slate-400 print:mt-6">
