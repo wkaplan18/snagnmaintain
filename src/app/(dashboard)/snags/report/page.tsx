@@ -4,6 +4,20 @@ import { DASHBOARD_TERMS, STATUS_CONFIG, PRIORITY_CONFIG } from '@/types'
 import type { OrgType, Snag } from '@/types'
 import ReportClient from './ReportClient'
 
+const DONE_STATUSES = new Set(['fixed', 'approved', 'closed'])
+
+const SnagITLogo = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="36" height="36">
+    <rect width="32" height="32" rx="7" fill="#1A56DB"/>
+    <circle cx="16" cy="16" r="8" stroke="white" strokeWidth="2" fill="none" opacity="0.9"/>
+    <circle cx="16" cy="16" r="2.5" fill="white"/>
+    <line x1="16" y1="4" x2="16" y2="9" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+    <line x1="16" y1="23" x2="16" y2="28" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+    <line x1="4" y1="16" x2="9" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+    <line x1="23" y1="16" x2="28" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+)
+
 export default async function SnagReportPage({
   searchParams,
 }: {
@@ -80,11 +94,9 @@ export default async function SnagReportPage({
         {/* Header */}
         <div className="mb-8 flex items-start justify-between border-b border-slate-200 pb-6 print:mb-4 print:pb-4">
           <div>
-            <div className="mb-2 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1A56DB]">
-                <span className="text-xs font-bold text-white">S</span>
-              </div>
-              <span className="text-lg font-bold text-slate-900">SnagIT</span>
+            <div className="mb-2 flex items-center gap-2.5">
+              <SnagITLogo />
+              <span className="text-xl font-bold text-slate-900">SnagIT</span>
             </div>
             <h1 className="text-2xl font-bold text-slate-900">{terms.issues} Report</h1>
             <p className="mt-1 text-sm text-slate-500">
@@ -158,6 +170,7 @@ export default async function SnagReportPage({
                 const priority = PRIORITY_CONFIG[s.priority]
                 const photo = s.attachments?.find(a => !a.is_resolution)
                 const c = s.contractor
+                const done = DONE_STATUSES.has(s.status)
                 return (
                   <tr
                     key={s.id}
@@ -172,18 +185,20 @@ export default async function SnagReportPage({
                         <img
                           src={photo.public_url}
                           alt={s.title}
-                          className="h-14 w-14 rounded-lg object-cover"
+                          className="h-40 w-40 rounded-lg object-cover"
                         />
                       ) : (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-slate-100">
-                          <span className="text-xs text-slate-300">—</span>
+                        <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-slate-100">
+                          <span className="text-sm text-slate-300">No photo</span>
                         </div>
                       )}
                     </td>
                     <td className="py-3 pr-3 align-top">
-                      <p className="font-medium text-slate-900">{s.title}</p>
+                      <p className={`font-medium ${done ? 'text-slate-400 line-through' : 'text-slate-900'}`}>
+                        {s.title}
+                      </p>
                       {s.description && (
-                        <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-slate-500">
+                        <p className={`mt-0.5 line-clamp-3 text-xs leading-relaxed ${done ? 'text-slate-300 line-through' : 'text-slate-500'}`}>
                           {s.description}
                         </p>
                       )}
