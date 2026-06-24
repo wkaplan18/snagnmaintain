@@ -231,24 +231,32 @@ export default async function SnagReportPage({
                       )}
                     </div>
 
-                    {/* Meta row */}
-                    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500">
-                      <span className={`inline-flex rounded-full border px-2 py-0.5 font-medium ${status.bg} ${status.color}`}>
-                        {status.label}
-                      </span>
-                      {s.room?.name && <span>{s.room.name}</span>}
-                      {c && (
-                        <span>
-                          {c.company ? `${c.name} (${c.company})` : c.name}
+                    {/* Meta grid */}
+                    <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 border-t border-slate-100 pt-3 text-xs">
+                      <div>
+                        <p className="font-semibold uppercase tracking-wide text-slate-400">Status</p>
+                        <span className={`mt-0.5 inline-flex rounded-full border px-2 py-0.5 font-medium ${status.bg} ${status.color}`}>
+                          {status.label}
                         </span>
+                      </div>
+                      <div>
+                        <p className="font-semibold uppercase tracking-wide text-slate-400">Date Logged</p>
+                        <p className="mt-0.5 text-slate-700">
+                          {new Date(s.created_at).toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </p>
+                      </div>
+                      {s.room?.name && (
+                        <div>
+                          <p className="font-semibold uppercase tracking-wide text-slate-400">Room / Area</p>
+                          <p className="mt-0.5 text-slate-700">{s.room.name}</p>
+                        </div>
                       )}
-                      <span className="ml-auto text-slate-400">
-                        {new Date(s.created_at).toLocaleDateString('en-ZA', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
-                      </span>
+                      {c && (
+                        <div>
+                          <p className="font-semibold uppercase tracking-wide text-slate-400">Assigned To</p>
+                          <p className="mt-0.5 text-slate-700">{c.company ? `${c.name} (${c.company})` : c.name}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
