@@ -3,23 +3,16 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
-  HardHat, BedDouble, Home, Building, Users, Warehouse,
-  Key, UtensilsCrossed, GraduationCap, ShoppingBag,
+  HardHat, BedDouble, Building, Users,
   Camera, Zap, CheckCircle, Bell, BarChart3, Smartphone,
   ArrowRight, ChevronRight,
 } from 'lucide-react'
 
 const USER_TYPES = [
-  { icon: HardHat,         label: 'Builder',           color: '#F97316', bg: '#FFF7ED' },
-  { icon: BedDouble,       label: 'Hotel Manager',      color: '#8B5CF6', bg: '#F5F3FF' },
-  { icon: Home,            label: 'Home Owner',         color: '#0EA5E9', bg: '#F0F9FF' },
-  { icon: Building,        label: 'Property Manager',   color: '#10B981', bg: '#ECFDF5' },
-  { icon: Users,           label: 'Body Corporate',     color: '#F43F5E', bg: '#FFF1F2' },
-  { icon: Warehouse,       label: 'Facilities Manager', color: '#1A56DB', bg: '#EEF4FF' },
-  { icon: Key,             label: 'Short-term Rental',  color: '#D97706', bg: '#FFFBEB' },
-  { icon: UtensilsCrossed, label: 'Restaurant / F&B',   color: '#EF4444', bg: '#FEF2F2' },
-  { icon: GraduationCap,   label: 'School / Campus',    color: '#6366F1', bg: '#EEF2FF' },
-  { icon: ShoppingBag,     label: 'Retail Chain',       color: '#14B8A6', bg: '#F0FDFA' },
+  { icon: HardHat,   label: 'Builder / Developer',  color: '#F97316', bg: '#FFF7ED' },
+  { icon: BedDouble, label: 'Hotel / Hospitality',  color: '#8B5CF6', bg: '#F5F3FF' },
+  { icon: Building,  label: 'Property Manager',     color: '#10B981', bg: '#ECFDF5' },
+  { icon: Users,     label: 'Body Corporate / HOA', color: '#F43F5E', bg: '#FFF1F2' },
 ]
 
 const STEPS = [
@@ -134,7 +127,7 @@ export default function LandingPage() {
         {/* Badge */}
         <div className="animate-fade-up mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-1.5" style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', animationDelay: '100ms', opacity: 0 }}>
           <span className="h-2 w-2 animate-pulse rounded-full" style={{ background: '#22C55E' }} />
-          <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>10+ property types supported</span>
+          <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>Built for builders, hotels & property managers</span>
         </div>
 
         {/* Headline */}
@@ -162,7 +155,7 @@ export default function LandingPage() {
         {/* Floating stat pills */}
         <div className="animate-fade-up mt-16 flex flex-wrap items-center justify-center gap-4" style={{ opacity: 0, animationDelay: '650ms' }}>
           {[
-            { val: '10+', label: 'Property types' },
+            { val: '4', label: 'Property types' },
             { val: '30s', label: 'To log a snag' },
             { val: '100%', label: 'Mobile ready' },
           ].map(({ val, label }) => (
@@ -183,7 +176,7 @@ export default function LandingPage() {
 
       {/* ── USER TYPE TICKER ── */}
       <section className="overflow-hidden border-y py-10" style={{ background: '#F8FAFC', borderColor: '#E2E8F0' }}>
-        <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest" style={{ color: '#94A3B8' }}>Built for every property type</p>
+        <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest" style={{ color: '#94A3B8' }}>Built for these property types</p>
         <div className="flex animate-ticker gap-4" style={{ width: 'max-content' }}>
           {doubled.map(({ icon: Icon, label, color, bg }, i) => (
             <div key={i} className="flex shrink-0 items-center gap-2.5 rounded-2xl border px-5 py-3" style={{ background: bg, borderColor: color + '33' }}>
