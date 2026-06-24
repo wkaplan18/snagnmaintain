@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { AlertCircle, Plus } from 'lucide-react'
+import { AlertCircle, Plus, Printer } from 'lucide-react'
 import Link from 'next/link'
 import SnagCard from '@/components/snags/SnagCard'
 import type { Snag, DashboardTerms } from '@/types'
@@ -56,9 +56,19 @@ export default function SnagsClient({ initialSnags, projects, terms, fixedCount 
     <div className="mx-auto max-w-lg px-4 pb-24 pt-6">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">{terms.issues}</h1>
-        <Link href="/snags/new" className="sf-btn-primary flex items-center gap-1.5 px-3.5 py-2 text-sm">
-          <Plus className="h-4 w-4" /> Add {issue}
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/snags/report?${new URLSearchParams({ ...(status ? { status } : {}), ...(projectId ? { project_id: projectId } : {}) })}`}
+            target="_blank"
+            title="Print / Save PDF report"
+            className="sf-btn-secondary flex items-center gap-1.5 px-3 py-2 text-sm"
+          >
+            <Printer className="h-4 w-4" />
+          </Link>
+          <Link href="/snags/new" className="sf-btn-primary flex items-center gap-1.5 px-3.5 py-2 text-sm">
+            <Plus className="h-4 w-4" /> Add {issue}
+          </Link>
+        </div>
       </div>
 
       {projects.length > 1 && (

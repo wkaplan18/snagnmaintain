@@ -164,6 +164,11 @@
   }
 }
 
+/* Print: hide navigation chrome so report pages print cleanly */
+@media print {
+  .sf-bottom-nav { display: none !important; }
+}
+
 /* Landing page animations */
 @keyframes float-slow {
   0%, 100% { transform: translateY(0px) scale(1); }
