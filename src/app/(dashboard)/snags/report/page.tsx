@@ -145,6 +145,34 @@ export default async function SnagReportPage({
           </div>
         )}
 
+        {/* Status key */}
+        <div className="mb-6 rounded-xl border border-slate-100 bg-slate-50 px-5 py-4 print:mb-4">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Status Key</p>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs text-slate-600 sm:grid-cols-3">
+            <div className="flex items-start gap-2">
+              <span className="mt-0.5 inline-flex rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-700 whitespace-nowrap">Open</span>
+              <span>Logged but not yet assigned to anyone</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="mt-0.5 inline-flex rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 text-[10px] font-medium text-orange-700 whitespace-nowrap">Assigned</span>
+              <span>Contractor or staff member has been assigned</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="mt-0.5 inline-flex rounded-full border border-teal-200 bg-teal-50 px-2 py-0.5 text-[10px] font-medium text-teal-700 whitespace-nowrap">Fixed</span>
+              <span>Contractor marked as resolved — awaiting sign-off</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="mt-0.5 inline-flex rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-700 whitespace-nowrap">Approved</span>
+              <span>Fix confirmed and signed off — issue closed ✓</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="mt-0.5 inline-flex rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-medium text-rose-700 whitespace-nowrap">Rejected</span>
+              <span>Fix was inspected and not accepted — needs redo</span>
+            </div>
+          </div>
+          <p className="mt-3 text-[10px] text-slate-400">Items shown with strikethrough are resolved (Fixed / Approved).</p>
+        </div>
+
         {/* Snag table */}
         {allSnags.length === 0 ? (
           <p className="py-16 text-center text-slate-500">
