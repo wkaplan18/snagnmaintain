@@ -246,37 +246,31 @@ export default function LandingPage() {
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-500">You manage everything. Your contractors just fix things — no logins, no app installs, no per-user fees. Ever.</p>
         </FadeUp>
 
-        <div className="mx-auto grid max-w-3xl items-stretch gap-5 sm:grid-cols-2">
+        <div className="mx-auto grid max-w-6xl items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-4">
 
-          {/* Property plan */}
+          {/* Solo plan */}
           <FadeUp className="flex">
             <div className="flex w-full flex-col overflow-hidden rounded-3xl" style={{ background: '#0F172A', border: '1px solid rgba(255,255,255,0.08)' }}>
-              {/* Top accent */}
               <div className="h-1 w-full" style={{ background: 'rgba(255,255,255,0.12)' }} />
-              <div className="flex flex-1 flex-col p-8">
-                {/* Plan label */}
+              <div className="flex flex-1 flex-col p-7">
                 <div className="mb-6 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>Property</span>
-                  <span className="rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.4)' }}>1 site</span>
+                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>Solo</span>
+                  <span className="rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.4)' }}>1 property</span>
                 </div>
-                {/* Price */}
                 <div className="mb-2 flex items-end gap-1.5">
                   <span className="mb-1 text-lg font-bold" style={{ color: 'rgba(255,255,255,0.6)' }}>R</span>
-                  <span className="text-6xl font-black leading-none text-white">1,499</span>
+                  <span className="text-5xl font-black leading-none text-white">1,499</span>
                   <span className="mb-1 text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>/mo</span>
                 </div>
-                <p className="mb-6 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>Hotels, homeowners & property managers.</p>
-                {/* Divider */}
+                <p className="mb-6 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>Hotels, homeowners & single-site managers.</p>
                 <div className="mb-6 h-px w-full" style={{ background: 'rgba(255,255,255,0.07)' }} />
-                {/* Features */}
-                <ul className="mb-8 flex-1 space-y-3.5">
+                <ul className="mb-8 flex-1 space-y-3">
                   {[
                     '1 property',
-                    'You manage — contractors just fix',
-                    'Unlimited contractors — no app needed',
+                    'Unlimited contractors',
                     'Photo before & after logging',
                     'Live dashboard & reports',
-                    'Full audit trail for every job',
+                    'Full audit trail',
                   ].map(f => (
                     <li key={f} className="flex items-center gap-3 text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
                       <CheckCircle className="h-4 w-4 shrink-0" style={{ color: '#22C55E' }} />
@@ -284,8 +278,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                {/* CTA */}
-                <Link href="/register" className="block w-full rounded-xl py-3.5 text-center text-sm font-bold text-white transition-all hover:opacity-80 active:scale-[0.98]" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <Link href="/register" className="block w-full rounded-xl py-3.5 text-center text-sm font-bold text-white transition-opacity hover:opacity-80 active:scale-[0.98]" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.12)' }}>
                   Start free trial
                 </Link>
                 <p className="mt-3 text-center text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>14 days free · No credit card</p>
@@ -294,34 +287,28 @@ export default function LandingPage() {
           </FadeUp>
 
           {/* Contractor plan */}
-          <FadeUp delay={100} className="flex">
-            <div className="flex w-full flex-col overflow-hidden rounded-3xl" style={{ background: '#0A1628', border: '1px solid rgba(26,86,219,0.45)', boxShadow: '0 0 0 1px rgba(26,86,219,0.15), 0 8px 64px rgba(26,86,219,0.2)' }}>
-              {/* Top accent — blue gradient */}
-              <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #1A56DB, #6366F1)' }} />
-              <div className="flex flex-1 flex-col p-8">
-                {/* Plan label + badge */}
+          <FadeUp delay={75} className="flex">
+            <div className="flex w-full flex-col overflow-hidden rounded-3xl" style={{ background: '#0F172A', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div className="h-1 w-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
+              <div className="flex flex-1 flex-col p-7">
                 <div className="mb-6 flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>Contractor</span>
-                  <span className="rounded-full px-3 py-1 text-[11px] font-bold" style={{ background: 'rgba(26,86,219,0.3)', color: '#93B4FF', border: '1px solid rgba(26,86,219,0.4)' }}>Unlimited sites</span>
+                  <span className="rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.4)' }}>5 properties</span>
                 </div>
-                {/* Price */}
                 <div className="mb-2 flex items-end gap-1.5">
                   <span className="mb-1 text-lg font-bold" style={{ color: 'rgba(255,255,255,0.6)' }}>R</span>
-                  <span className="text-6xl font-black leading-none text-white">2,699</span>
+                  <span className="text-5xl font-black leading-none text-white">2,999</span>
                   <span className="mb-1 text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>/mo</span>
                 </div>
                 <p className="mb-6 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>Builders & contractors running multiple sites.</p>
-                {/* Divider */}
-                <div className="mb-6 h-px w-full" style={{ background: 'rgba(26,86,219,0.3)' }} />
-                {/* Features */}
-                <ul className="mb-8 flex-1 space-y-3.5">
+                <div className="mb-6 h-px w-full" style={{ background: 'rgba(255,255,255,0.07)' }} />
+                <ul className="mb-8 flex-1 space-y-3">
                   {[
-                    'Unlimited properties & sites',
-                    'You manage — contractors just fix',
-                    'Unlimited contractors — no app needed',
+                    'Up to 5 properties',
+                    'Unlimited contractors',
                     'Photo before & after logging',
                     'Live dashboard & reports',
-                    'Full audit trail for every job',
+                    'Full audit trail',
                   ].map(f => (
                     <li key={f} className="flex items-center gap-3 text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
                       <CheckCircle className="h-4 w-4 shrink-0" style={{ color: '#22C55E' }} />
@@ -329,11 +316,85 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                {/* CTA */}
-                <Link href="/register" className="block w-full rounded-xl py-3.5 text-center text-sm font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #1A56DB, #6366F1)', boxShadow: '0 4px 24px rgba(26,86,219,0.45)' }}>
+                <Link href="/register" className="block w-full rounded-xl py-3.5 text-center text-sm font-bold text-white transition-opacity hover:opacity-80 active:scale-[0.98]" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.12)' }}>
                   Start free trial
                 </Link>
                 <p className="mt-3 text-center text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>14 days free · No credit card</p>
+              </div>
+            </div>
+          </FadeUp>
+
+          {/* Portfolio plan — highlighted */}
+          <FadeUp delay={150} className="flex">
+            <div className="flex w-full flex-col overflow-hidden rounded-3xl" style={{ background: '#0A1628', border: '1px solid rgba(26,86,219,0.45)', boxShadow: '0 0 0 1px rgba(26,86,219,0.15), 0 8px 64px rgba(26,86,219,0.2)' }}>
+              <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #1A56DB, #6366F1)' }} />
+              <div className="flex flex-1 flex-col p-7">
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>Portfolio</span>
+                  <span className="rounded-full px-3 py-1 text-[11px] font-bold" style={{ background: 'rgba(26,86,219,0.3)', color: '#93B4FF', border: '1px solid rgba(26,86,219,0.4)' }}>Most popular</span>
+                </div>
+                <div className="mb-2 flex items-end gap-1.5">
+                  <span className="mb-1 text-lg font-bold" style={{ color: 'rgba(255,255,255,0.6)' }}>R</span>
+                  <span className="text-5xl font-black leading-none text-white">8,999</span>
+                  <span className="mb-1 text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>/mo</span>
+                </div>
+                <p className="mb-6 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>Property managers & hotel groups with large portfolios.</p>
+                <div className="mb-6 h-px w-full" style={{ background: 'rgba(26,86,219,0.3)' }} />
+                <ul className="mb-8 flex-1 space-y-3">
+                  {[
+                    'Up to 20 properties',
+                    'Unlimited contractors',
+                    'Photo before & after logging',
+                    'Live dashboard & reports',
+                    'Full audit trail',
+                  ].map(f => (
+                    <li key={f} className="flex items-center gap-3 text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                      <CheckCircle className="h-4 w-4 shrink-0" style={{ color: '#22C55E' }} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/register" className="block w-full rounded-xl py-3.5 text-center text-sm font-bold text-white transition-opacity hover:opacity-90 active:scale-[0.98]" style={{ background: 'linear-gradient(135deg, #1A56DB, #6366F1)', boxShadow: '0 4px 24px rgba(26,86,219,0.45)' }}>
+                  Start free trial
+                </Link>
+                <p className="mt-3 text-center text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>14 days free · No credit card</p>
+              </div>
+            </div>
+          </FadeUp>
+
+          {/* Enterprise plan */}
+          <FadeUp delay={225} className="flex">
+            <div className="flex w-full flex-col overflow-hidden rounded-3xl" style={{ background: '#0F172A', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #6366F1, #8B5CF6)' }} />
+              <div className="flex flex-1 flex-col p-7">
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>Enterprise</span>
+                  <span className="rounded-full px-3 py-1 text-[11px] font-semibold" style={{ background: 'rgba(139,92,246,0.2)', color: '#C4B5FD', border: '1px solid rgba(139,92,246,0.3)' }}>20+ properties</span>
+                </div>
+                <div className="mb-2">
+                  <span className="text-5xl font-black leading-none text-white">Custom</span>
+                </div>
+                <p className="mb-6 text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>Large groups, chains & developers. Tailored to your scale.</p>
+                <div className="mb-6 h-px w-full" style={{ background: 'rgba(255,255,255,0.07)' }} />
+                <ul className="mb-8 flex-1 space-y-3">
+                  {[
+                    'Unlimited properties',
+                    'Unlimited contractors',
+                    'Photo before & after logging',
+                    'Live dashboard & reports',
+                    'Full audit trail',
+                    'Dedicated account manager',
+                  ].map(f => (
+                    <li key={f} className="flex items-center gap-3 text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                      <CheckCircle className="h-4 w-4 shrink-0" style={{ color: '#22C55E' }} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <a href="mailto:warren@kaplan.co.za" className="block w-full rounded-xl py-3.5 text-center text-sm font-bold text-white transition-opacity hover:opacity-80 active:scale-[0.98]" style={{ background: 'rgba(139,92,246,0.25)', border: '1px solid rgba(139,92,246,0.4)' }}>
+                  Contact us
+                </a>
+                <p className="mt-3 text-center text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Custom pricing · Volume discounts</p>
               </div>
             </div>
           </FadeUp>
