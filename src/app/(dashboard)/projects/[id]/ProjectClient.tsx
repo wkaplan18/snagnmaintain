@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Home, ChevronDown, ChevronRight, Camera, MapPin } from 'lucide-react'
+import { ArrowLeft, Plus, Home, ChevronDown, ChevronRight, Camera, MapPin, Printer } from 'lucide-react'
 import SnagCard from '@/components/snags/SnagCard'
 import { useSnags } from '@/hooks/useSnags'
 import { DEFAULT_ROOMS, type Contractor, type DashboardTerms, type OrgType, type Room, type UnitType } from '@/types'
@@ -117,7 +117,17 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
               </p>
             )}
           </div>
-          <span className="sf-badge bg-slate-50 border-slate-200 text-slate-600 capitalize">{project.status}</span>
+          <div className="flex items-center gap-2">
+            <span className="sf-badge bg-slate-50 border-slate-200 text-slate-600 capitalize">{project.status}</span>
+            <Link
+              href={`/snags/report?project_id=${project.id}`}
+              target="_blank"
+              title="Print / Save PDF report"
+              className="sf-btn-secondary flex items-center gap-1.5 px-2.5 py-1.5 text-sm"
+            >
+              <Printer className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
         {unit ? (
           <div className="mt-6">
@@ -148,7 +158,17 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
             </p>
           )}
         </div>
-        <span className="sf-badge bg-slate-50 border-slate-200 text-slate-600 capitalize">{project.status}</span>
+        <div className="flex items-center gap-2">
+          <span className="sf-badge bg-slate-50 border-slate-200 text-slate-600 capitalize">{project.status}</span>
+          <Link
+            href={`/snags/report?project_id=${project.id}`}
+            target="_blank"
+            title="Print / Save PDF report"
+            className="sf-btn-secondary flex items-center gap-1.5 px-2.5 py-1.5 text-sm"
+          >
+            <Printer className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
 
       <div className="mb-3 mt-6 flex items-center justify-between">
