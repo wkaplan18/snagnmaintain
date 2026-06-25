@@ -22,19 +22,9 @@ export async function POST(req: NextRequest) {
   const resend = new Resend('re_jNGLrMr3_2L6dQUduYXEVE5ykkFZzVP7R')
   const { error: emailError } = await resend.emails.send({
     from: 'SnagIT <noreply@family.kaplan.co.za>',
-    to: 'warren@kaplan.co.za',
-    subject: `New SnagIT Enterprise Enquiry — ${name}`,
-    html: `
-      <h2>New Enterprise Enquiry</h2>
-      <table cellpadding="8" style="border-collapse:collapse;width:100%;max-width:500px">
-        <tr><td><strong>Name</strong></td><td>${name}</td></tr>
-        <tr><td><strong>Company</strong></td><td>${company || '—'}</td></tr>
-        <tr><td><strong>Email</strong></td><td>${email}</td></tr>
-        <tr><td><strong>Phone</strong></td><td>${phone || '—'}</td></tr>
-        <tr><td><strong>Properties</strong></td><td>${properties || '—'}</td></tr>
-        <tr><td><strong>Message</strong></td><td>${message || '—'}</td></tr>
-      </table>
-    `,
+    to: 'wkaplan@gmail.com',
+    subject: `SnagIT contact: ${name}`,
+    html: `<p>Name: ${name}<br>Company: ${company || '—'}<br>Email: ${email}<br>Phone: ${phone || '—'}<br>Properties: ${properties || '—'}<br>Message: ${message || '—'}</p>`,
   })
 
   if (emailError) {
