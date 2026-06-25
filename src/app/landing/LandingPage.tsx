@@ -82,6 +82,7 @@ function FadeUp({ children, delay = 0, className = '', style }: { children: Reac
 function EnterpriseModal({ onClose }: { onClose: () => void }) {
   const [form, setForm] = useState({ name: '', company: '', email: '', phone: '', properties: '', message: '' })
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -91,7 +92,13 @@ function EnterpriseModal({ onClose }: { onClose: () => void }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     })
-    setStatus(res.ok ? 'success' : 'error')
+    if (res.ok) {
+      setStatus('success')
+    } else {
+      const data = await res.json()
+      setErrorMsg(data.error ?? 'Unknown error')
+      setStatus('error')
+    }
   }
 
   return (
@@ -162,7 +169,7 @@ function EnterpriseModal({ onClose }: { onClose: () => void }) {
                   style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
                 />
               </div>
-              {status === 'error' && <p className="text-sm" style={{ color: '#F87171' }}>Something went wrong — please try again.</p>}
+              {status === 'error' && <p className="text-sm" style={{ color: '#F87171' }}>{errorMsg || 'Something went wrong — please try again.'}</p>}
               <button
                 type="submit"
                 disabled={status === 'loading'}
