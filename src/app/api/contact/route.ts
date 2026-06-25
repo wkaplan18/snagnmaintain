@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to save enquiry' }, { status: 500 })
   }
 
-  const resend = new Resend('re_jNGLrMr3_2L6dQUduYXEVE5ykkFZzVP7R')
+  const resend = new Resend(process.env.RESEND_API_KEY)
   const { error: emailError } = await resend.emails.send({
     from: 'SnagIT <noreply@family.kaplan.co.za>',
     to: 'wkaplan@gmail.com',
