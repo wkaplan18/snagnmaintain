@@ -145,7 +145,7 @@ export default function SettingsClient({ email, profile, orgName, orgType }: Pro
         type="button"
         onClick={async () => {
           await supabase.auth.signOut()
-          router.push('/')
+          window.location.href = '/'
         }}
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-red-100 bg-red-50 py-3 text-sm font-semibold text-red-600 transition-all hover:bg-red-100 active:scale-[0.97]"
       >
