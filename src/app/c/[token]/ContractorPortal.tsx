@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { Camera, CheckCircle, Clock, AlertTriangle, Loader2, ChevronDown, ChevronUp, RefreshCw, X } from 'lucide-react'
 import { compressImage } from '@/lib/compressImage'
 
@@ -256,16 +256,6 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
   const [projectFilter, setProjectFilter] = useState<string>('all')
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null)
   const photoPickerRef = useRef<HTMLInputElement | null>(null)
-
-  // On load: if there's nothing in To Do but there are completed items, switch tab automatically.
-  // This handles the case where the contractor refreshes after the owner approves their fix.
-  useEffect(() => {
-    const initialTodo = snags.filter(s => ['assigned', 'in_progress', 'rejected', 'fixed'].includes(s.status))
-    const initialCompleted = snags.filter(s => ['approved', 'closed'].includes(s.status))
-    if (initialTodo.length === 0 && initialCompleted.length > 0) {
-      setActiveTab('completed')
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 'fixed' stays in To Do as "In Review" — only moves to Completed when approved
   const todoSnags = localSnags.filter(s => ['assigned', 'in_progress', 'rejected', 'fixed'].includes(s.status))
