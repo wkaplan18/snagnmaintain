@@ -51,15 +51,15 @@ export default function Image() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 128,
-            height: 128,
+            width: 154,
+            height: 154,
             background: 'white',
-            borderRadius: 32,
-            marginBottom: 36,
+            borderRadius: 38,
+            marginBottom: 43,
             boxShadow: '0 12px 40px rgba(0,0,0,0.30)',
           }}
         >
-          <svg width="88" height="88" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+          <svg width="106" height="106" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
             <rect width="32" height="32" rx="7" fill="#1A56DB"/>
             <circle cx="16" cy="16" r="8" stroke="white" strokeWidth="2" fill="none" opacity="0.9"/>
             <circle cx="16" cy="16" r="2.5" fill="white"/>
@@ -73,11 +73,11 @@ export default function Image() {
         {/* Wordmark */}
         <div
           style={{
-            fontSize: 92,
+            fontSize: 110,
             fontWeight: 800,
-            letterSpacing: '-3px',
+            letterSpacing: '-3.5px',
             lineHeight: 1,
-            marginBottom: 22,
+            marginBottom: 26,
             display: 'flex',
           }}
         >
@@ -88,7 +88,7 @@ export default function Image() {
         {/* Tagline */}
         <div
           style={{
-            fontSize: 34,
+            fontSize: 41,
             fontWeight: 500,
             color: 'rgba(255,255,255,0.78)',
             letterSpacing: '0.5px',
