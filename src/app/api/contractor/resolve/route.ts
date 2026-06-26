@@ -80,7 +80,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Could not update snag status — no rows matched' }, { status: 500 })
   }
 
-  // Re-read immediately to detect if a DB trigger reverted the status
+  // Save resolution note if provided
+  if (resolutionNote?.trim()) {
+    await supabase
+      .from('snags')
+      .update({ resolution_note: resolutionNote.trim() })
+      .eq('id', snagId)
+  }
+
+  // Re-read AFTER all updates to catch any trigger reverting the status
   const { data: verify } = await supabase
     .from('snags')
     .select('status')
@@ -89,16 +97,8 @@ export async function POST(req: NextRequest) {
 
   if (verify?.status !== 'fixed') {
     return NextResponse.json({
-      error: `Status was set to fixed but DB now shows "${verify?.status}" — a database trigger may be reverting it`,
+      error: `DB shows "${verify?.status}" after update — a trigger or policy is reverting the status`,
     }, { status: 500 })
-  }
-
-  // Save resolution note if provided (best-effort — column may not exist on older schemas)
-  if (resolutionNote?.trim()) {
-    await supabase
-      .from('snags')
-      .update({ resolution_note: resolutionNote.trim() })
-      .eq('id', snagId)
   }
 
   return NextResponse.json({ success: true })
