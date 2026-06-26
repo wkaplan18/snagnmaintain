@@ -13,15 +13,17 @@ interface Props {
   profile: { full_name: string | null; whatsapp: string | null; phone: string | null; job_title: string | null }
   orgName: string | null
   orgType: string | null
+  orgId: string | null
 }
 
-export default function SettingsClient({ email, profile, orgName, orgType }: Props) {
+export default function SettingsClient({ email, profile, orgName, orgType, orgId }: Props) {
   const orgTypeConfig = orgType ? ORG_TYPE_CONFIG[orgType as OrgType] : null
   const terms = DASHBOARD_TERMS[(orgType ?? 'builder') as OrgType]
   const [fullName, setFullName] = useState(profile.full_name ?? '')
   const [whatsapp, setWhatsapp] = useState(profile.whatsapp ?? '')
   const [phone, setPhone] = useState(profile.phone ?? '')
   const [jobTitle, setJobTitle] = useState(profile.job_title ?? '')
+  const [orgNameVal, setOrgNameVal] = useState(orgName ?? '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -33,18 +35,19 @@ export default function SettingsClient({ email, profile, orgName, orgType }: Pro
     setSaving(true)
     setSaved(false)
     setError('')
-    const { error } = await supabase
-      .from('profiles')
-      .update({
+    const { data: { user } } = await supabase.auth.getUser()
+    const [{ error }, { error: orgError }] = await Promise.all([
+      supabase.from('profiles').update({
         full_name: fullName.trim() || null,
         whatsapp: whatsapp.trim() || null,
         phone: phone.trim() || null,
         job_title: jobTitle.trim() || null,
-      })
-      .eq('id', (await supabase.auth.getUser()).data.user!.id)
+      }).eq('id', user!.id),
+      orgId ? supabase.from('organizations').update({ name: orgNameVal.trim() || null }).eq('id', orgId) : Promise.resolve({ error: null }),
+    ])
 
-    if (error) {
-      setError(error.message)
+    if (error || orgError) {
+      setError((error ?? orgError)!.message)
     } else {
       setSaved(true)
       router.refresh()
@@ -83,6 +86,19 @@ export default function SettingsClient({ email, profile, orgName, orgType }: Pro
       )}
 
       <form onSubmit={handleSave} className="sf-card space-y-4 p-5">
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">Organisation name</label>
+          <input
+            type="text"
+            value={orgNameVal}
+            onChange={e => setOrgNameVal(e.target.value)}
+            placeholder="My Organisation"
+            className="sf-input"
+          />
+        </div>
+
+        <div className="h-px bg-slate-100" />
+
         <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-700">Full name</label>
           <input

@@ -15,7 +15,7 @@ export default async function SettingsPage() {
 
   const { data: membership } = await supabase
     .from('org_members')
-    .select('organizations(name, org_type)')
+    .select('org_id, organizations(name, org_type)')
     .eq('user_id', user.id)
     .single()
 
@@ -29,6 +29,7 @@ export default async function SettingsPage() {
       profile={profile ?? { full_name: null, whatsapp: null, phone: null, job_title: null }}
       orgName={org?.name ?? null}
       orgType={org?.org_type ?? null}
+      orgId={membership?.org_id ?? null}
     />
   )
 }
