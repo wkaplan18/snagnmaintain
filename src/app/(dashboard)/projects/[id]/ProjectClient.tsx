@@ -139,18 +139,28 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
         <>
           <div className="mb-3 mt-6 flex items-center justify-between">
             <h2 className="text-base font-semibold text-slate-900">{terms.units}</h2>
-            <button onClick={() => setShowAddUnit(v => !v)} className="inline-flex items-center gap-1 text-sm font-medium text-[#1A56DB]">
-              <Plus className="h-4 w-4" /> Add {terms.unit.toLowerCase()}
-            </button>
+            {!isHotel && (
+              <button onClick={() => setShowAddUnit(v => !v)} className="inline-flex items-center gap-1 text-sm font-medium text-[#1A56DB]">
+                <Plus className="h-4 w-4" /> Add {terms.unit.toLowerCase()}
+              </button>
+            )}
           </div>
 
-          {showAddUnit && (
+          {isHotel && units.length === 0 && (
+            <div className="sf-card flex flex-col items-center p-8 text-center">
+              <Home className="mb-3 h-8 w-8 text-slate-300" />
+              <p className="text-sm font-medium text-slate-700">No rooms logged yet</p>
+              <p className="mt-1 text-xs text-slate-400">Rooms are created automatically when you log your first issue in that room.</p>
+            </div>
+          )}
+
+          {!isHotel && showAddUnit && (
             <form onSubmit={handleAddUnit} className="sf-card mb-4 space-y-3 p-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">{terms.unit} name</label>
                   <input type="text" required minLength={1} value={unitName} onChange={e => setUnitName(e.target.value)}
-                    placeholder={isHotel ? 'Room 101' : 'Unit 14'} className="sf-input" />
+                    placeholder="Unit 14" className="sf-input" />
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">Type</label>
@@ -161,7 +171,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
               </div>
               <label className="flex items-center gap-2 text-sm text-slate-600">
                 <input type="checkbox" checked={seedRooms} onChange={e => setSeedRooms(e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
-                {isHotel ? 'Add standard hotel areas (bathroom, sleeping area…)' : 'Add standard SA rooms (kitchen, bedrooms, bathrooms…)'}
+                Add standard SA rooms (kitchen, bedrooms, bathrooms…)
               </label>
               {error && <p className="text-xs text-red-600">{error}</p>}
               <button type="submit" disabled={saving || !unitName.trim()} className="sf-btn-primary w-full py-2.5 text-sm disabled:opacity-60">
@@ -170,7 +180,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
             </form>
           )}
 
-          {units.length === 0 && !showAddUnit ? (
+          {!isHotel && units.length === 0 && !showAddUnit ? (
             <div className="sf-card flex flex-col items-center p-8 text-center">
               <Home className="mb-3 h-8 w-8 text-slate-300" />
               <p className="text-sm text-slate-500">No {terms.units.toLowerCase()} yet — add the first {terms.unit.toLowerCase()} to start logging {terms.issues.toLowerCase()}.</p>

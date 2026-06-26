@@ -5,10 +5,10 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, BookUser, Camera, ChevronRight, Loader2, Pencil, RotateCcw, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { compressImage } from '@/lib/compressImage'
-import { DASHBOARD_TERMS } from '@/types'
+import { DASHBOARD_TERMS, DEFAULT_HOTEL_ROOM_AREAS } from '@/types'
 import type { Contractor, DashboardTerms, OrgType, Room } from '@/types'
 
-type Step = 'project' | 'photo' | 'details' | 'room' | 'assign' | 'whatsapp'
+type Step = 'project' | 'room_number' | 'photo' | 'details' | 'room' | 'assign' | 'whatsapp'
 
 function formatWhatsApp(raw: string): string {
   const num = raw.replace(/[\s\-().]/g, '')
@@ -167,11 +167,16 @@ export default function AddJobClient() {
   const [projectId, setProjectId] = useState('')
   const [unitId, setUnitId] = useState('')
   const [orgId, setOrgId] = useState('')
+  const [isHotel, setIsHotel] = useState(false)
   const [terms, setTerms] = useState<DashboardTerms>(DASHBOARD_TERMS['builder'])
   const [rooms, setRooms] = useState<Room[]>([])
   const [contractors, setContractors] = useState<Contractor[]>([])
   const [allProjects, setAllProjects] = useState<{ id: string; name: string }[]>([])
   const [supportsContacts, setSupportsContacts] = useState(false)
+
+  // Hotel room number step
+  const [roomNumberInput, setRoomNumberInput] = useState('')
+  const [roomNumberBusy, setRoomNumberBusy] = useState(false)
 
   // Wizard state
   const [step, setStep] = useState<Step>('photo')
@@ -220,9 +225,11 @@ export default function AddJobClient() {
       const org = Array.isArray(raw) ? raw[0] : raw as { org_type?: string } | null | undefined
       const orgType = (org?.org_type ?? 'builder') as OrgType
       const _orgId = memberData?.org_id ?? ''
+      const _isHotel = orgType === 'hotel'
 
       setOrgId(_orgId)
       setTerms(DASHBOARD_TERMS[orgType])
+      setIsHotel(_isHotel)
 
       let _projectId = qProjectId
       let _unitId = qUnitId
@@ -238,7 +245,6 @@ export default function AddJobClient() {
         if (projects.length === 0) { router.push('/projects/new'); return }
 
         if (projects.length > 1) {
-          // Let user pick which project
           setAllProjects(projects)
           setOrgId(_orgId)
           setReady(true)
@@ -247,6 +253,17 @@ export default function AddJobClient() {
         }
 
         _projectId = projects[0].id
+
+        // Hotels: don't auto-create a unit — let the user type the room number
+        if (_isHotel && !_unitId) {
+          setProjectId(_projectId)
+          const { data: _contractors } = await supabase
+            .from('contractors').select('*').eq('org_id', _orgId).eq('is_active', true).order('name')
+          setContractors(_contractors ?? [])
+          setReady(true)
+          setStep('room_number')
+          return
+        }
 
         let { data: unit } = await supabase
           .from('units')
@@ -305,6 +322,10 @@ export default function AddJobClient() {
 
   async function selectProject(id: string) {
     setProjectId(id)
+    if (isHotel) {
+      setStep('room_number')
+      return
+    }
     let { data: unit } = await supabase.from('units').select('id').eq('project_id', id).limit(1).maybeSingle()
     if (!unit) {
       const { data: created } = await supabase
@@ -319,6 +340,36 @@ export default function AddJobClient() {
     ])
     setRooms(_rooms ?? [])
     setContractors(_contractors ?? [])
+    setStep('photo')
+  }
+
+  async function selectRoomNumber() {
+    const roomName = roomNumberInput.trim()
+    if (!roomName) return
+    setRoomNumberBusy(true)
+
+    const { data: existing } = await supabase
+      .from('units').select('id').eq('project_id', projectId).eq('name', roomName).maybeSingle()
+
+    let _unitId: string
+    if (existing) {
+      _unitId = existing.id
+    } else {
+      const { data: created, error } = await supabase
+        .from('units')
+        .insert({ project_id: projectId, name: roomName, unit_type: 'standard_room' })
+        .select('id').single()
+      if (error || !created) { alert('Could not create room'); setRoomNumberBusy(false); return }
+      _unitId = created.id
+      await supabase.from('rooms').insert(
+        DEFAULT_HOTEL_ROOM_AREAS.map((name, i) => ({ unit_id: _unitId, name, room_order: i }))
+      )
+    }
+
+    setUnitId(_unitId)
+    const { data: _rooms } = await supabase.from('rooms').select('*').eq('unit_id', _unitId).order('room_order')
+    setRooms(_rooms ?? [])
+    setRoomNumberBusy(false)
     setStep('photo')
   }
 
@@ -445,10 +496,15 @@ export default function AddJobClient() {
   }
 
   const hasProjectStep = allProjects.length > 1
-  const totalSteps = hasProjectStep ? 4 : 3
+  const hasRoomNumberStep = isHotel && !qUnitId
+  const totalSteps = (hasProjectStep ? 1 : 0) + (hasRoomNumberStep ? 1 : 0) + 3
   const stepNum = (s: Step) => {
-    const base: Record<Step, number> = { project: 1, photo: hasProjectStep ? 2 : 1, details: hasProjectStep ? 3 : 2, room: hasProjectStep ? 4 : 3, assign: 0, whatsapp: 0 }
-    return base[s]
+    const order: Step[] = []
+    if (hasProjectStep) order.push('project')
+    if (hasRoomNumberStep) order.push('room_number')
+    order.push('photo', 'details', 'room')
+    const idx = order.indexOf(s)
+    return idx === -1 ? 0 : idx + 1
   }
 
   // ─── STEP: Project picker ────────────────────────────────────────────────────
@@ -480,6 +536,51 @@ export default function AddJobClient() {
               <ChevronRight className="h-4 w-4 flex-shrink-0 text-slate-300" />
             </button>
           ))}
+        </div>
+      </div>
+    )
+  }
+
+  // ─── STEP: Room number (hotels only) ─────────────────────────────────────────
+  if (step === 'room_number') {
+    return (
+      <div className="flex min-h-screen flex-col bg-white">
+        <div className="border-b border-slate-200 px-4 pt-safe pb-4">
+          <div className="flex items-center gap-3 pt-3">
+            <button
+              onClick={() => hasProjectStep ? setStep('project') : router.push('/snags')}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <div>
+              <p className="text-xs text-slate-400">Step {stepNum('room_number')} of {totalSteps}</p>
+              <h1 className="text-base font-bold text-slate-900">Which room?</h1>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-1 flex-col px-6 pt-8 gap-3">
+          <p className="text-sm text-slate-500">Enter the room or suite number where the issue was found.</p>
+          <input
+            type="text"
+            autoFocus
+            value={roomNumberInput}
+            onChange={e => setRoomNumberInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && roomNumberInput.trim() && selectRoomNumber()}
+            placeholder="e.g. 101, Suite 201, Penthouse"
+            className="sf-input text-base"
+          />
+        </div>
+
+        <div className="px-4 pb-28 pt-4">
+          <button
+            onClick={selectRoomNumber}
+            disabled={!roomNumberInput.trim() || roomNumberBusy}
+            className="sf-btn-primary flex w-full items-center justify-center gap-2 py-4 text-base disabled:opacity-40"
+          >
+            {roomNumberBusy ? <Loader2 className="h-5 w-5 animate-spin" /> : <>Next <ChevronRight className="h-5 w-5" /></>}
+          </button>
         </div>
       </div>
     )
@@ -637,7 +738,7 @@ export default function AddJobClient() {
             </button>
             <div>
               <p className="text-xs text-slate-400">Step {stepNum('room')} of {totalSteps}</p>
-              <h1 className="text-base font-bold text-slate-900">Which room?</h1>
+              <h1 className="text-base font-bold text-slate-900">{isHotel ? 'Which area?' : 'Which room?'}</h1>
             </div>
           </div>
         </div>
