@@ -22,20 +22,22 @@ export interface DashboardTerms {
   contractorTrade: string
   internalLabel: string
   externalLabel: string
+  unit: string
+  units: string
 }
 
 export const DASHBOARD_TERMS: Record<OrgType, DashboardTerms> = {
-  builder:          { project: 'Project',  projects: 'Projects',   issue: 'Snag',  issues: 'Snags',  contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Staff',            externalLabel: 'Subcontractor' },
-  hotel:            { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Staff member', contractorTrade: 'Role',  internalLabel: 'Maintenance Staff', externalLabel: 'Contractor' },
-  property_manager: { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Staff',            externalLabel: 'Contractor' },
-  body_corporate:   { project: 'Complex',  projects: 'Complexes',  issue: 'Issue', issues: 'Issues', contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Building Staff',   externalLabel: 'Contractor' },
+  builder:          { project: 'Project',  projects: 'Projects',   issue: 'Snag',  issues: 'Snags',  contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Staff',            externalLabel: 'Subcontractor', unit: 'Unit',  units: 'Units' },
+  hotel:            { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Staff member', contractorTrade: 'Role',  internalLabel: 'Maintenance Staff', externalLabel: 'Contractor',    unit: 'Room',  units: 'Rooms' },
+  property_manager: { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Staff',            externalLabel: 'Contractor',    unit: 'Unit',  units: 'Units' },
+  body_corporate:   { project: 'Complex',  projects: 'Complexes',  issue: 'Issue', issues: 'Issues', contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Building Staff',   externalLabel: 'Contractor',    unit: 'Unit',  units: 'Units' },
 }
 
 export type SnagStatus = 'open' | 'assigned' | 'in_progress' | 'fixed' | 'approved' | 'closed' | 'rejected'
 // Active statuses in the current workflow (in_progress / closed kept for legacy data)
 export const ACTIVE_STATUSES: SnagStatus[] = ['open', 'assigned', 'rejected']
 export type ProjectStatus = 'active' | 'completed' | 'on_hold' | 'archived'
-export type UnitType = 'house' | 'apartment' | 'villa' | 'office' | 'townhouse' | 'penthouse' | 'retail' | 'other'
+export type UnitType = 'house' | 'apartment' | 'villa' | 'office' | 'townhouse' | 'penthouse' | 'retail' | 'other' | 'standard_room' | 'suite' | 'family_room' | 'penthouse_suite' | 'accessible_room'
 export type DefectCategory = 'paint' | 'crack' | 'tile' | 'water' | 'fitting' | 'alignment' | 'finishing' | 'electrical' | 'plumbing' | 'structural' | 'carpentry' | 'glazing' | 'hvac' | 'other'
 export type OrgMemberRole = 'owner' | 'admin' | 'manager' | 'inspector' | 'viewer'
 
@@ -256,6 +258,18 @@ export const DEFAULT_ROOMS = [
   'Passage',
   'Storeroom',
 ]
+
+export const DEFAULT_HOTEL_ROOM_AREAS = [
+  'Bathroom',
+  'Sleeping Area',
+  'Living Area',
+  'Balcony',
+  'Entrance',
+  'Kitchenette',
+]
+
+export const HOTEL_UNIT_TYPES: UnitType[] = ['standard_room', 'suite', 'family_room', 'penthouse_suite', 'accessible_room', 'other']
+export const BUILDER_UNIT_TYPES: UnitType[] = ['apartment', 'house', 'townhouse', 'villa', 'penthouse', 'office', 'retail', 'other']
 
 export const SA_PROVINCES = [
   'Gauteng',

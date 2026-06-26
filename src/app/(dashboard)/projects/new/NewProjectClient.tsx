@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { SA_PROVINCES, DEFAULT_ROOMS } from '@/types'
+import { SA_PROVINCES, DEFAULT_ROOMS, DEFAULT_HOTEL_ROOM_AREAS } from '@/types'
 import type { DashboardTerms, OrgType } from '@/types'
 
 export default function NewProjectClient({ orgId, terms, orgType }: { orgId: string; terms: DashboardTerms; orgType: OrgType }) {
@@ -45,9 +45,10 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
     }
 
     if (mode === 'single') {
+      const isHotel = orgType === 'hotel'
       const { data: unit, error: unitError } = await supabase
         .from('units')
-        .insert({ project_id: data.id, name: name.trim(), unit_type: 'house' })
+        .insert({ project_id: data.id, name: name.trim(), unit_type: isHotel ? 'standard_room' : 'house' })
         .select('id')
         .single()
 
@@ -57,8 +58,9 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
         return
       }
 
+      const roomList = isHotel ? DEFAULT_HOTEL_ROOM_AREAS : DEFAULT_ROOMS
       await supabase.from('rooms').insert(
-        DEFAULT_ROOMS.map((roomName, i) => ({ unit_id: unit.id, name: roomName, room_order: i }))
+        roomList.map((roomName, i) => ({ unit_id: unit.id, name: roomName, room_order: i }))
       )
     }
 
@@ -107,27 +109,27 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
 
         {/* Property structure toggle */}
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">Property structure</label>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">{terms.project} structure</label>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setMode('single')}
               className={`flex-1 rounded-xl border py-2.5 text-xs font-semibold transition-all ${mode === 'single' ? 'border-[#1A56DB] bg-[#EEF4FF] text-[#1A56DB]' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
             >
-              Single property
+              Single {terms.unit.toLowerCase()}
             </button>
             <button
               type="button"
               onClick={() => setMode('multiple')}
               className={`flex-1 rounded-xl border py-2.5 text-xs font-semibold transition-all ${mode === 'multiple' ? 'border-[#1A56DB] bg-[#EEF4FF] text-[#1A56DB]' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
             >
-              Multiple units
+              Multiple {terms.units.toLowerCase()}
             </button>
           </div>
           <p className="mt-1.5 text-xs text-slate-400">
             {mode === 'single'
-              ? 'One standalone property — rooms are created automatically.'
-              : 'An apartment block, complex or development with separate units.'}
+              ? `One ${terms.unit.toLowerCase()} — areas created automatically.`
+              : `A ${terms.project.toLowerCase()} with multiple ${terms.units.toLowerCase()}.`}
           </p>
         </div>
 

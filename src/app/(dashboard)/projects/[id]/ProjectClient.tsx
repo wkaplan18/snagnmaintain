@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft, Plus, Home, ChevronDown, ChevronRight, Camera, MapPin, Printer } from 'lucide-react'
 import SnagCard from '@/components/snags/SnagCard'
 import { useSnags } from '@/hooks/useSnags'
-import { DEFAULT_ROOMS, type Contractor, type DashboardTerms, type OrgType, type Room, type UnitType } from '@/types'
+import { DEFAULT_ROOMS, DEFAULT_HOTEL_ROOM_AREAS, HOTEL_UNIT_TYPES, BUILDER_UNIT_TYPES, type Contractor, type DashboardTerms, type OrgType, type Room, type UnitType } from '@/types'
 
 interface UnitRow {
   id: string
@@ -28,7 +28,6 @@ interface ProjectInfo {
   description: string | null
 }
 
-const UNIT_TYPES: UnitType[] = ['apartment', 'house', 'townhouse', 'villa', 'penthouse', 'office', 'retail', 'other']
 
 function UnitSnags({ projectId, unitId, terms, bare = false }: { projectId: string; unitId: string; terms: DashboardTerms; bare?: boolean }) {
   const { snags, loading } = useSnags({ unitId })
@@ -59,7 +58,9 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
   const [openUnit, setOpenUnit] = useState<string | null>(units.length === 1 ? units[0].id : null)
   const [showAddUnit, setShowAddUnit] = useState(units.length === 0)
   const [unitName, setUnitName] = useState('')
-  const [unitType, setUnitType] = useState<UnitType>('apartment')
+  const isHotel = orgType === 'hotel'
+  const unitTypeOptions = isHotel ? HOTEL_UNIT_TYPES : BUILDER_UNIT_TYPES
+  const [unitType, setUnitType] = useState<UnitType>(isHotel ? 'standard_room' : 'apartment')
   const [seedRooms, setSeedRooms] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -90,8 +91,9 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
     }
 
     if (seedRooms) {
+      const roomList = isHotel ? DEFAULT_HOTEL_ROOM_AREAS : DEFAULT_ROOMS
       await supabase.from('rooms').insert(
-        DEFAULT_ROOMS.map((name, i) => ({ unit_id: unit.id, name, room_order: i }))
+        roomList.map((name, i) => ({ unit_id: unit.id, name, room_order: i }))
       )
     }
 
@@ -136,9 +138,9 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
       ) : (
         <>
           <div className="mb-3 mt-6 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-slate-900">Units</h2>
+            <h2 className="text-base font-semibold text-slate-900">{terms.units}</h2>
             <button onClick={() => setShowAddUnit(v => !v)} className="inline-flex items-center gap-1 text-sm font-medium text-[#1A56DB]">
-              <Plus className="h-4 w-4" /> Add unit
+              <Plus className="h-4 w-4" /> Add {terms.unit.toLowerCase()}
             </button>
           </div>
 
@@ -146,24 +148,24 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
             <form onSubmit={handleAddUnit} className="sf-card mb-4 space-y-3 p-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700">Unit name</label>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700">{terms.unit} name</label>
                   <input type="text" required minLength={1} value={unitName} onChange={e => setUnitName(e.target.value)}
-                    placeholder="Unit 14" className="sf-input" />
+                    placeholder={isHotel ? 'Room 101' : 'Unit 14'} className="sf-input" />
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">Type</label>
                   <select value={unitType} onChange={e => setUnitType(e.target.value as UnitType)} className="sf-input capitalize">
-                    {UNIT_TYPES.map(t => <option key={t} value={t} className="capitalize">{t}</option>)}
+                    {unitTypeOptions.map(t => <option key={t} value={t} className="capitalize">{t.replace(/_/g, ' ')}</option>)}
                   </select>
                 </div>
               </div>
               <label className="flex items-center gap-2 text-sm text-slate-600">
                 <input type="checkbox" checked={seedRooms} onChange={e => setSeedRooms(e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
-                Add standard SA rooms (kitchen, bedrooms, bathrooms…)
+                {isHotel ? 'Add standard hotel areas (bathroom, sleeping area…)' : 'Add standard SA rooms (kitchen, bedrooms, bathrooms…)'}
               </label>
               {error && <p className="text-xs text-red-600">{error}</p>}
               <button type="submit" disabled={saving || !unitName.trim()} className="sf-btn-primary w-full py-2.5 text-sm disabled:opacity-60">
-                {saving ? 'Adding…' : 'Add unit'}
+                {saving ? 'Adding…' : `Add ${terms.unit.toLowerCase()}`}
               </button>
             </form>
           )}
@@ -171,7 +173,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
           {units.length === 0 && !showAddUnit ? (
             <div className="sf-card flex flex-col items-center p-8 text-center">
               <Home className="mb-3 h-8 w-8 text-slate-300" />
-              <p className="text-sm text-slate-500">No units yet — add the first unit to start logging {terms.issues.toLowerCase()}.</p>
+              <p className="text-sm text-slate-500">No {terms.units.toLowerCase()} yet — add the first {terms.unit.toLowerCase()} to start logging {terms.issues.toLowerCase()}.</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -186,7 +188,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-slate-900">{u.name}</p>
-                          <p className="text-xs capitalize text-slate-400">{u.unit_type}</p>
+                          <p className="text-xs capitalize text-slate-400">{u.unit_type.replace(/_/g, ' ')}</p>
                         </div>
                       </div>
                       {open ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
