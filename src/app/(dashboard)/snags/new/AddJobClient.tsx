@@ -510,7 +510,7 @@ export default function AddJobClient() {
   // ─── STEP: Project picker ────────────────────────────────────────────────────
   if (step === 'project') {
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-white">
         <div className="border-b border-slate-200 px-4 pt-safe pb-4">
           <div className="flex items-center gap-3 pt-3">
             <button onClick={() => router.push('/snags')} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500">
@@ -544,7 +544,7 @@ export default function AddJobClient() {
   // ─── STEP: Room number (hotels only) ─────────────────────────────────────────
   if (step === 'room_number') {
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-white">
         <div className="border-b border-slate-200 px-4 pt-safe pb-4">
           <div className="flex items-center gap-3 pt-3">
             <button
@@ -589,7 +589,7 @@ export default function AddJobClient() {
   // ─── STEP: Photo ─────────────────────────────────────────────────────────────
   if (step === 'photo') {
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-white">
         <div className="border-b border-slate-200 px-4 pt-safe pb-4">
           <div className="flex items-center gap-3 pt-3">
             <button onClick={() => router.push('/snags')} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500">
@@ -668,7 +668,7 @@ export default function AddJobClient() {
   // ─── STEP: Details ───────────────────────────────────────────────────────────
   if (step === 'details') {
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-white">
         <div className="border-b border-slate-200 px-4 pt-safe pb-4">
           <div className="flex items-center gap-3 pt-3">
             <button onClick={() => setStep('photo')} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500">
@@ -730,7 +730,7 @@ export default function AddJobClient() {
   // ─── STEP: Room ──────────────────────────────────────────────────────────────
   if (step === 'room') {
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-white">
         <div className="border-b border-slate-200 px-4 pt-safe pb-4">
           <div className="flex items-center gap-3 pt-3">
             <button onClick={() => setStep('details')} className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500">
@@ -806,7 +806,7 @@ export default function AddJobClient() {
   // ─── STEP: Assign ────────────────────────────────────────────────────────────
   if (step === 'assign') {
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-white">
         <div className="border-b border-slate-200 px-4 pt-safe pb-4">
           <div className="flex items-center gap-3 pt-3">
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
