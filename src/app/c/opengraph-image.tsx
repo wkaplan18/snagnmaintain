@@ -75,13 +75,14 @@ export default function Image() {
           style={{
             fontSize: 92,
             fontWeight: 800,
-            color: 'white',
             letterSpacing: '-3px',
             lineHeight: 1,
             marginBottom: 22,
+            display: 'flex',
           }}
         >
-          SnagIT
+          <span style={{ color: 'white' }}>Snag</span>
+          <span style={{ color: '#22C55E' }}>IT</span>
         </div>
 
         {/* Tagline */}
@@ -93,7 +94,7 @@ export default function Image() {
             letterSpacing: '0.5px',
           }}
         >
-          Log it. Fix it. Done.
+          Log it. Assign it. Fixed.
         </div>
 
         {/* Domain badge */}

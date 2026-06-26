@@ -257,15 +257,15 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null)
   const photoPickerRef = useRef<HTMLInputElement | null>(null)
 
-  // Auto-reload when the tab becomes visible again if any snags are awaiting approval,
-  // so the contractor sees the updated status without manually pressing Refresh.
+  // On load: if there's nothing in To Do but there are completed items, switch tab automatically.
+  // This handles the case where the contractor refreshes after the owner approves their fix.
   useEffect(() => {
-    function onVisible() {
-      if (!document.hidden) window.location.reload()
+    const initialTodo = snags.filter(s => ['assigned', 'in_progress', 'rejected', 'fixed'].includes(s.status))
+    const initialCompleted = snags.filter(s => ['approved', 'closed'].includes(s.status))
+    if (initialTodo.length === 0 && initialCompleted.length > 0) {
+      setActiveTab('completed')
     }
-    document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 'fixed' stays in To Do as "In Review" — only moves to Completed when approved
   const todoSnags = localSnags.filter(s => ['assigned', 'in_progress', 'rejected', 'fixed'].includes(s.status))
@@ -320,14 +320,27 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
 
       <div className="bg-[#1A56DB] px-4 pt-safe pb-4">
         <div className="mx-auto max-w-lg pt-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 text-white font-bold text-lg">
-                {contractor.name.charAt(0)}
+          {/* Logo + refresh row */}
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2.5">
+              {/* Icon */}
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20">
+                <svg width="22" height="22" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="32" height="32" rx="7" fill="white" fillOpacity="0.25"/>
+                  <circle cx="16" cy="16" r="8" stroke="white" strokeWidth="2" fill="none" opacity="0.9"/>
+                  <circle cx="16" cy="16" r="2.5" fill="white"/>
+                  <line x1="16" y1="4" x2="16" y2="9" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <line x1="16" y1="23" x2="16" y2="28" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <line x1="4" y1="16" x2="9" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <line x1="23" y1="16" x2="28" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
               </div>
+              {/* Wordmark */}
               <div>
-                <p className="text-blue-200 text-xs font-medium">Hi, {contractor.name} 👋</p>
-                <p className="text-white font-semibold text-sm">Your assigned jobs</p>
+                <p className="text-xl font-extrabold leading-none tracking-tight text-white">
+                  Snag<span style={{ color: '#22C55E' }}>IT</span>
+                </p>
+                <p className="text-[10px] text-blue-200 font-medium tracking-wide mt-0.5">Log it. Assign it. Fixed.</p>
               </div>
             </div>
             <button
@@ -336,6 +349,17 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
             >
               <RefreshCw className="h-3.5 w-3.5" /> Refresh
             </button>
+          </div>
+
+          {/* Contractor greeting */}
+          <div className="flex items-center gap-2.5 mt-4 mb-0">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 text-white font-bold text-base flex-shrink-0">
+              {contractor.name.charAt(0)}
+            </div>
+            <div>
+              <p className="text-blue-200 text-xs font-medium">Hi, {contractor.name} 👋</p>
+              <p className="text-white font-semibold text-sm">Your assigned jobs</p>
+            </div>
           </div>
 
           <div className="mt-4 flex gap-2">
