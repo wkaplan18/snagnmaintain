@@ -45,28 +45,28 @@ export default function Image() {
           }}
         />
 
-        {/* Icon box */}
+        {/* App icon — exact icon.svg on white card so it reads against the blue bg */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 108,
-            height: 108,
-            background: 'rgba(255,255,255,0.14)',
-            borderRadius: 28,
-            border: '2px solid rgba(255,255,255,0.28)',
+            width: 128,
+            height: 128,
+            background: 'white',
+            borderRadius: 32,
             marginBottom: 36,
+            boxShadow: '0 12px 40px rgba(0,0,0,0.30)',
           }}
         >
-          {/* Crosshair icon matching app icon.svg */}
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-            <circle cx="32" cy="32" r="18" stroke="white" strokeWidth="3.5" fill="none" opacity="0.95" />
-            <circle cx="32" cy="32" r="5.5" fill="white" />
-            <line x1="32" y1="6"  x2="32" y2="17" stroke="white" strokeWidth="3.5" strokeLinecap="round" />
-            <line x1="32" y1="47" x2="32" y2="58" stroke="white" strokeWidth="3.5" strokeLinecap="round" />
-            <line x1="6"  y1="32" x2="17" y2="32" stroke="white" strokeWidth="3.5" strokeLinecap="round" />
-            <line x1="47" y1="32" x2="58" y2="32" stroke="white" strokeWidth="3.5" strokeLinecap="round" />
+          <svg width="88" height="88" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="7" fill="#1A56DB"/>
+            <circle cx="16" cy="16" r="8" stroke="white" strokeWidth="2" fill="none" opacity="0.9"/>
+            <circle cx="16" cy="16" r="2.5" fill="white"/>
+            <line x1="16" y1="4"  x2="16" y2="9"  stroke="white" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="16" y1="23" x2="16" y2="28" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="4"  y1="16" x2="9"  y2="16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="23" y1="16" x2="28" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
           </svg>
         </div>
 
