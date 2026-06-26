@@ -113,7 +113,6 @@ export default function SettingsClient({ email, profile, orgName, orgType, orgId
         <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-700">
             WhatsApp number
-            <span className="ml-1.5 text-xs font-normal text-slate-400">— {terms.contractor.toLowerCase()}s will send fix updates here</span>
           </label>
           <input
             type="tel"
