@@ -127,31 +127,35 @@ function PhotoMarkupEditor({ photoUrl, onDone, onCancel }: {
         />
       </div>
 
-      <div className="flex items-center justify-between gap-3 px-4 py-3 pb-safe bg-black/90">
-        <div className="flex items-center gap-2">
+      <div className="bg-black/90" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+        {/* Colour picker row */}
+        <div className="flex items-center justify-center gap-4 px-4 pt-3 pb-2">
           {MARKUP_COLORS.map(c => (
             <button
               key={c}
               onClick={() => setColor(c)}
-              className="h-8 w-8 rounded-full border-2 transition-transform active:scale-90"
-              style={{ backgroundColor: c, borderColor: color === c ? 'white' : 'transparent' }}
+              className="h-9 w-9 flex-shrink-0 rounded-full border-[3px] transition-transform active:scale-90"
+              style={{ backgroundColor: c, borderColor: color === c ? 'white' : 'rgba(255,255,255,0.2)' }}
             />
           ))}
         </div>
-        <div className="flex items-center gap-3">
+        {/* Controls row */}
+        <div className="flex items-center justify-between px-4 pb-3">
           <button
             onClick={() => { setPaths(p => p.slice(0, -1)) }}
             disabled={paths.length === 0}
-            className="flex items-center gap-1 text-sm text-white disabled:opacity-40"
+            className="flex items-center gap-1.5 text-sm text-white disabled:opacity-40"
           >
             <RotateCcw className="h-4 w-4" /> Undo
           </button>
-          <button onClick={onCancel} className="text-sm text-slate-400">Cancel</button>
           <button
             onClick={handleDone}
-            className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-black active:scale-95 transition-transform"
+            className="rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-black active:scale-95 transition-transform"
           >
             Done
+          </button>
+          <button onClick={onCancel} className="text-sm text-slate-400">
+            Cancel
           </button>
         </div>
       </div>
