@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Home, ChevronDown, ChevronRight, Camera, MapPin, Printer } from 'lucide-react'
+import { ArrowLeft, Plus, Home, ChevronDown, ChevronRight, Camera, MapPin, Printer, AlertCircle } from 'lucide-react'
 import SnagCard from '@/components/snags/SnagCard'
 import { useSnags } from '@/hooks/useSnags'
 import { DEFAULT_ROOMS, DEFAULT_HOTEL_ROOM_AREAS, HOTEL_UNIT_TYPES, BUILDER_UNIT_TYPES, type Contractor, type DashboardTerms, type OrgType, type Room, type UnitType } from '@/types'
@@ -146,11 +146,20 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
             )}
           </div>
 
+          {isHotel && (
+            <Link
+              href={`/snags/new?projectId=${project.id}`}
+              className="sf-btn-primary mb-4 flex w-full items-center justify-center gap-2 py-3 text-sm"
+            >
+              <AlertCircle className="h-4 w-4" /> Log an issue
+            </Link>
+          )}
+
           {isHotel && units.length === 0 && (
             <div className="sf-card flex flex-col items-center p-8 text-center">
               <Home className="mb-3 h-8 w-8 text-slate-300" />
               <p className="text-sm font-medium text-slate-700">No rooms logged yet</p>
-              <p className="mt-1 text-xs text-slate-400">Rooms are created automatically when you log your first issue in that room.</p>
+              <p className="mt-1 text-xs text-slate-400">Tap &quot;Log an issue&quot; above — enter the room number and it&apos;s created automatically.</p>
             </div>
           )}
 
