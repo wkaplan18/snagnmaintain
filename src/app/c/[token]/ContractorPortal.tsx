@@ -293,8 +293,8 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
       // Mark as 'fixed' (In Review) — stays in To Do tab, not Completed
       setLocalSnags(prev => prev.map(s => s.id === snagId ? { ...s, status: 'fixed' } : s))
       setResolvingId(null)
-    } catch {
-      alert('Failed to update. Please try again.')
+    } catch (err) {
+      alert(`Failed to submit: ${err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
       setUploading(null)
     }
