@@ -1,9 +1,36 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Camera, CheckCircle, Clock, AlertTriangle, Loader2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
+import { Camera, CheckCircle, Clock, AlertTriangle, Loader2, ChevronDown, ChevronUp, RefreshCw, X } from 'lucide-react'
 import { compressImage } from '@/lib/compressImage'
 
+// ─── Photo lightbox ───────────────────────────────────────────────────────────
+function PhotoViewer({ url, onClose }: { url: string; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95"
+      onClick={onClose}
+    >
+      {/* X button — always above the image */}
+      <button
+        onClick={onClose}
+        style={{ top: 'max(1rem, env(safe-area-inset-top))' }}
+        className="absolute right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm border border-white/20 hover:bg-white/25 active:scale-95 transition-[transform,background-color]"
+      >
+        <X className="h-5 w-5" />
+      </button>
+      <img
+        src={url}
+        alt=""
+        onClick={e => e.stopPropagation()}
+        className="rounded-xl object-contain"
+        style={{ maxHeight: '88vh', maxWidth: '95vw' }}
+      />
+    </div>
+  )
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function groupByProject(snags: ContractorSnag[]) {
   const map = new Map<string, ContractorSnag[]>()
   for (const s of snags) {
@@ -42,13 +69,14 @@ interface SnagCardProps {
   onNoteChange: (v: string) => void
   onRemovePhoto: () => void
   onPickerClick: () => void
+  onViewPhoto: (url: string) => void
 }
 
 function SnagCard({
   snag, isExpanded, isResolving, isUploading,
   resolveNote, resolvePhotoPreview, photoPickerRef,
   onToggleExpand, onOpenResolvePanel, onCancelResolve, onSubmitResolve,
-  onNoteChange, onRemovePhoto, onPickerClick,
+  onNoteChange, onRemovePhoto, onPickerClick, onViewPhoto,
 }: SnagCardProps) {
   const isRejected = snag.status === 'rejected'
   const isDone = snag.status === 'approved' || snag.status === 'closed'
@@ -78,10 +106,13 @@ function SnagCard({
           ) : null}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          {isDone ? <CheckCircle className="h-4 w-4 text-green-500" />
-            : isFixed ? <CheckCircle className="h-4 w-4 text-teal-500" />
-            : isRejected ? <AlertTriangle className="h-4 w-4 text-rose-500" />
-            : <Clock className="h-4 w-4 text-slate-300" />}
+          {isDone
+            ? <CheckCircle className="h-4 w-4 text-green-500" />
+            : isFixed
+              ? <span className="rounded-full bg-amber-100 border border-amber-300 px-2 py-0.5 text-[10px] font-bold text-amber-700 uppercase tracking-wide">In Review</span>
+              : isRejected
+                ? <AlertTriangle className="h-4 w-4 text-rose-500" />
+                : <Clock className="h-4 w-4 text-slate-300" />}
           {isExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
         </div>
       </button>
@@ -92,18 +123,24 @@ function SnagCard({
           {problemPhoto && (
             <div>
               <p className="mb-1 text-xs font-medium text-slate-400 uppercase tracking-wide">Problem</p>
-              <div className="h-48 overflow-hidden rounded-xl">
+              <button
+                onClick={() => onViewPhoto(problemPhoto.public_url)}
+                className="block h-48 w-full overflow-hidden rounded-xl active:scale-[0.98] transition-transform"
+              >
                 <img src={problemPhoto.public_url} alt="Problem" className="h-full w-full object-cover" />
-              </div>
+              </button>
             </div>
           )}
 
           {fixPhoto && (isFixed || isDone) && (
             <div>
               <p className="mb-1 text-xs font-medium text-teal-600 uppercase tracking-wide">Fix photo</p>
-              <div className="h-48 overflow-hidden rounded-xl border-2 border-teal-200">
+              <button
+                onClick={() => onViewPhoto(fixPhoto.public_url)}
+                className="block h-48 w-full overflow-hidden rounded-xl border-2 border-teal-200 active:scale-[0.98] transition-transform"
+              >
                 <img src={fixPhoto.public_url} alt="Fix" className="h-full w-full object-cover" />
-              </div>
+              </button>
             </div>
           )}
 
@@ -123,9 +160,9 @@ function SnagCard({
           )}
 
           {isFixed && (
-            <div className="flex items-center gap-2 rounded-xl bg-teal-50 border border-teal-200 px-3 py-2.5">
-              <CheckCircle className="h-4 w-4 text-teal-600 flex-shrink-0" />
-              <p className="text-sm font-medium text-teal-700">Marked as completed — awaiting approval</p>
+            <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5">
+              <Clock className="h-4 w-4 text-amber-600 flex-shrink-0" />
+              <p className="text-sm font-medium text-amber-700">Submitted — waiting for manager approval</p>
             </div>
           )}
 
@@ -217,10 +254,12 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
   const [uploading, setUploading] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'todo' | 'completed'>('todo')
   const [projectFilter, setProjectFilter] = useState<string>('all')
+  const [viewingPhoto, setViewingPhoto] = useState<string | null>(null)
   const photoPickerRef = useRef<HTMLInputElement | null>(null)
 
-  const todoSnags = localSnags.filter(s => ['assigned', 'in_progress', 'rejected'].includes(s.status))
-  const completedSnags = localSnags.filter(s => ['fixed', 'approved', 'closed'].includes(s.status))
+  // 'fixed' stays in To Do as "In Review" — only moves to Completed when approved
+  const todoSnags = localSnags.filter(s => ['assigned', 'in_progress', 'rejected', 'fixed'].includes(s.status))
+  const completedSnags = localSnags.filter(s => ['approved', 'closed'].includes(s.status))
 
   function openResolvePanel(snagId: string) {
     setResolvingId(snagId)
@@ -250,9 +289,9 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
         const body = await res.json().catch(() => ({}))
         throw new Error(body.error ?? 'Failed')
       }
+      // Mark as 'fixed' (In Review) — stays in To Do tab, not Completed
       setLocalSnags(prev => prev.map(s => s.id === snagId ? { ...s, status: 'fixed' } : s))
       setResolvingId(null)
-      setActiveTab('completed')
     } catch {
       alert('Failed to update. Please try again.')
     } finally {
@@ -267,6 +306,8 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-12">
+      {viewingPhoto && <PhotoViewer url={viewingPhoto} onClose={() => setViewingPhoto(null)} />}
+
       <div className="bg-[#1A56DB] px-4 pt-safe pb-4">
         <div className="mx-auto max-w-lg pt-4">
           <div className="flex items-center justify-between">
@@ -341,7 +382,7 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
               {activeTab === 'todo' ? 'Nothing to do — all done!' : 'No completed snags yet'}
             </p>
             <p className="text-sm text-slate-500 mt-1">
-              {activeTab === 'todo' ? 'Check the Completed tab to see your fixes.' : 'Fix a snag and it will appear here.'}
+              {activeTab === 'todo' ? 'Check the Completed tab to see your approved fixes.' : 'Fixes will appear here once the manager approves them.'}
             </p>
           </div>
         )}
@@ -368,6 +409,7 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
                     onNoteChange={setResolveNote}
                     onRemovePhoto={() => { setResolvePhoto(null); setResolvePhotoPreview(null) }}
                     onPickerClick={() => photoPickerRef.current?.click()}
+                    onViewPhoto={setViewingPhoto}
                   />
                 ))}
               </div>
@@ -384,7 +426,6 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
         className="hidden"
         onChange={handlePhotoSelect}
       />
-
     </div>
   )
 }
