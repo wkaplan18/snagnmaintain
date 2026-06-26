@@ -257,8 +257,9 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null)
   const photoPickerRef = useRef<HTMLInputElement | null>(null)
 
-  // 'fixed' stays in To Do as "In Review" — only moves to Completed when approved
-  const todoSnags = localSnags.filter(s => ['assigned', 'in_progress', 'rejected', 'fixed'].includes(s.status))
+  const openSnags = localSnags.filter(s => ['assigned', 'in_progress', 'rejected'].includes(s.status))
+  const awaitingSnags = localSnags.filter(s => s.status === 'fixed')
+  const todoSnags = [...openSnags, ...awaitingSnags]
   const completedSnags = localSnags.filter(s => ['approved', 'closed'].includes(s.status))
 
   function openResolvePanel(snagId: string) {
@@ -300,7 +301,7 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
   }
 
   const allProjects = [...new Set(localSnags.map(s => s.project?.name ?? 'Project'))]
-  const activeSnags = (activeTab === 'todo' ? todoSnags : completedSnags)
+  const activeSnags = completedSnags
     .filter(s => projectFilter === 'all' || (s.project?.name ?? 'Project') === projectFilter)
   const grouped = groupByProject(activeSnags)
 
@@ -399,47 +400,122 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
           </select>
         )}
 
-        {activeSnags.length === 0 && (
-          <div className="sf-card p-8 text-center">
-            <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-3" />
-            <p className="font-semibold text-slate-900">
-              {activeTab === 'todo' ? 'Nothing to do — all done!' : 'No completed snags yet'}
-            </p>
-            <p className="text-sm text-slate-500 mt-1">
-              {activeTab === 'todo' ? 'Check the Completed tab to see your approved fixes.' : 'Fixes will appear here once the manager approves them.'}
-            </p>
-          </div>
-        )}
+        {activeTab === 'todo' ? (
+          <>
+            {/* Open work section */}
+            {openSnags.filter(s => projectFilter === 'all' || (s.project?.name ?? 'Project') === projectFilter).length === 0 && awaitingSnags.filter(s => projectFilter === 'all' || (s.project?.name ?? 'Project') === projectFilter).length === 0 && (
+              <div className="sf-card p-8 text-center">
+                <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-3" />
+                <p className="font-semibold text-slate-900">Nothing left to do!</p>
+                <p className="text-sm text-slate-500 mt-1">Check the Completed tab to see your approved fixes.</p>
+              </div>
+            )}
 
-        <div className="space-y-5">
-          {[...grouped.entries()].map(([project, items]) => (
-            <div key={project}>
-              <p className="mb-2 text-sm font-semibold text-slate-700">📋 {project}</p>
-              <div className="space-y-2">
-                {items.map(snag => (
-                  <SnagCard
-                    key={snag.id}
-                    snag={snag}
-                    isExpanded={expandedId === snag.id}
-                    isResolving={resolvingId === snag.id}
-                    isUploading={uploading === snag.id}
-                    resolveNote={resolveNote}
-                    resolvePhotoPreview={resolvePhotoPreview}
-                    photoPickerRef={photoPickerRef}
-                    onToggleExpand={() => setExpandedId(expandedId === snag.id ? null : snag.id)}
-                    onOpenResolvePanel={() => openResolvePanel(snag.id)}
-                    onCancelResolve={() => setResolvingId(null)}
-                    onSubmitResolve={() => handleSubmitResolve(snag.id)}
-                    onNoteChange={setResolveNote}
-                    onRemovePhoto={() => { setResolvePhoto(null); setResolvePhotoPreview(null) }}
-                    onPickerClick={() => photoPickerRef.current?.click()}
-                    onViewPhoto={setViewingPhoto}
-                  />
+            {openSnags.filter(s => projectFilter === 'all' || (s.project?.name ?? 'Project') === projectFilter).length > 0 && (
+              <div className="space-y-5 mb-5">
+                {[...groupByProject(openSnags.filter(s => projectFilter === 'all' || (s.project?.name ?? 'Project') === projectFilter)).entries()].map(([project, items]) => (
+                  <div key={project}>
+                    <p className="mb-2 text-sm font-semibold text-slate-700">📋 {project}</p>
+                    <div className="space-y-2">
+                      {items.map(snag => (
+                        <SnagCard
+                          key={snag.id}
+                          snag={snag}
+                          isExpanded={expandedId === snag.id}
+                          isResolving={resolvingId === snag.id}
+                          isUploading={uploading === snag.id}
+                          resolveNote={resolveNote}
+                          resolvePhotoPreview={resolvePhotoPreview}
+                          photoPickerRef={photoPickerRef}
+                          onToggleExpand={() => setExpandedId(expandedId === snag.id ? null : snag.id)}
+                          onOpenResolvePanel={() => openResolvePanel(snag.id)}
+                          onCancelResolve={() => setResolvingId(null)}
+                          onSubmitResolve={() => handleSubmitResolve(snag.id)}
+                          onNoteChange={setResolveNote}
+                          onRemovePhoto={() => { setResolvePhoto(null); setResolvePhotoPreview(null) }}
+                          onPickerClick={() => photoPickerRef.current?.click()}
+                          onViewPhoto={setViewingPhoto}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
+            )}
+
+            {/* Awaiting approval section */}
+            {awaitingSnags.filter(s => projectFilter === 'all' || (s.project?.name ?? 'Project') === projectFilter).length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-px flex-1 bg-amber-200" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-amber-600">Submitted — awaiting approval</span>
+                  <div className="h-px flex-1 bg-amber-200" />
+                </div>
+                <div className="space-y-2">
+                  {awaitingSnags.filter(s => projectFilter === 'all' || (s.project?.name ?? 'Project') === projectFilter).map(snag => (
+                    <SnagCard
+                      key={snag.id}
+                      snag={snag}
+                      isExpanded={expandedId === snag.id}
+                      isResolving={resolvingId === snag.id}
+                      isUploading={uploading === snag.id}
+                      resolveNote={resolveNote}
+                      resolvePhotoPreview={resolvePhotoPreview}
+                      photoPickerRef={photoPickerRef}
+                      onToggleExpand={() => setExpandedId(expandedId === snag.id ? null : snag.id)}
+                      onOpenResolvePanel={() => openResolvePanel(snag.id)}
+                      onCancelResolve={() => setResolvingId(null)}
+                      onSubmitResolve={() => handleSubmitResolve(snag.id)}
+                      onNoteChange={setResolveNote}
+                      onRemovePhoto={() => { setResolvePhoto(null); setResolvePhotoPreview(null) }}
+                      onPickerClick={() => photoPickerRef.current?.click()}
+                      onViewPhoto={setViewingPhoto}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {activeSnags.length === 0 && (
+              <div className="sf-card p-8 text-center">
+                <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-3" />
+                <p className="font-semibold text-slate-900">No completed snags yet</p>
+                <p className="text-sm text-slate-500 mt-1">Fixes will appear here once the manager approves them.</p>
+              </div>
+            )}
+            <div className="space-y-5">
+              {[...grouped.entries()].map(([project, items]) => (
+                <div key={project}>
+                  <p className="mb-2 text-sm font-semibold text-slate-700">📋 {project}</p>
+                  <div className="space-y-2">
+                    {items.map(snag => (
+                      <SnagCard
+                        key={snag.id}
+                        snag={snag}
+                        isExpanded={expandedId === snag.id}
+                        isResolving={resolvingId === snag.id}
+                        isUploading={uploading === snag.id}
+                        resolveNote={resolveNote}
+                        resolvePhotoPreview={resolvePhotoPreview}
+                        photoPickerRef={photoPickerRef}
+                        onToggleExpand={() => setExpandedId(expandedId === snag.id ? null : snag.id)}
+                        onOpenResolvePanel={() => openResolvePanel(snag.id)}
+                        onCancelResolve={() => setResolvingId(null)}
+                        onSubmitResolve={() => handleSubmitResolve(snag.id)}
+                        onNoteChange={setResolveNote}
+                        onRemovePhoto={() => { setResolvePhoto(null); setResolvePhotoPreview(null) }}
+                        onPickerClick={() => photoPickerRef.current?.click()}
+                        onViewPhoto={setViewingPhoto}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
 
       <input

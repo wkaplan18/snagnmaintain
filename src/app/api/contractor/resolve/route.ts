@@ -65,14 +65,19 @@ export async function POST(req: NextRequest) {
 
   const resolutionNote = formData.get('resolutionNote') as string | null
 
-  // Mark snag as fixed
-  const { error: updateError } = await supabase
+  // Mark snag as fixed — use .select() so we can verify rows were actually updated
+  const { error: updateError, data: updated } = await supabase
     .from('snags')
-    .update({ status: 'fixed' })
+    .update({ status: 'fixed', fixed_at: new Date().toISOString() })
     .eq('id', snagId)
+    .select('id, status')
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
+  }
+
+  if (!updated || updated.length === 0) {
+    return NextResponse.json({ error: 'Could not update snag status — no rows matched' }, { status: 500 })
   }
 
   // Save resolution note if provided (best-effort — column may not exist on older schemas)
