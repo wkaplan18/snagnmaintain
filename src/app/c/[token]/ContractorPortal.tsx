@@ -111,7 +111,7 @@ function SnagCard({
             : isFixed
               ? <span className="rounded-full bg-amber-100 border border-amber-300 px-2 py-0.5 text-[10px] font-bold text-amber-700 uppercase tracking-wide">In Review</span>
               : isRejected
-                ? <AlertTriangle className="h-4 w-4 text-rose-500" />
+                ? <span className="rounded-full bg-rose-100 border border-rose-300 px-2 py-0.5 text-[10px] font-bold text-rose-700 uppercase tracking-wide">Rejected</span>
                 : <Clock className="h-4 w-4 text-slate-300" />}
           {isExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
         </div>

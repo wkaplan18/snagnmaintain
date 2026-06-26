@@ -356,6 +356,7 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
         {assignMode === 'view' && localContractor && (() => {
           const isApproved = snag.status === 'approved' || snag.status === 'closed'
           const isInReview = snag.status === 'fixed'
+          const isRejected = snag.status === 'rejected'
           return (
             <div className="px-4 pb-4">
               <div className="flex items-center gap-3">
@@ -377,6 +378,11 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
                 {isInReview && (
                   <span className="flex-shrink-0 rounded-full bg-amber-100 border border-amber-300 px-2.5 py-1 text-xs font-bold text-amber-700">
                     In Review
+                  </span>
+                )}
+                {isRejected && (
+                  <span className="flex-shrink-0 rounded-full bg-rose-100 border border-rose-300 px-2.5 py-1 text-xs font-bold text-rose-700">
+                    Rejected
                   </span>
                 )}
               </div>
