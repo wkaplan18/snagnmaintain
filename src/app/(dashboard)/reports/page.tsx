@@ -84,7 +84,6 @@ export default async function ReportsPage() {
         </div>
       )}
 
-      <p className="mt-6 text-center text-xs text-slate-400">PDF {terms.issues.toLowerCase()} reports — coming soon.</p>
     </div>
   )
 }
