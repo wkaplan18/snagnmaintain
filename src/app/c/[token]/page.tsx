@@ -1,15 +1,17 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
+import { unstable_noStore as noStore } from 'next/cache'
 import ContractorPortal from './ContractorPortal'
 
-// Without cookies in the request, Next caches this page statically and the
-// contractor sees a stale snag list — force fresh data on every visit.
 export const dynamic = 'force-dynamic'
 
 export default async function ContractorPage({ params }: { params: Promise<{ token: string }> }) {
+  // Belt-and-suspenders: opt every fetch in this render out of the Data Cache.
+  // force-dynamic alone doesn't always prevent Supabase fetches from being
+  // served stale when there's no auth cookie to vary on.
+  noStore()
+
   const { token } = await params
-  // Contractors have no auth session — the access token IS the auth,
-  // so queries must run as service role (anon is blocked by RLS).
   const supabase = createAdminClient()
 
   // Find contractor by token (service role bypasses RLS)
