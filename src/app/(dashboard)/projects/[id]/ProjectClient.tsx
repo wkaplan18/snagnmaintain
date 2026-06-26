@@ -207,7 +207,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-slate-900">{u.name}</p>
-                          <p className="text-xs capitalize text-slate-400">{u.unit_type.replace(/_/g, ' ')}</p>
+                          {!isHotel && <p className="text-xs capitalize text-slate-400">{u.unit_type.replace(/_/g, ' ')}</p>}
                         </div>
                       </div>
                       {open ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
