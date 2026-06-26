@@ -417,7 +417,10 @@ export default function AddJobClient() {
           due_date: null,
         }),
       })
-      if (!res.ok) throw new Error('Save failed')
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}))
+        throw new Error(JSON.stringify(errBody))
+      }
       const snag = await res.json()
 
       if (photo && snag.id) {
@@ -429,8 +432,8 @@ export default function AddJobClient() {
 
       setSavedSnagId(snag.id)
       setStep('assign')
-    } catch {
-      alert('Failed to save. Please try again.')
+    } catch (err) {
+      alert('Save failed: ' + (err instanceof Error ? err.message : String(err)))
     } finally {
       setSaving(false)
     }
