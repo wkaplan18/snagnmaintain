@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
       attachments(*),
       contractor:contractors(id, name, company, whatsapp, trade, access_token),
       room:rooms(id, name),
+      unit:units(id, name),
       project:projects(id, name)
     `)
     .order('created_at', { ascending: false })

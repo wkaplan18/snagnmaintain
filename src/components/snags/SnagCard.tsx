@@ -62,7 +62,11 @@ export default function SnagCard({ snag }: { snag: Snag }) {
 
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <span className={`sf-badge ${status.bg} ${status.color}`}>{status.label}</span>
-            {snag.room && <span className="text-xs text-slate-400">{snag.room.name}</span>}
+            {(snag.unit || snag.room) && (
+              <span className="text-xs text-slate-400">
+                {[snag.unit?.name, snag.room?.name].filter(Boolean).join(' · ')}
+              </span>
+            )}
           </div>
 
           {c && (

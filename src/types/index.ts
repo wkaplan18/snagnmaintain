@@ -177,6 +177,7 @@ export interface Snag {
   comments?: Comment[]
   contractor?: Contractor | null
   room?: Room | null
+  unit?: { id: string; name: string } | null
   project?: { id: string; name: string } | null
 }
 
