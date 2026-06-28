@@ -294,46 +294,46 @@ export default function ContractorsClient({ orgId, contractors, terms }: { orgId
       ) : (
         <div className="space-y-3">
           {filtered.map(c => (
-            <div key={c.id} className="sf-card p-4">
-              <div className="flex items-start justify-between gap-3">
-                <button onClick={() => startEdit(c)} className="min-w-0 text-left">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-slate-900 underline-offset-2 hover:underline">{c.name}</p>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${c.is_internal ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'}`}>
-                      {c.is_internal ? terms.internalLabel : terms.externalLabel}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500">{[c.trade, c.company].filter(Boolean).join(' · ') || '—'} · <span className="text-[#1A56DB]">edit</span></p>
-                  {c.whatsapp && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
-                      <MessageCircle className="h-3 w-3" /> {c.whatsapp}
-                    </p>
-                  )}
-                </button>
-                <div className="flex flex-shrink-0 flex-col gap-1.5">
-                  {(c.whatsapp || origin) && (
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 text-right">Send link via</p>
-                  )}
-                  {c.whatsapp && origin && (
-                    <a
-                      href={waLink(c.whatsapp, `Hi ${c.name}, here's your portal link — it shows all jobs assigned to you, now and in future:\n${origin}/c/${c.access_token}?t=${Date.now()}`)}
-                      target="_blank"
-                      rel="noopener"
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1EBE5B] active:scale-[0.97] transition-[transform,opacity]"
-                    >
-                      {WA_ICON} WhatsApp
-                    </a>
-                  )}
-                  {origin && (
-                    <a
-                      href={portalMailtoLink(c)}
-                      className="inline-flex items-center gap-1.5 sf-btn-secondary px-3 py-2 text-xs"
-                    >
-                      <Mail className="h-3.5 w-3.5" /> Email
-                    </a>
-                  )}
+            <div key={c.id} className="sf-card overflow-hidden">
+              <button onClick={() => startEdit(c)} className="w-full p-4 text-left">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold text-slate-900">{c.name}</p>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${c.is_internal ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'}`}>
+                    {c.is_internal ? terms.internalLabel : terms.externalLabel}
+                  </span>
                 </div>
-              </div>
+                <p className="text-xs text-slate-500">{[c.trade, c.company].filter(Boolean).join(' · ') || '—'} · <span className="text-[#1A56DB]">edit</span></p>
+                {c.whatsapp && (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
+                    <MessageCircle className="h-3 w-3" /> {c.whatsapp}
+                  </p>
+                )}
+              </button>
+              {(c.whatsapp || origin) && (
+                <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Send link via</p>
+                  <div className="flex items-center gap-2">
+                    {c.whatsapp && origin && (
+                      <a
+                        href={waLink(c.whatsapp, `Hi ${c.name}, here's your portal link — it shows all jobs assigned to you, now and in future:\n${origin}/c/${c.access_token}?t=${Date.now()}`)}
+                        target="_blank"
+                        rel="noopener"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 active:scale-[0.97] transition-[transform,opacity]"
+                      >
+                        {WA_ICON} WhatsApp
+                      </a>
+                    )}
+                    {origin && (
+                      <a
+                        href={portalMailtoLink(c)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 active:scale-[0.97] transition-[transform,background-color]"
+                      >
+                        <Mail className="h-3.5 w-3.5" /> Email
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
