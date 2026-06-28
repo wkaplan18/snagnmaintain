@@ -44,24 +44,42 @@ export default function DashboardClient({ orgName, terms, projects, projectStats
   return (
     <div className="min-h-screen bg-sf-base pb-28">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 pt-safe pb-4">
-        <div className="mx-auto max-w-2xl px-4">
-          <div className="flex items-center justify-between pt-3">
-            <div>
-              <h1 className="text-lg font-bold text-slate-900">{orgName}</h1>
-              <p className="text-xs text-slate-500">Dashboard</p>
+      <div className="pt-safe" style={{ background: 'linear-gradient(150deg, #1E63EB 0%, #1340B2 100%)' }}>
+        <div className="mx-auto max-w-2xl px-4 pb-5 pt-4">
+          <div className="flex items-center justify-between">
+            {/* Logo + org */}
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/15">
+                <svg viewBox="0 0 32 32" fill="none" className="h-5 w-5">
+                  <circle cx="16" cy="16" r="8.5" stroke="white" strokeWidth="2.5"/>
+                  <circle cx="16" cy="16" r="2.5" fill="white"/>
+                  <line x1="16" y1="4" x2="16" y2="9" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                  <line x1="16" y1="23" x2="16" y2="28" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                  <line x1="4" y1="16" x2="9" y2="16" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                  <line x1="23" y1="16" x2="28" y2="16" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/50">
+                  Snag<span style={{ color: '#4ADE80' }}>IT</span>
+                </p>
+                <h1 className="text-base font-bold leading-tight text-white">{orgName}</h1>
+              </div>
             </div>
+            {/* Actions */}
             <div className="flex items-center gap-2">
-              <Link href="/settings" className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition-colors">
+              <Link href="/settings" className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-white transition-colors hover:bg-white/25">
                 <Settings className="h-4 w-4" />
               </Link>
-              <Link href="/projects/new" className="sf-btn-primary py-2.5 px-4 text-sm">
-                <Plus className="h-4 w-4" />
+              <Link href="/projects/new" className="flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-xs font-bold text-[#1340B2] transition-colors hover:bg-white/90">
+                <Plus className="h-3.5 w-3.5" />
                 New {terms.project}
               </Link>
             </div>
           </div>
         </div>
+        {/* Rounded bottom edge into content */}
+        <div className="h-5 rounded-t-[20px] bg-sf-base" />
       </div>
 
       <div className="mx-auto max-w-2xl px-4 pt-4 space-y-5">
