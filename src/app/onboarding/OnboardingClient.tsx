@@ -89,7 +89,7 @@ export default function OnboardingClient({ email }: { email: string }) {
             <p className="mt-1 text-sm text-slate-500">We'll tailor the experience to how you work</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3">
             {ORG_TYPES.map(([key, config]) => {
               const Icon = ORG_TYPE_ICONS[key]
               const selected = orgType === key
