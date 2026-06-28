@@ -7,8 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft, Plus, Home, ChevronDown, ChevronRight, Camera, MapPin, Printer, AlertCircle, X, Loader2 } from 'lucide-react'
 import { waLink } from '@/lib/whatsappLink'
 import SnagCard from '@/components/snags/SnagCard'
-import { useSnags } from '@/hooks/useSnags'
-import { DEFAULT_ROOMS, DEFAULT_HOTEL_ROOM_AREAS, HOTEL_UNIT_TYPES, BUILDER_UNIT_TYPES, type Contractor, type DashboardTerms, type OrgType, type Room, type UnitType } from '@/types'
+import { DEFAULT_ROOMS, DEFAULT_HOTEL_ROOM_AREAS, HOTEL_UNIT_TYPES, BUILDER_UNIT_TYPES, type Contractor, type DashboardTerms, type OrgType, type Room, type Snag, type UnitType } from '@/types'
 
 interface UnitRow {
   id: string
@@ -33,9 +32,7 @@ interface ProjectInfo {
 }
 
 
-function UnitSnags({ projectId, unitId, unitName, terms, bare = false }: { projectId: string; unitId: string; unitName: string; terms: DashboardTerms; bare?: boolean }) {
-  const { snags, loading } = useSnags({ unitId })
-
+function UnitSnags({ projectId, unitId, unitName, snags, terms, bare = false }: { projectId: string; unitId: string; unitName: string; snags: Snag[]; terms: DashboardTerms; bare?: boolean }) {
   return (
     <div className={bare ? 'pt-3' : 'border-t border-slate-100 px-4 pb-4 pt-3'}>
       <Link
@@ -44,9 +41,7 @@ function UnitSnags({ projectId, unitId, unitName, terms, bare = false }: { proje
       >
         <Camera className="h-4 w-4" /> Add {terms.issue.toLowerCase()} to {unitName}
       </Link>
-      {loading ? (
-        <p className="py-2 text-xs text-slate-400">Loading {terms.issues.toLowerCase()}…</p>
-      ) : snags.length === 0 ? (
+      {snags.length === 0 ? (
         <p className="py-2 text-xs text-slate-400">No {terms.issues.toLowerCase()} logged yet.</p>
       ) : (
         <div className="space-y-2">
@@ -57,7 +52,7 @@ function UnitSnags({ projectId, unitId, unitName, terms, bare = false }: { proje
   )
 }
 
-export default function ProjectClient({ project, units, contractors, terms, orgType, openCountsByUnit }: { project: ProjectInfo; units: UnitRow[]; contractors: Contractor[]; terms: DashboardTerms; orgType: OrgType; openCountsByUnit: Record<string, number> }) {
+export default function ProjectClient({ project, units, contractors, terms, orgType, openCountsByUnit, snagsByUnit }: { project: ProjectInfo; units: UnitRow[]; contractors: Contractor[]; terms: DashboardTerms; orgType: OrgType; openCountsByUnit: Record<string, number>; snagsByUnit: Record<string, Snag[]> }) {
   const isSingleProperty = units.length === 1 && units[0].name === project.name
   const [openUnit, setOpenUnit] = useState<string | null>(units.length === 1 ? units[0].id : null)
   const [showAddUnit, setShowAddUnit] = useState(units.length === 0)
@@ -177,7 +172,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
 
       {isSingleProperty ? (
         <div className="mt-6">
-          <UnitSnags projectId={project.id} unitId={units[0].id} unitName={units[0].name} terms={terms} bare />
+          <UnitSnags projectId={project.id} unitId={units[0].id} unitName={units[0].name} snags={snagsByUnit[units[0].id] ?? []} terms={terms} bare />
         </div>
       ) : (
         <>
@@ -274,7 +269,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
                         {open ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
                       </div>
                     </button>
-                    {open && <UnitSnags projectId={project.id} unitId={u.id} unitName={u.name} terms={terms} />}
+                    {open && <UnitSnags projectId={project.id} unitId={u.id} unitName={u.name} snags={snagsByUnit[u.id] ?? []} terms={terms} />}
                   </div>
                 )
               })}
