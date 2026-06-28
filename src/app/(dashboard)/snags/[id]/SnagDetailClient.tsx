@@ -97,7 +97,11 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
   const [editDescription, setEditDescription] = useState(snag.description ?? '')
   const [editRoomId, setEditRoomId] = useState(snag.room?.id ?? '')
 
-  useEffect(() => setOrigin(window.location.origin), [])
+  const [supportsContacts, setSupportsContacts] = useState(false)
+  useEffect(() => {
+    setOrigin(window.location.origin)
+    setSupportsContacts('contacts' in navigator)
+  }, [])
 
   async function handleAddPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -488,10 +492,12 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
                   placeholder="WhatsApp number"
                   className="sf-input flex-1"
                 />
-                <button type="button" onClick={pickContact} title="Choose from contacts"
-                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 active:bg-slate-100">
-                  <BookUser className="h-5 w-5" />
-                </button>
+                {supportsContacts && (
+                  <button type="button" onClick={pickContact} title="Choose from contacts"
+                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 active:bg-slate-100">
+                    <BookUser className="h-5 w-5" />
+                  </button>
+                )}
               </div>
               <p className="mt-1.5 text-xs text-amber-600">Needed to send the job assignment via WhatsApp</p>
             </div>
