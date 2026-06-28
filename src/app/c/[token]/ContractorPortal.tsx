@@ -344,7 +344,10 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
                 <p className="text-xl font-extrabold leading-none tracking-tight text-white">
                   Snag<span style={{ color: '#22C55E' }}>IT</span>
                 </p>
-                <p className="text-[10px] font-medium tracking-wide mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Log it. Assign it. Fixed.</p>
+                <p className="text-[10px] font-medium tracking-wide mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  Log it. Assign it.{' '}
+                  <span style={{ background: 'linear-gradient(135deg, #38BDF8, #818CF8, #F472B6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Fixed.</span>
+                </p>
               </div>
             </div>
             <button
