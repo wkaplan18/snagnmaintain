@@ -58,6 +58,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
   const [showAddUnit, setShowAddUnit] = useState(units.length === 0)
   const [unitName, setUnitName] = useState('')
   const isHotel = orgType === 'hotel' || orgType === 'property_manager'
+  const isBodyCorp = orgType === 'body_corporate'
   const displayUnits = isHotel ? units.filter(u => (openCountsByUnit[u.id] ?? 0) > 0) : units
   const unitTypeOptions = isHotel ? HOTEL_UNIT_TYPES : BUILDER_UNIT_TYPES
   const [unitType, setUnitType] = useState<UnitType>(isHotel ? 'standard_room' : 'apartment')
@@ -109,7 +110,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
     setError('')
     const { data: unit, error: unitError } = await supabase
       .from('units')
-      .insert({ project_id: project.id, name: unitName.trim(), unit_type: unitType })
+      .insert({ project_id: project.id, name: unitName.trim(), unit_type: isBodyCorp ? 'other' : unitType })
       .select('id')
       .single()
 
@@ -119,7 +120,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
       return
     }
 
-    if (seedRooms) {
+    if (seedRooms && !isBodyCorp) {
       const roomList = isHotel ? DEFAULT_HOTEL_ROOM_AREAS : DEFAULT_ROOMS
       await supabase.from('rooms').insert(
         roomList.map((name, i) => ({ unit_id: unit.id, name, room_order: i }))
@@ -214,23 +215,27 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
 
           {!isHotel && showAddUnit && (
             <form onSubmit={handleAddUnit} className="sf-card mb-4 space-y-3 p-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className={isBodyCorp ? '' : 'grid grid-cols-2 gap-3'}>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">{terms.unit} name</label>
                   <input type="text" required minLength={1} value={unitName} onChange={e => setUnitName(e.target.value)}
-                    placeholder="Unit 14" className="sf-input" />
+                    placeholder={isBodyCorp ? 'e.g. Swimming Pool, Parking B1, Gym' : 'Unit 14'} className="sf-input" />
                 </div>
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700">Type</label>
-                  <select value={unitType} onChange={e => setUnitType(e.target.value as UnitType)} className="sf-input capitalize">
-                    {unitTypeOptions.map(t => <option key={t} value={t} className="capitalize">{t.replace(/_/g, ' ')}</option>)}
-                  </select>
-                </div>
+                {!isBodyCorp && (
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-slate-700">Type</label>
+                    <select value={unitType} onChange={e => setUnitType(e.target.value as UnitType)} className="sf-input capitalize">
+                      {unitTypeOptions.map(t => <option key={t} value={t} className="capitalize">{t.replace(/_/g, ' ')}</option>)}
+                    </select>
+                  </div>
+                )}
               </div>
-              <label className="flex items-center gap-2 text-sm text-slate-600">
-                <input type="checkbox" checked={seedRooms} onChange={e => setSeedRooms(e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
-                Add standard SA rooms (kitchen, bedrooms, bathrooms…)
-              </label>
+              {!isBodyCorp && (
+                <label className="flex items-center gap-2 text-sm text-slate-600">
+                  <input type="checkbox" checked={seedRooms} onChange={e => setSeedRooms(e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
+                  Add standard SA rooms (kitchen, bedrooms, bathrooms…)
+                </label>
+              )}
               {error && <p className="text-xs text-red-600">{error}</p>}
               <button type="submit" disabled={saving || !unitName.trim()} className="sf-btn-primary w-full py-2.5 text-sm disabled:opacity-60">
                 {saving ? 'Adding…' : `Add ${terms.unit.toLowerCase()}`}

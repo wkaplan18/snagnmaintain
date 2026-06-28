@@ -15,6 +15,7 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
   const [province, setProvince] = useState('')
   const [description, setDescription] = useState('')
   const isOnTheFly = orgType === 'hotel' || orgType === 'property_manager'
+  const isBodyCorp = orgType === 'body_corporate'
   const [mode, setMode] = useState<'single' | 'multiple'>(isOnTheFly ? 'multiple' : 'single')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -48,7 +49,7 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
     if (mode === 'single' && !isOnTheFly) {
       const { data: unit, error: unitError } = await supabase
         .from('units')
-        .insert({ project_id: data.id, name: name.trim(), unit_type: 'house' })
+        .insert({ project_id: data.id, name: name.trim(), unit_type: isBodyCorp ? 'other' : 'house' })
         .select('id')
         .single()
 
@@ -58,9 +59,11 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
         return
       }
 
-      await supabase.from('rooms').insert(
-        DEFAULT_ROOMS.map((roomName, i) => ({ unit_id: unit.id, name: roomName, room_order: i }))
-      )
+      if (!isBodyCorp) {
+        await supabase.from('rooms').insert(
+          DEFAULT_ROOMS.map((roomName, i) => ({ unit_id: unit.id, name: roomName, room_order: i }))
+        )
+      }
     }
 
     router.push(`/projects/${data.id}`)
