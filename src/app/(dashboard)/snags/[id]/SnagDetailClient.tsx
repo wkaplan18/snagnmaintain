@@ -478,19 +478,22 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
               <option value="">{terms.contractorTrade} (optional)</option>
               {(terms.contractorTrade === 'Role' ? HOTEL_ROLES : TRADES).map(t => <option key={t} value={t}>{t}</option>)}
             </select>
-            <div className="flex gap-2">
-              <input
-                type="tel"
-                value={newCWhatsApp}
-                onChange={e => setNewCWhatsApp(e.target.value)}
-                onBlur={e => { if (e.target.value.trim()) setNewCWhatsApp(formatWhatsApp(e.target.value.trim())) }}
-                placeholder="WhatsApp number"
-                className="sf-input flex-1"
-              />
-              <button type="button" onClick={pickContact} title="Choose from contacts"
-                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 active:bg-slate-100">
-                <BookUser className="h-5 w-5" />
-              </button>
+            <div>
+              <div className="flex gap-2">
+                <input
+                  type="tel"
+                  value={newCWhatsApp}
+                  onChange={e => setNewCWhatsApp(e.target.value)}
+                  onBlur={e => { if (e.target.value.trim()) setNewCWhatsApp(formatWhatsApp(e.target.value.trim())) }}
+                  placeholder="WhatsApp number"
+                  className="sf-input flex-1"
+                />
+                <button type="button" onClick={pickContact} title="Choose from contacts"
+                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 active:bg-slate-100">
+                  <BookUser className="h-5 w-5" />
+                </button>
+              </div>
+              <p className="mt-1.5 text-xs text-amber-600">Needed to send the job assignment via WhatsApp</p>
             </div>
             <div className="flex gap-2 pt-1">
               <button onClick={addAndAssign} disabled={contractorBusy || !newCName.trim()}

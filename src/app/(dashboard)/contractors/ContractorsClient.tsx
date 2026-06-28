@@ -235,6 +235,7 @@ export default function ContractorsClient({ orgId, contractors, terms }: { orgId
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700">WhatsApp</label>
               <input type="tel" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="+27 82 000 0000" className="sf-input" />
+              <p className="mt-1.5 text-xs text-amber-600">Needed to send job assignments</p>
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
