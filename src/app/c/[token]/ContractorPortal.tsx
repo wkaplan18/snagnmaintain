@@ -320,7 +320,10 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
     <div className="min-h-screen bg-slate-50 pb-12">
       {viewingPhoto && <PhotoViewer url={viewingPhoto} onClose={() => setViewingPhoto(null)} />}
 
-      {/* Dark logo strip — matches website nav */}
+      {/* Header — blue wrapper so any subpixel gap shows blue not white */}
+      <div className="bg-[#1A56DB]">
+
+      {/* Dark logo strip */}
       <div className="px-4 pt-safe pb-3" style={{ background: '#050E1F' }}>
         <div className="mx-auto max-w-lg pt-4">
           <div className="flex items-center justify-between">
@@ -355,7 +358,7 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
       </div>
 
       {/* Blue section — greeting + tabs */}
-      <div className="bg-[#1A56DB] px-4 pb-4">
+      <div className="px-4 pb-4">
         <div className="mx-auto max-w-lg">
           {/* Contractor greeting */}
           <div className="flex items-center gap-2.5 mt-4 mb-0">
@@ -402,6 +405,7 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
           </div>
         </div>
       </div>
+      </div>{/* end blue header wrapper */}
 
       <div className="mx-auto max-w-lg px-4 pt-5 pb-12">
         {allProjects.length > 1 && (
