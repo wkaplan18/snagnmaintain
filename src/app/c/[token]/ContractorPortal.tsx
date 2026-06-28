@@ -320,21 +320,20 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
     <div className="min-h-screen bg-slate-50 pb-12">
       {viewingPhoto && <PhotoViewer url={viewingPhoto} onClose={() => setViewingPhoto(null)} />}
 
-      <div className="px-4 pt-safe pb-4" style={{ background: '#050E1F' }}>
-        <div className="mx-auto max-w-lg pt-4">
-          {/* Logo + refresh row */}
-          <div className="flex items-center justify-between mb-1">
+      {/* Dark logo strip — matches website nav */}
+      <div className="px-4 pt-safe" style={{ background: '#050E1F' }}>
+        <div className="mx-auto max-w-lg pt-4 pb-3">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              {/* Icon */}
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20">
-                <svg width="22" height="22" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="32" height="32" rx="7" fill="white" fillOpacity="0.25"/>
-                  <circle cx="16" cy="16" r="8" stroke="white" strokeWidth="2" fill="none" opacity="0.9"/>
-                  <circle cx="16" cy="16" r="2.5" fill="white"/>
-                  <line x1="16" y1="4" x2="16" y2="9" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                  <line x1="16" y1="23" x2="16" y2="28" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                  <line x1="4" y1="16" x2="9" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                  <line x1="23" y1="16" x2="28" y2="16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              {/* Icon — solid blue box like website nav */}
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: '#1A56DB' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="6.5" stroke="white" strokeWidth="1.5" opacity="0.9"/>
+                  <circle cx="12" cy="12" r="2" fill="white"/>
+                  <line x1="12" y1="3" x2="12" y2="7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="12" y1="17" x2="12" y2="21" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="3" y1="12" x2="7" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="17" y1="12" x2="21" y2="12" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
               </div>
               {/* Wordmark */}
@@ -342,24 +341,29 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
                 <p className="text-xl font-extrabold leading-none tracking-tight text-white">
                   Snag<span style={{ color: '#22C55E' }}>IT</span>
                 </p>
-                <p className="text-[10px] font-medium tracking-wide mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Log it. Assign it. Fixed.</p>
+                <p className="text-[10px] font-medium tracking-wide mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Log it. Assign it. Fixed.</p>
               </div>
             </div>
             <button
               onClick={() => window.location.reload()}
-              className="flex items-center gap-1.5 rounded-xl bg-white/15 px-3 py-2 text-xs font-medium text-white hover:bg-white/25 active:scale-95 transition-[transform,background-color]"
+              className="flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-xs font-medium text-white/70 hover:bg-white/20 active:scale-95 transition-[transform,background-color]"
             >
               <RefreshCw className="h-3.5 w-3.5" /> Refresh
             </button>
           </div>
+        </div>
+      </div>
 
+      {/* Blue section — greeting + tabs */}
+      <div className="bg-[#1A56DB] px-4 pb-4">
+        <div className="mx-auto max-w-lg">
           {/* Contractor greeting */}
           <div className="flex items-center gap-2.5 mt-4 mb-0">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 text-white font-bold text-base flex-shrink-0">
               {contractor.name.charAt(0)}
             </div>
             <div>
-              <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>Hi, {contractor.name} 👋</p>
+              <p className="text-blue-200 text-xs font-medium">Hi, {contractor.name} 👋</p>
               <p className="text-white font-semibold text-sm">Your assigned jobs</p>
             </div>
           </div>
