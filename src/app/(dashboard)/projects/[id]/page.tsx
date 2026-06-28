@@ -12,7 +12,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
   const [{ data: orgMember }, { data: project }, { data: units }, { data: contractors }, { data: openSnags }] = await Promise.all([
     supabase.from('org_members').select('org_id, organizations(org_type)').eq('user_id', user.id).limit(1).maybeSingle(),
-    supabase.from('projects').select('id, org_id, name, address, city, province, status, description').eq('id', id).maybeSingle(),
+    supabase.from('projects').select('id, org_id, name, address, city, province, status, description, client_name, client_whatsapp, share_token').eq('id', id).maybeSingle(),
     supabase.from('units').select('id, name, unit_type, floor_number, rooms(id, unit_id, name, room_order, created_at)').eq('project_id', id).order('created_at', { ascending: true }),
     supabase.from('contractors').select('*').eq('is_active', true).order('name'),
     supabase.from('snags').select('unit_id').eq('project_id', id).in('status', ['open', 'assigned', 'rejected']),
