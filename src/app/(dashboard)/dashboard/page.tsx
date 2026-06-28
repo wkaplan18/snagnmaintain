@@ -4,12 +4,13 @@ import DashboardClient from '@/components/dashboard/DashboardClient'
 import { DASHBOARD_TERMS } from '@/types'
 import type { OrgType } from '@/types'
 
+const ACTIVE = new Set(['open', 'assigned', 'rejected'])
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Get user's org
   const { data: orgMember } = await supabase
     .from('org_members')
     .select('org_id, role, organizations(id, name, logo_url, plan, org_type)')
@@ -22,24 +23,43 @@ export default async function DashboardPage() {
 
   const orgId = orgMember.org_id
 
-  // Run all remaining queries in parallel — no dependencies between them
-  const [
-    { data: projectStats },
-    { count: needsReview },
-    { data: projects },
-  ] = await Promise.all([
-    supabase.from('snag_stats_by_project').select('*'),
-    supabase
-      .from('snags')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'fixed'),
-    supabase
-      .from('projects')
-      .select('id, name, status, image_url, city')
-      .eq('org_id', orgId)
-      .eq('status', 'active')
-      .order('updated_at', { ascending: false }),
+  // Fetch projects first so we can query snags by project IDs
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('id, name, status, image_url, city')
+    .eq('org_id', orgId)
+    .eq('status', 'active')
+    .order('updated_at', { ascending: false })
+
+  const projectIds = (projects ?? []).map(p => p.id)
+
+  const [{ data: snagRows }, { count: needsReview }] = await Promise.all([
+    projectIds.length > 0
+      ? supabase.from('snags').select('project_id, status').in('project_id', projectIds)
+      : Promise.resolve({ data: [] as { project_id: string; status: string }[], error: null }),
+    supabase.from('snags').select('id', { count: 'exact', head: true }).eq('status', 'fixed'),
   ])
+
+  // Compute per-project stats using the same ACTIVE_STATUSES as the rest of the app
+  const statsMap: Record<string, { total: number; open: number; approved: number }> = {}
+  for (const s of snagRows ?? []) {
+    const c = statsMap[s.project_id] ?? (statsMap[s.project_id] = { total: 0, open: 0, approved: 0 })
+    c.total++
+    if (ACTIVE.has(s.status)) c.open++
+    if (s.status === 'approved') c.approved++
+  }
+
+  const projectStats = (projects ?? []).map(p => {
+    const c = statsMap[p.id] ?? { total: 0, open: 0, approved: 0 }
+    return {
+      project_id: p.id,
+      project_name: p.name,
+      total_snags: c.total,
+      open_snags: c.open,
+      resolved_snags: c.approved,
+      completion_pct: c.total > 0 ? Math.round((c.approved / c.total) * 100) : 0,
+    }
+  })
 
   const org = Array.isArray(orgMember.organizations)
     ? orgMember.organizations[0]
@@ -52,7 +72,7 @@ export default async function DashboardPage() {
       orgName={org?.name ?? 'My Organisation'}
       terms={terms}
       projects={projects ?? []}
-      projectStats={projectStats ?? []}
+      projectStats={projectStats}
       needsReview={needsReview ?? 0}
     />
   )
