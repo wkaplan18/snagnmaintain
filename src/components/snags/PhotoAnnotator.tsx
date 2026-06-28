@@ -124,7 +124,7 @@ export default function PhotoAnnotator({ imageUrl, onDone, onSkip }: Props) {
       clearTimeout(timeout)
       if (!blob) return onSkip()
       onDone(new File([blob], `snag-${Date.now()}.jpg`, { type: 'image/jpeg' }))
-    }, 'image/jpeg', 0.88)
+    }, 'image/jpeg', 0.75)
   }
 
   return (
