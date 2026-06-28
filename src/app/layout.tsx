@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import NextTopLoader from 'nextjs-toploader'
 import ScrollToTop from '@/components/ui/ScrollToTop'
+import RegisterSW from '@/components/ui/RegisterSW'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-display' })
@@ -15,6 +16,9 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'default',
     title: 'SnagIT',
+  },
+  icons: {
+    apple: '/icons/apple-touch-icon.png',
   },
 }
 
@@ -31,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-sf-base text-sf-text antialiased">
         <NextTopLoader color="#1A56DB" showSpinner={false} height={3} />
         <ScrollToTop />
+        <RegisterSW />
         {children}
       </body>
     </html>
