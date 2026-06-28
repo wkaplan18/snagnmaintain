@@ -33,19 +33,17 @@ interface ProjectInfo {
 }
 
 
-function UnitSnags({ projectId, unitId, terms, bare = false, hideAddButton = false }: { projectId: string; unitId: string; terms: DashboardTerms; bare?: boolean; hideAddButton?: boolean }) {
+function UnitSnags({ projectId, unitId, unitName, terms, bare = false }: { projectId: string; unitId: string; unitName: string; terms: DashboardTerms; bare?: boolean }) {
   const { snags, loading } = useSnags({ unitId })
 
   return (
     <div className={bare ? 'pt-3' : 'border-t border-slate-100 px-4 pb-4 pt-3'}>
-      {!hideAddButton && (
-        <Link
-          href={`/snags/new?projectId=${projectId}&unitId=${unitId}`}
-          className="sf-btn-primary mb-3 flex w-full items-center justify-center gap-2 py-2.5 text-sm"
-        >
-          <Camera className="h-4 w-4" /> Add {terms.issue.toLowerCase()}
-        </Link>
-      )}
+      <Link
+        href={`/snags/new?projectId=${projectId}&unitId=${unitId}`}
+        className="sf-btn-primary mb-3 flex w-full items-center justify-center gap-2 py-2.5 text-sm"
+      >
+        <Camera className="h-4 w-4" /> Add {terms.issue.toLowerCase()} to {unitName}
+      </Link>
       {loading ? (
         <p className="py-2 text-xs text-slate-400">Loading {terms.issues.toLowerCase()}…</p>
       ) : snags.length === 0 ? (
@@ -179,7 +177,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
 
       {isSingleProperty ? (
         <div className="mt-6">
-          <UnitSnags projectId={project.id} unitId={units[0].id} terms={terms} bare />
+          <UnitSnags projectId={project.id} unitId={units[0].id} unitName={units[0].name} terms={terms} bare />
         </div>
       ) : (
         <>
@@ -276,7 +274,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
                         {open ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
                       </div>
                     </button>
-                    {open && <UnitSnags projectId={project.id} unitId={u.id} terms={terms} hideAddButton={isHotel} />}
+                    {open && <UnitSnags projectId={project.id} unitId={u.id} unitName={u.name} terms={terms} />}
                   </div>
                 )
               })}
