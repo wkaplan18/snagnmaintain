@@ -20,7 +20,7 @@ const TEMPLATE_HEADERS = ['Name', 'Trade', 'Company', 'WhatsApp', 'Email', 'Phon
 
 type Tab = 'all' | 'internal' | 'external'
 
-export default function ContractorsClient({ orgId, contractors, terms }: { orgId: string; contractors: Contractor[]; terms: DashboardTerms }) {
+export default function ContractorsClient({ orgId, contractors, terms, openCountByContractor = {} }: { orgId: string; contractors: Contractor[]; terms: DashboardTerms; openCountByContractor?: Record<string, number> }) {
   const tradeOptions = terms.contractorTrade === 'Role' ? HOTEL_ROLES : TRADES
   const [showAdd, setShowAdd] = useState(contractors.length === 0)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -304,6 +304,11 @@ export default function ContractorsClient({ orgId, contractors, terms }: { orgId
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${c.is_internal ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'}`}>
                         {c.is_internal ? terms.internalLabel : terms.externalLabel}
                       </span>
+                      {(openCountByContractor[c.id] ?? 0) > 0 && (
+                        <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-semibold text-orange-700">
+                          {openCountByContractor[c.id]} unattended
+                        </span>
+                      )}
                       {[c.trade, c.company].filter(Boolean).length > 0 && (
                         <p className="text-xs text-slate-500">{[c.trade, c.company].filter(Boolean).join(' · ')}</p>
                       )}
