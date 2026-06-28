@@ -344,9 +344,11 @@ export default function AddJobClient() {
     }
     let { data: unit } = await supabase.from('units').select('id').eq('project_id', id).limit(1).maybeSingle()
     if (!unit) {
-      const { data: created } = await supabase
-        .from('units').insert({ project_id: id, name: 'Main', unit_type: 'house' }).select('id').single()
-      unit = created
+      const newUnitId = crypto.randomUUID()
+      const { error: unitErr } = await supabase
+        .from('units').insert({ id: newUnitId, project_id: id, name: 'Main', unit_type: 'house' })
+      if (unitErr) return
+      unit = { id: newUnitId }
     }
     if (!unit) return
     setUnitId(unit.id)
