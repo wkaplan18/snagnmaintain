@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { ArrowLeft, BookUser, Camera, ChevronRight, Loader2, MapPin, Pencil, Plus, User, CalendarClock, X } from 'lucide-react'
 import { waLink } from '@/lib/whatsappLink'
 import { compressImage } from '@/lib/compressImage'
-import { STATUS_CONFIG, type Attachment, type Contractor, type DashboardTerms, type SnagStatus } from '@/types'
+import { STATUS_CONFIG, TRADES, HOTEL_ROLES, type Attachment, type Contractor, type DashboardTerms, type SnagStatus } from '@/types'
 
 const STATUS_FLOW: SnagStatus[] = ['open', 'assigned', 'fixed', 'approved']
 
@@ -474,7 +474,10 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
               </button>
             </div>
             <input autoFocus type="text" value={newCName} onChange={e => setNewCName(e.target.value)} placeholder="Name *" className="sf-input" />
-            <input type="text" value={newCTrade} onChange={e => setNewCTrade(e.target.value)} placeholder={terms.contractorTrade} className="sf-input" />
+            <select value={newCTrade} onChange={e => setNewCTrade(e.target.value)} className="sf-input">
+              <option value="">{terms.contractorTrade} (optional)</option>
+              {(terms.contractorTrade === 'Role' ? HOTEL_ROLES : TRADES).map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
             <div className="flex gap-2">
               <input
                 type="tel"

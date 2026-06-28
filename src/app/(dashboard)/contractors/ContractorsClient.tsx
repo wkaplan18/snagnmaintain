@@ -12,16 +12,16 @@ const WA_ICON = (
 )
 import * as XLSX from 'xlsx'
 import { waLink } from '@/lib/whatsappLink'
+import { TRADES, HOTEL_ROLES } from '@/types'
 import type { Contractor, DashboardTerms } from '@/types'
 
 // Exact template headers — the import matches these case-insensitively.
 const TEMPLATE_HEADERS = ['Name', 'Trade', 'Company', 'WhatsApp', 'Email', 'Phone'] as const
 
-const TRADES = ['Painter', 'Tiler', 'Plumber', 'Electrician', 'Carpenter', 'Builder', 'Glazier', 'HVAC', 'Waterproofing', 'General']
-
 type Tab = 'all' | 'internal' | 'external'
 
 export default function ContractorsClient({ orgId, contractors, terms }: { orgId: string; contractors: Contractor[]; terms: DashboardTerms }) {
+  const tradeOptions = terms.contractorTrade === 'Role' ? HOTEL_ROLES : TRADES
   const [showAdd, setShowAdd] = useState(contractors.length === 0)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [name, setName] = useState('')
@@ -217,10 +217,10 @@ export default function ContractorsClient({ orgId, contractors, terms }: { orgId
             </div>
             {!isInternal && (
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Trade</label>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">{terms.contractorTrade}</label>
                 <select value={trade} onChange={e => setTrade(e.target.value)} className="sf-input">
                   <option value="">Select…</option>
-                  {TRADES.map(t => <option key={t} value={t}>{t}</option>)}
+                  {tradeOptions.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
             )}

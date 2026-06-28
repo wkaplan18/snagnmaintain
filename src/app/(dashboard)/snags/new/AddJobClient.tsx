@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, BookUser, Camera, ChevronRight, Loader2, Pencil, RotateCcw, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { compressImage } from '@/lib/compressImage'
-import { DASHBOARD_TERMS, DEFAULT_HOTEL_ROOM_AREAS, DEFAULT_ROOMS } from '@/types'
+import { DASHBOARD_TERMS, DEFAULT_HOTEL_ROOM_AREAS, DEFAULT_ROOMS, TRADES, HOTEL_ROLES } from '@/types'
 import type { Contractor, DashboardTerms, OrgType, Room } from '@/types'
 
 type Step = 'project' | 'room_number' | 'photo' | 'details' | 'room' | 'assign' | 'whatsapp'
@@ -912,7 +912,10 @@ export default function AddJobClient() {
                 </button>
               </div>
               <input type="text" autoFocus value={newName} onChange={e => setNewName(e.target.value)} placeholder="Name *" className="sf-input" />
-              <input type="text" value={newTrade} onChange={e => setNewTrade(e.target.value)} placeholder={terms.contractorTrade} className="sf-input" />
+              <select value={newTrade} onChange={e => setNewTrade(e.target.value)} className="sf-input">
+                <option value="">{terms.contractorTrade} (optional)</option>
+                {(isHotel ? HOTEL_ROLES : TRADES).map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
               <div className="flex gap-2">
                 <input
                   type="tel"

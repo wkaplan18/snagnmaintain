@@ -272,6 +272,9 @@ export const DEFAULT_HOTEL_ROOM_AREAS = [
 export const HOTEL_UNIT_TYPES: UnitType[] = ['standard_room', 'suite', 'family_room', 'penthouse_suite', 'accessible_room', 'other']
 export const BUILDER_UNIT_TYPES: UnitType[] = ['apartment', 'house', 'townhouse', 'villa', 'penthouse', 'office', 'retail', 'other']
 
+export const TRADES = ['Painter', 'Tiler', 'Plumber', 'Electrician', 'Carpenter', 'Builder', 'Glazier', 'HVAC', 'Waterproofing', 'General']
+export const HOTEL_ROLES = ['Maintenance', 'Housekeeping', 'Front Desk', 'Security', 'F&B', 'Management', 'Concierge', 'Other']
+
 export const SA_PROVINCES = [
   'Gauteng',
   'Western Cape',
