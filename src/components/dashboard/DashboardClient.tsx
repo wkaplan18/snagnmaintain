@@ -44,8 +44,8 @@ export default function DashboardClient({ orgName, terms, projects, projectStats
   return (
     <div className="min-h-screen bg-sf-base pb-28">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-4 pt-safe pb-4">
-        <div className="mx-auto max-w-2xl">
+      <div className="bg-white border-b border-slate-200 pt-safe pb-4">
+        <div className="mx-auto max-w-2xl px-4">
           <div className="flex items-center justify-between pt-3">
             <div>
               <h1 className="text-lg font-bold text-slate-900">{orgName}</h1>
