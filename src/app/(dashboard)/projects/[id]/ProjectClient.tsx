@@ -91,7 +91,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
       const token = json.share_token as string
       setShareToken(token)
       const shareUrl = `${window.location.origin}/share/${token}`
-      const message = `Hi ${clientName || 'there'}, here's a live view of your snagging progress for *${project.name}*:\n\n${shareUrl}\n\nYou can view all snags, their status and photos in real time.`
+      const message = `Hi ${clientName || 'there'}, here's a live view of your ${terms.issues.toLowerCase()} status for *${project.name}*:\n\n${shareUrl}\n\nYou can view all ${terms.issues.toLowerCase()}, their status and photos in real time.`
       window.open(waLink(null, message), '_blank')
       setShowShare(false)
     } catch (err) {
@@ -293,8 +293,8 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
           <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Share with client</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Opens WhatsApp with a read-only view of all snags.</p>
+                <h3 className="text-base font-bold text-slate-900 capitalize">Share with {terms.shareRecipient}</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Opens WhatsApp with a read-only view of all {terms.issues.toLowerCase()}.</p>
               </div>
               <button onClick={() => setShowShare(false)} className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100">
                 <X className="h-4 w-4 text-slate-500" />
@@ -302,7 +302,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
             </div>
             <form onSubmit={handleShareSend} className="space-y-3">
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Client name <span className="font-normal text-slate-400">(optional — used in the message)</span></label>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 capitalize">{terms.shareRecipient} name <span className="font-normal text-slate-400">(optional — used in the message)</span></label>
                 <input
                   type="text"
                   value={clientName}
@@ -313,7 +313,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
               </div>
               {shareToken && (
                 <div className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-2.5">
-                  <p className="text-xs text-slate-500 mb-1">Client view link</p>
+                  <p className="text-xs text-slate-500 mb-1 capitalize">{terms.shareRecipient} view link</p>
                   <p className="text-xs font-mono text-slate-700 break-all">
                     {typeof window !== 'undefined' ? `${window.location.origin}/share/${shareToken}` : `/share/${shareToken}`}
                   </p>

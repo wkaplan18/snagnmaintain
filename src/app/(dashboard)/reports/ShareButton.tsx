@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { X } from 'lucide-react'
+import type { DashboardTerms } from '@/types'
 
 const WA_SVG = (
   <svg className="h-4 w-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
@@ -14,15 +15,19 @@ export default function ShareButton({
   projectName,
   shareToken,
   savedClientName,
+  terms,
 }: {
   projectId: string
   projectName: string
   shareToken: string | null
   savedClientName: string | null
+  terms: DashboardTerms
 }) {
   const [showModal, setShowModal] = useState(false)
-  const [clientName, setClientName] = useState(savedClientName ?? '')
+  const [recipientName, setRecipientName] = useState(savedClientName ?? '')
   const [busy, setBusy] = useState(false)
+
+  const recipient = terms.shareRecipient
 
   async function handleSend() {
     setBusy(true)
@@ -31,15 +36,15 @@ export default function ShareButton({
       const res = await fetch('/api/project/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ project_id: projectId, client_name: clientName.trim(), client_whatsapp: '' }),
+        body: JSON.stringify({ project_id: projectId, client_name: recipientName.trim(), client_whatsapp: '' }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Failed')
       token = json.share_token as string
 
       const shareUrl = `https://snagitapp.co.za/share/${token}`
-      const greeting = clientName.trim() ? `Hi ${clientName.trim()}, ` : ''
-      const message = `${greeting}here's your live snagging progress for *${projectName}*:\n\n${shareUrl}\n\nView all snags, status and photos in real time.`
+      const greeting = recipientName.trim() ? `Hi ${recipientName.trim()}, ` : ''
+      const message = `${greeting}here's your live ${terms.issues.toLowerCase()} status for *${projectName}*:\n\n${shareUrl}\n\nView all ${terms.issues.toLowerCase()}, status and photos in real time.`
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank')
       setShowModal(false)
     } catch {
@@ -57,7 +62,7 @@ export default function ShareButton({
         style={{ backgroundColor: '#25D366' }}
       >
         {WA_SVG}
-        Send progress to client
+        Send {terms.issues.toLowerCase()} update to {recipient}
       </button>
 
       {showModal && (
@@ -71,7 +76,7 @@ export default function ShareButton({
           >
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Send to client</h3>
+                <h3 className="text-base font-bold text-slate-900 capitalize">Send to {recipient}</h3>
                 <p className="text-xs text-slate-500 mt-0.5">{projectName}</p>
               </div>
               <button onClick={() => setShowModal(false)} className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100">
@@ -79,13 +84,13 @@ export default function ShareButton({
               </button>
             </div>
             <div className="mb-4">
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                Client name <span className="font-normal text-slate-400">(optional)</span>
+              <label className="mb-1.5 block text-sm font-medium text-slate-700 capitalize">
+                {recipient} name <span className="font-normal text-slate-400">(optional)</span>
               </label>
               <input
                 type="text"
-                value={clientName}
-                onChange={e => setClientName(e.target.value)}
+                value={recipientName}
+                onChange={e => setRecipientName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSend()}
                 placeholder="e.g. John Smith"
                 className="sf-input"

@@ -24,13 +24,14 @@ export interface DashboardTerms {
   externalLabel: string
   unit: string
   units: string
+  shareRecipient: string
 }
 
 export const DASHBOARD_TERMS: Record<OrgType, DashboardTerms> = {
-  builder:          { project: 'Project',  projects: 'Projects',   issue: 'Snag',  issues: 'Snags',  contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Staff',            externalLabel: 'Subcontractor', unit: 'Unit',  units: 'Units' },
-  hotel:            { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Staff member', contractorTrade: 'Role',  internalLabel: 'Maintenance Staff', externalLabel: 'Contractor',    unit: 'Room',  units: 'Rooms' },
-  property_manager: { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Staff',            externalLabel: 'Contractor',    unit: 'Unit',  units: 'Units' },
-  body_corporate:   { project: 'Complex',  projects: 'Complexes',  issue: 'Issue', issues: 'Issues', contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Building Staff',   externalLabel: 'Contractor',    unit: 'Unit',  units: 'Units' },
+  builder:          { project: 'Project',  projects: 'Projects',   issue: 'Snag',  issues: 'Snags',  contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Staff',            externalLabel: 'Subcontractor', unit: 'Unit',  units: 'Units', shareRecipient: 'client'   },
+  hotel:            { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Staff member', contractorTrade: 'Role',  internalLabel: 'Maintenance Staff', externalLabel: 'Contractor',    unit: 'Room',  units: 'Rooms', shareRecipient: 'ownership' },
+  property_manager: { project: 'Property', projects: 'Properties', issue: 'Issue', issues: 'Issues', contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Staff',            externalLabel: 'Contractor',    unit: 'Unit',  units: 'Units', shareRecipient: 'owner'    },
+  body_corporate:   { project: 'Complex',  projects: 'Complexes',  issue: 'Issue', issues: 'Issues', contractor: 'Contractor',   contractorTrade: 'Trade', internalLabel: 'Building Staff',   externalLabel: 'Contractor',    unit: 'Unit',  units: 'Units', shareRecipient: 'trustees' },
 }
 
 export type SnagStatus = 'open' | 'assigned' | 'in_progress' | 'fixed' | 'approved' | 'closed' | 'rejected'

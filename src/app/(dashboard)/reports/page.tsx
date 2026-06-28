@@ -93,6 +93,7 @@ export default async function ReportsPage() {
                   projectName={r.project_name}
                   shareToken={projectMap.get(r.project_id)?.shareToken ?? null}
                   savedClientName={projectMap.get(r.project_id)?.clientName ?? null}
+                  terms={terms}
                 />
               </div>
             </div>
