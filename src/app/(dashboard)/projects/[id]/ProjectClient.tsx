@@ -33,17 +33,19 @@ interface ProjectInfo {
 }
 
 
-function UnitSnags({ projectId, unitId, terms, bare = false }: { projectId: string; unitId: string; terms: DashboardTerms; bare?: boolean }) {
+function UnitSnags({ projectId, unitId, terms, bare = false, hideAddButton = false }: { projectId: string; unitId: string; terms: DashboardTerms; bare?: boolean; hideAddButton?: boolean }) {
   const { snags, loading } = useSnags({ unitId })
 
   return (
     <div className={bare ? 'pt-3' : 'border-t border-slate-100 px-4 pb-4 pt-3'}>
-      <Link
-        href={`/snags/new?projectId=${projectId}&unitId=${unitId}`}
-        className="sf-btn-primary mb-3 flex w-full items-center justify-center gap-2 py-2.5 text-sm"
-      >
-        <Camera className="h-4 w-4" /> Add {terms.issue.toLowerCase()}
-      </Link>
+      {!hideAddButton && (
+        <Link
+          href={`/snags/new?projectId=${projectId}&unitId=${unitId}`}
+          className="sf-btn-primary mb-3 flex w-full items-center justify-center gap-2 py-2.5 text-sm"
+        >
+          <Camera className="h-4 w-4" /> Add {terms.issue.toLowerCase()}
+        </Link>
+      )}
       {loading ? (
         <p className="py-2 text-xs text-slate-400">Loading {terms.issues.toLowerCase()}…</p>
       ) : snags.length === 0 ? (
@@ -274,7 +276,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
                         {open ? <ChevronDown className="h-4 w-4 text-slate-400" /> : <ChevronRight className="h-4 w-4 text-slate-400" />}
                       </div>
                     </button>
-                    {open && <UnitSnags projectId={project.id} unitId={u.id} terms={terms} />}
+                    {open && <UnitSnags projectId={project.id} unitId={u.id} terms={terms} hideAddButton={isHotel} />}
                   </div>
                 )
               })}
