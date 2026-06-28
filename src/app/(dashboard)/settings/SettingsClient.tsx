@@ -3,20 +3,42 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, User, Check, LogOut, Building2 } from 'lucide-react'
+import { ArrowLeft, User, Check, LogOut, Building2, Users, X, Send, Mail } from 'lucide-react'
 import Link from 'next/link'
 import { DASHBOARD_TERMS, ORG_TYPE_CONFIG } from '@/types'
 import type { OrgType } from '@/types'
 
+interface Member {
+  user_id: string
+  role: string
+  email: string
+  name: string | null
+}
+
+interface PendingInvite {
+  id: string
+  email: string
+  role: string
+  created_at: string
+}
+
 interface Props {
   email: string
+  currentUserId: string
   profile: { full_name: string | null; whatsapp: string | null; phone: string | null; job_title: string | null }
   orgName: string | null
   orgType: string | null
   orgId: string | null
+  members: Member[]
+  pendingInvites: PendingInvite[]
 }
 
-export default function SettingsClient({ email, profile, orgName, orgType, orgId }: Props) {
+function initials(name: string | null, email: string) {
+  if (name) return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+  return email.slice(0, 2).toUpperCase()
+}
+
+export default function SettingsClient({ email, currentUserId, profile, orgName, orgType, orgId, members, pendingInvites }: Props) {
   const orgTypeConfig = orgType ? ORG_TYPE_CONFIG[orgType as OrgType] : null
   const terms = DASHBOARD_TERMS[(orgType ?? 'builder') as OrgType]
   const [fullName, setFullName] = useState(profile.full_name ?? '')
@@ -27,6 +49,14 @@ export default function SettingsClient({ email, profile, orgName, orgType, orgId
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+
+  // Invite state
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviting, setInviting] = useState(false)
+  const [inviteError, setInviteError] = useState('')
+  const [inviteSuccess, setInviteSuccess] = useState('')
+  const [localInvites, setLocalInvites] = useState<PendingInvite[]>(pendingInvites)
+
   const supabase = createClient()
   const router = useRouter()
 
@@ -54,6 +84,42 @@ export default function SettingsClient({ email, profile, orgName, orgType, orgId
       setTimeout(() => setSaved(false), 3000)
     }
     setSaving(false)
+  }
+
+  async function handleInvite(e: React.FormEvent) {
+    e.preventDefault()
+    setInviting(true)
+    setInviteError('')
+    setInviteSuccess('')
+
+    const res = await fetch('/api/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: inviteEmail.trim() }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setInviteError(json.error ?? 'Could not send invite')
+    } else {
+      setInviteSuccess(`Invite sent to ${inviteEmail.trim()}`)
+      setLocalInvites(prev => [
+        { id: crypto.randomUUID(), email: inviteEmail.trim(), role: 'admin', created_at: new Date().toISOString() },
+        ...prev.filter(i => i.email !== inviteEmail.trim()),
+      ])
+      setInviteEmail('')
+    }
+    setInviting(false)
+  }
+
+  async function cancelInvite(id: string, invEmail: string) {
+    if (!confirm(`Cancel invite for ${invEmail}?`)) return
+    const res = await fetch('/api/invite', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    if (res.ok) setLocalInvites(prev => prev.filter(i => i.id !== id))
   }
 
   return (
@@ -111,9 +177,7 @@ export default function SettingsClient({ email, profile, orgName, orgType, orgId
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            WhatsApp number
-          </label>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">WhatsApp number</label>
           <input
             type="tel"
             value={whatsapp}
@@ -155,6 +219,92 @@ export default function SettingsClient({ email, profile, orgName, orgType, orgId
           {saved ? <><Check className="h-4 w-4" /> Saved</> : saving ? 'Saving…' : 'Save profile'}
         </button>
       </form>
+
+      {/* ── Team Section ── */}
+      {orgId && (
+        <div className="mt-5">
+          <div className="mb-3 flex items-center gap-2">
+            <Users className="h-4 w-4 text-slate-400" />
+            <h2 className="text-sm font-semibold text-slate-900">Team access</h2>
+          </div>
+
+          {/* Current members */}
+          <div className="sf-card mb-3 divide-y divide-slate-100 overflow-hidden">
+            {members.map(m => (
+              <div key={m.user_id} className="flex items-center gap-3 px-4 py-3">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#EEF4FF] text-[11px] font-bold text-[#1A56DB]">
+                  {initials(m.name, m.email)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  {m.name && <p className="text-sm font-medium text-slate-900 truncate">{m.name}</p>}
+                  <p className="text-xs text-slate-500 truncate">{m.email}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold capitalize text-slate-600">
+                    {m.role}
+                  </span>
+                  {m.user_id === currentUserId && (
+                    <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-700">You</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pending invites */}
+          {localInvites.length > 0 && (
+            <div className="sf-card mb-3 divide-y divide-slate-100 overflow-hidden">
+              <p className="px-4 pt-3 pb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Pending invites</p>
+              {localInvites.map(inv => (
+                <div key={inv.id} className="flex items-center gap-3 px-4 py-3">
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-50">
+                    <Mail className="h-3.5 w-3.5 text-amber-500" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-slate-700 truncate">{inv.email}</p>
+                    <p className="text-[10px] text-slate-400">Invite sent · awaiting acceptance</p>
+                  </div>
+                  <button
+                    onClick={() => cancelInvite(inv.id, inv.email)}
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                    title="Cancel invite"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Invite form */}
+          <form onSubmit={handleInvite} className="sf-card p-4">
+            <p className="mb-3 text-sm font-semibold text-slate-900">Invite someone to your team</p>
+            <p className="mb-3 text-xs text-slate-500">
+              They'll get an email with a link to join. Once accepted, they can log in and manage {terms.issues.toLowerCase()} just like you.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                required
+                value={inviteEmail}
+                onChange={e => setInviteEmail(e.target.value)}
+                placeholder="colleague@example.com"
+                className="sf-input flex-1"
+              />
+              <button
+                type="submit"
+                disabled={inviting || !inviteEmail.trim()}
+                className="flex items-center gap-1.5 rounded-xl bg-[#1A56DB] px-4 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                <Send className="h-3.5 w-3.5" />
+                {inviting ? 'Sending…' : 'Invite'}
+              </button>
+            </div>
+            {inviteError && <p className="mt-2 text-xs text-red-600">{inviteError}</p>}
+            {inviteSuccess && <p className="mt-2 text-xs text-green-700">{inviteSuccess}</p>}
+          </form>
+        </div>
+      )}
 
       <button
         type="button"
