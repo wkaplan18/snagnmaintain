@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { SA_PROVINCES, DEFAULT_ROOMS, DEFAULT_HOTEL_ROOM_AREAS } from '@/types'
+import { SA_PROVINCES, DEFAULT_ROOMS } from '@/types'
 import type { DashboardTerms, OrgType } from '@/types'
 
 export default function NewProjectClient({ orgId, terms, orgType }: { orgId: string; terms: DashboardTerms; orgType: OrgType }) {
@@ -14,7 +14,8 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
   const [city, setCity] = useState('')
   const [province, setProvince] = useState('')
   const [description, setDescription] = useState('')
-  const [mode, setMode] = useState<'single' | 'multiple'>(orgType === 'hotel' ? 'multiple' : 'single')
+  const isOnTheFly = orgType === 'hotel' || orgType === 'property_manager'
+  const [mode, setMode] = useState<'single' | 'multiple'>(isOnTheFly ? 'multiple' : 'single')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -44,11 +45,10 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
       return
     }
 
-    if (mode === 'single') {
-      const isHotel = orgType === 'hotel'
+    if (mode === 'single' && !isOnTheFly) {
       const { data: unit, error: unitError } = await supabase
         .from('units')
-        .insert({ project_id: data.id, name: name.trim(), unit_type: isHotel ? 'standard_room' : 'house' })
+        .insert({ project_id: data.id, name: name.trim(), unit_type: 'house' })
         .select('id')
         .single()
 
@@ -58,9 +58,8 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
         return
       }
 
-      const roomList = isHotel ? DEFAULT_HOTEL_ROOM_AREAS : DEFAULT_ROOMS
       await supabase.from('rooms').insert(
-        roomList.map((roomName, i) => ({ unit_id: unit.id, name: roomName, room_order: i }))
+        DEFAULT_ROOMS.map((roomName, i) => ({ unit_id: unit.id, name: roomName, room_order: i }))
       )
     }
 
@@ -107,8 +106,8 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
             placeholder={`Notes about this ${terms.project.toLowerCase()}`} className="sf-input resize-none" />
         </div>
 
-        {/* Property structure toggle — hidden for hotels (always multiple rooms) */}
-        {orgType !== 'hotel' && (
+        {/* Property structure toggle — hidden for hotels & property managers (units created on-the-fly) */}
+        {!isOnTheFly && (
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-700">{terms.project} structure</label>
             <div className="flex gap-2">
@@ -138,7 +137,7 @@ export default function NewProjectClient({ orgId, terms, orgType }: { orgId: str
         {error && <p className="text-xs text-red-600">{error}</p>}
 
         <button type="submit" disabled={loading || name.trim().length < 2} className="sf-btn-primary w-full disabled:opacity-60">
-          {loading ? 'Creating…' : mode === 'single' ? `Create ${terms.project.toLowerCase()}` : `Create ${terms.project.toLowerCase()} & add units`}
+          {loading ? 'Creating…' : `Create ${terms.project.toLowerCase()}`}
         </button>
       </form>
     </div>

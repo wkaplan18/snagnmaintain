@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, BookUser, Camera, ChevronRight, Loader2, Pencil, RotateCcw, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { compressImage } from '@/lib/compressImage'
-import { DASHBOARD_TERMS, DEFAULT_HOTEL_ROOM_AREAS } from '@/types'
+import { DASHBOARD_TERMS, DEFAULT_HOTEL_ROOM_AREAS, DEFAULT_ROOMS } from '@/types'
 import type { Contractor, DashboardTerms, OrgType, Room } from '@/types'
 
 type Step = 'project' | 'room_number' | 'photo' | 'details' | 'room' | 'assign' | 'whatsapp'
@@ -177,6 +177,8 @@ export default function AddJobClient() {
   const [unitId, setUnitId] = useState('')
   const [orgId, setOrgId] = useState('')
   const [isHotel, setIsHotel] = useState(false)
+  const [isOnTheFly, setIsOnTheFly] = useState(false)
+  const [orgType, setOrgType] = useState<OrgType>('builder')
   const [terms, setTerms] = useState<DashboardTerms>(DASHBOARD_TERMS['builder'])
   const [rooms, setRooms] = useState<Room[]>([])
   const [contractors, setContractors] = useState<Contractor[]>([])
@@ -237,10 +239,13 @@ export default function AddJobClient() {
       const orgType = (org?.org_type ?? 'builder') as OrgType
       const _orgId = memberData?.org_id ?? ''
       const _isHotel = orgType === 'hotel'
+      const _isOnTheFly = orgType === 'hotel' || orgType === 'property_manager'
 
       setOrgId(_orgId)
+      setOrgType(orgType)
       setTerms(DASHBOARD_TERMS[orgType])
       setIsHotel(_isHotel)
+      setIsOnTheFly(_isOnTheFly)
 
       let _projectId = qProjectId
       let _unitId = qUnitId
@@ -265,8 +270,8 @@ export default function AddJobClient() {
 
         _projectId = projects[0].id
 
-        // Hotels: don't auto-create a unit — let the user type the room number
-        if (_isHotel && !_unitId) {
+        // Hotels & property managers: don't auto-create a unit — let the user type the unit/room number
+        if (_isOnTheFly && !_unitId) {
           setProjectId(_projectId)
           const { data: _contractors } = await supabase
             .from('contractors').select('*').eq('org_id', _orgId).eq('is_active', true).order('name')
@@ -333,7 +338,7 @@ export default function AddJobClient() {
 
   async function selectProject(id: string) {
     setProjectId(id)
-    if (isHotel) {
+    if (isOnTheFly) {
       setStep('room_number')
       return
     }
@@ -369,17 +374,19 @@ export default function AddJobClient() {
     } else {
       // Generate ID client-side so we don't need a SELECT-after-INSERT (avoids RLS read issues)
       _unitId = crypto.randomUUID()
+      const unitTypeVal = isHotel ? 'standard_room' : 'apartment'
       const { error } = await supabase
         .from('units')
-        .insert({ id: _unitId, project_id: projectId, name: roomName, unit_type: 'standard_room' })
+        .insert({ id: _unitId, project_id: projectId, name: roomName, unit_type: unitTypeVal })
       if (error) {
         console.error('Unit insert error:', error)
         alert(error.message)
         setRoomNumberBusy(false)
         return
       }
+      const roomAreas = isHotel ? DEFAULT_HOTEL_ROOM_AREAS : DEFAULT_ROOMS
       await supabase.from('rooms').insert(
-        DEFAULT_HOTEL_ROOM_AREAS.map((name, i) => ({ unit_id: _unitId, name, room_order: i }))
+        roomAreas.map((name, i) => ({ unit_id: _unitId, name, room_order: i }))
       )
     }
 
@@ -516,7 +523,7 @@ export default function AddJobClient() {
   }
 
   const hasProjectStep = allProjects.length > 1
-  const hasRoomNumberStep = isHotel && !qUnitId
+  const hasRoomNumberStep = isOnTheFly && !qUnitId
   const totalSteps = (hasProjectStep ? 1 : 0) + (hasRoomNumberStep ? 1 : 0) + 3
   const stepNum = (s: Step) => {
     const order: Step[] = []
@@ -561,8 +568,12 @@ export default function AddJobClient() {
     )
   }
 
-  // ─── STEP: Room number (hotels only) ─────────────────────────────────────────
+  // ─── STEP: Room/Unit number (hotels & property managers) ─────────────────────
   if (step === 'room_number') {
+    const unitLabel = terms.unit.toLowerCase()
+    const placeholder = isHotel
+      ? 'e.g. 101, Suite 201, Penthouse'
+      : 'e.g. Apt 4B, Unit 12, Studio 3'
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-white">
         <div className="border-b border-slate-200 px-4 pt-safe pb-4">
@@ -575,20 +586,20 @@ export default function AddJobClient() {
             </button>
             <div>
               <p className="text-xs text-slate-400">Step {stepNum('room_number')} of {totalSteps}</p>
-              <h1 className="text-base font-bold text-slate-900">Which room?</h1>
+              <h1 className="text-base font-bold text-slate-900">Which {unitLabel}?</h1>
             </div>
           </div>
         </div>
 
         <div className="flex flex-1 flex-col px-6 pt-8 gap-3">
-          <p className="text-sm text-slate-500">Enter the room or suite number where the issue was found.</p>
+          <p className="text-sm text-slate-500">Enter the {unitLabel} number or name where the issue was found.</p>
           <input
             type="text"
             autoFocus
             value={roomNumberInput}
             onChange={e => setRoomNumberInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && roomNumberInput.trim() && selectRoomNumber()}
-            placeholder="e.g. 101, Suite 201, Penthouse"
+            placeholder={placeholder}
             className="sf-input text-base"
           />
         </div>
