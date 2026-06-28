@@ -124,7 +124,8 @@
 
   /* Bottom nav */
   .sf-bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-slate-200 bg-white/90 pb-safe px-2 pt-2;
+    @apply fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-slate-200 bg-white/90 px-4 pt-2;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }

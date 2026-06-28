@@ -28,7 +28,7 @@ export default function BottomNav({ terms, fixedCount = 0 }: { terms: DashboardT
             className={`sf-nav-item ${active ? 'active' : ''}`}
           >
             <div className="relative">
-              <Icon className="h-5 w-5" />
+              <Icon className="h-6 w-6" />
               {item.badge > 0 && (
                 <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-orange-500 px-1 text-[9px] font-bold text-white">
                   {item.badge > 99 ? '99+' : item.badge}
