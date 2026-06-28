@@ -191,6 +191,8 @@ export default function AddJobClient() {
   const [step, setStep] = useState<Step>('photo')
   const [savedSnagId, setSavedSnagId] = useState<string | null>(null)
 
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }) }, [step])
+
   // Step data
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
