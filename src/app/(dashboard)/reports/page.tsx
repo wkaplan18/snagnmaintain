@@ -73,13 +73,13 @@ export default async function ReportsPage() {
         <div className="space-y-3">
           {rows.map(r => {
             const client = clientMap.get(r.project_id)
-            const canShare = !!(client?.client_whatsapp && client?.share_token)
+            const canShare = !!client?.share_token
             const shareUrl = canShare
               ? `https://snagitapp.co.za/share/${client!.share_token}`
               : null
             const waHref = canShare
               ? waLink(
-                  client!.client_whatsapp!,
+                  null,
                   `Hi ${client!.client_name || 'there'}, here's your live snagging progress for *${r.project_name}*:\n\n${shareUrl}\n\nView all snags, status and photos in real time.`
                 )
               : null

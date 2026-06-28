@@ -321,8 +321,8 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
       {viewingPhoto && <PhotoViewer url={viewingPhoto} onClose={() => setViewingPhoto(null)} />}
 
       {/* Dark logo strip — matches website nav */}
-      <div className="px-4 pt-safe" style={{ background: '#050E1F' }}>
-        <div className="mx-auto max-w-lg pt-4 pb-3">
+      <div className="px-4 pt-safe pb-3" style={{ background: '#050E1F' }}>
+        <div className="mx-auto max-w-lg pt-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               {/* Icon — solid blue box like website nav */}

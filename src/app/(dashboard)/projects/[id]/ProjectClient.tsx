@@ -84,7 +84,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
       const res = await fetch('/api/project/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ project_id: project.id, client_name: clientName, client_whatsapp: clientWhatsapp }),
+        body: JSON.stringify({ project_id: project.id, client_name: clientName, client_whatsapp: '' }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Failed')
@@ -92,7 +92,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
       setShareToken(token)
       const shareUrl = `${window.location.origin}/share/${token}`
       const message = `Hi ${clientName || 'there'}, here's a live view of your snagging progress for *${project.name}*:\n\n${shareUrl}\n\nYou can view all snags, their status and photos in real time.`
-      window.open(waLink(clientWhatsapp, message), '_blank')
+      window.open(waLink(null, message), '_blank')
       setShowShare(false)
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to generate share link')
@@ -299,23 +299,12 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
             </div>
             <form onSubmit={handleShareSend} className="space-y-3">
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Client name <span className="font-normal text-slate-400">(optional)</span></label>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">Client name <span className="font-normal text-slate-400">(optional — used in the message)</span></label>
                 <input
                   type="text"
                   value={clientName}
                   onChange={e => setClientName(e.target.value)}
                   placeholder="John Smith"
-                  className="sf-input"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">Client WhatsApp number</label>
-                <input
-                  type="tel"
-                  required
-                  value={clientWhatsapp}
-                  onChange={e => setClientWhatsapp(e.target.value)}
-                  placeholder="082 000 0000"
                   className="sf-input"
                 />
               </div>
@@ -329,7 +318,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
               )}
               <button
                 type="submit"
-                disabled={shareSaving || !clientWhatsapp.trim()}
+                disabled={shareSaving}
                 className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-60 transition-colors"
                 style={{ backgroundColor: '#25D366' }}
               >
