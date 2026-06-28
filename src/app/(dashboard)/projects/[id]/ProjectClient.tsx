@@ -57,8 +57,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
   const [openUnit, setOpenUnit] = useState<string | null>(units.length === 1 ? units[0].id : null)
   const [showAddUnit, setShowAddUnit] = useState(units.length === 0)
   const [unitName, setUnitName] = useState('')
-  const isHotel = orgType === 'hotel' || orgType === 'property_manager'
-  const isBodyCorp = orgType === 'body_corporate'
+  const isHotel = orgType === 'hotel' || orgType === 'property_manager' || orgType === 'body_corporate'
   const displayUnits = isHotel ? units.filter(u => (openCountsByUnit[u.id] ?? 0) > 0) : units
   const unitTypeOptions = isHotel ? HOTEL_UNIT_TYPES : BUILDER_UNIT_TYPES
   const [unitType, setUnitType] = useState<UnitType>(isHotel ? 'standard_room' : 'apartment')
@@ -110,7 +109,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
     setError('')
     const { data: unit, error: unitError } = await supabase
       .from('units')
-      .insert({ project_id: project.id, name: unitName.trim(), unit_type: isBodyCorp ? 'other' : unitType })
+      .insert({ project_id: project.id, name: unitName.trim(), unit_type: false ? 'other' : unitType })
       .select('id')
       .single()
 
@@ -120,7 +119,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
       return
     }
 
-    if (seedRooms && !isBodyCorp) {
+    if (seedRooms && !false) {
       const roomList = isHotel ? DEFAULT_HOTEL_ROOM_AREAS : DEFAULT_ROOMS
       await supabase.from('rooms').insert(
         roomList.map((name, i) => ({ unit_id: unit.id, name, room_order: i }))
@@ -215,13 +214,13 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
 
           {!isHotel && showAddUnit && (
             <form onSubmit={handleAddUnit} className="sf-card mb-4 space-y-3 p-4">
-              <div className={isBodyCorp ? '' : 'grid grid-cols-2 gap-3'}>
+              <div className={false ? '' : 'grid grid-cols-2 gap-3'}>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">{terms.unit} name</label>
                   <input type="text" required minLength={1} value={unitName} onChange={e => setUnitName(e.target.value)}
-                    placeholder={isBodyCorp ? 'e.g. Swimming Pool, Parking B1, Gym' : 'Unit 14'} className="sf-input" />
+                    placeholder={false ? 'e.g. Swimming Pool, Parking B1, Gym' : 'Unit 14'} className="sf-input" />
                 </div>
-                {!isBodyCorp && (
+                {!false && (
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-slate-700">Type</label>
                     <select value={unitType} onChange={e => setUnitType(e.target.value as UnitType)} className="sf-input capitalize">
@@ -230,7 +229,7 @@ export default function ProjectClient({ project, units, contractors, terms, orgT
                   </div>
                 )}
               </div>
-              {!isBodyCorp && (
+              {!false && (
                 <label className="flex items-center gap-2 text-sm text-slate-600">
                   <input type="checkbox" checked={seedRooms} onChange={e => setSeedRooms(e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
                   Add standard SA rooms (kitchen, bedrooms, bathrooms…)

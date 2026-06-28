@@ -239,7 +239,7 @@ export default function AddJobClient() {
       const orgType = (org?.org_type ?? 'builder') as OrgType
       const _orgId = memberData?.org_id ?? ''
       const _isHotel = orgType === 'hotel'
-      const _isOnTheFly = orgType === 'hotel' || orgType === 'property_manager'
+      const _isOnTheFly = orgType === 'hotel' || orgType === 'property_manager' || orgType === 'body_corporate'
 
       setOrgId(_orgId)
       setOrgType(orgType)
@@ -374,7 +374,7 @@ export default function AddJobClient() {
     } else {
       // Generate ID client-side so we don't need a SELECT-after-INSERT (avoids RLS read issues)
       _unitId = crypto.randomUUID()
-      const unitTypeVal = isHotel ? 'standard_room' : 'apartment'
+      const unitTypeVal = isHotel ? 'standard_room' : orgType === 'body_corporate' ? 'other' : 'apartment'
       const { error } = await supabase
         .from('units')
         .insert({ id: _unitId, project_id: projectId, name: roomName, unit_type: unitTypeVal })
@@ -384,10 +384,15 @@ export default function AddJobClient() {
         setRoomNumberBusy(false)
         return
       }
-      const roomAreas = isHotel ? DEFAULT_HOTEL_ROOM_AREAS : DEFAULT_ROOMS
-      await supabase.from('rooms').insert(
-        roomAreas.map((name, i) => ({ unit_id: _unitId, name, room_order: i }))
-      )
+      if (isHotel) {
+        await supabase.from('rooms').insert(
+          DEFAULT_HOTEL_ROOM_AREAS.map((name, i) => ({ unit_id: _unitId, name, room_order: i }))
+        )
+      } else if (orgType === 'property_manager') {
+        await supabase.from('rooms').insert(
+          DEFAULT_ROOMS.map((name, i) => ({ unit_id: _unitId, name, room_order: i }))
+        )
+      }
     }
 
     setUnitId(_unitId)
@@ -570,10 +575,12 @@ export default function AddJobClient() {
 
   // ─── STEP: Room/Unit number (hotels & property managers) ─────────────────────
   if (step === 'room_number') {
-    const unitLabel = terms.unit.toLowerCase()
+    const unitLabel = orgType === 'body_corporate' ? 'area or unit' : terms.unit.toLowerCase()
     const placeholder = isHotel
       ? 'e.g. 101, Suite 201, Penthouse'
-      : 'e.g. Apt 4B, Unit 12, Studio 3'
+      : orgType === 'body_corporate'
+        ? 'e.g. Pool, Gym, Unit 5A, Parking B1'
+        : 'e.g. Apt 4B, Unit 12, Studio 3'
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-white">
         <div className="border-b border-slate-200 px-4 pt-safe pb-4">
