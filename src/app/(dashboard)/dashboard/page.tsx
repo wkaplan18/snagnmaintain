@@ -56,6 +56,8 @@ export default async function DashboardPage() {
       project_name: p.name,
       total_snags: c.total,
       open_snags: c.open,
+      in_progress_snags: 0,
+      critical_snags: 0,
       resolved_snags: c.approved,
       completion_pct: c.total > 0 ? Math.round((c.approved / c.total) * 100) : 0,
     }
