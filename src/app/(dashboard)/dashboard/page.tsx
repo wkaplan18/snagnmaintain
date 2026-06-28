@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DashboardClient from '@/components/dashboard/DashboardClient'
-import { DASHBOARD_TERMS, DASHBOARD_TERMS as DT } from '@/types'
+import { DASHBOARD_TERMS } from '@/types'
 import type { OrgType } from '@/types'
 
 export default async function DashboardPage() {
@@ -25,23 +25,10 @@ export default async function DashboardPage() {
   // Run all remaining queries in parallel — no dependencies between them
   const [
     { data: projectStats },
-    { data: recentSnags },
     { count: needsReview },
     { data: projects },
   ] = await Promise.all([
     supabase.from('snag_stats_by_project').select('*'),
-    supabase
-      .from('snags')
-      .select(`
-        id, snag_number, title, status, created_at,
-        project:projects(name),
-        unit:units(name),
-        room:rooms(name),
-        contractor:contractors(name)
-      `)
-      .eq('project_id', supabase.from('projects').select('id').eq('org_id', orgId) as never)
-      .order('created_at', { ascending: false })
-      .limit(10),
     supabase
       .from('snags')
       .select('id', { count: 'exact', head: true })
@@ -60,23 +47,12 @@ export default async function DashboardPage() {
   const orgType = (org?.org_type ?? 'builder') as OrgType
   const terms = DASHBOARD_TERMS[orgType]
 
-  const one = <T,>(v: T | T[] | null | undefined): T | null =>
-    Array.isArray(v) ? (v[0] ?? null) : (v ?? null)
-  const flatSnags = (recentSnags ?? []).map((s) => ({
-    ...s,
-    project: one(s.project),
-    unit: one(s.unit),
-    room: one(s.room),
-    contractor: one(s.contractor),
-  }))
-
   return (
     <DashboardClient
       orgName={org?.name ?? 'My Organisation'}
       terms={terms}
       projects={projects ?? []}
       projectStats={projectStats ?? []}
-      recentSnags={flatSnags}
       needsReview={needsReview ?? 0}
     />
   )

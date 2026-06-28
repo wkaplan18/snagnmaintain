@@ -1,8 +1,8 @@
 'use client'
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import Link from 'next/link'
-import { AlertTriangle, CheckCircle, Clock, FolderOpen, Plus, ClipboardCheck, Settings } from 'lucide-react'
+import { CheckCircle, Clock, FolderOpen, Plus, ClipboardCheck, Settings } from 'lucide-react'
 import type { ProjectStats, DashboardTerms } from '@/types'
 
 interface Props {
@@ -10,36 +10,21 @@ interface Props {
   terms: DashboardTerms
   projects: Array<{ id: string; name: string; status: string; image_url: string | null; city: string | null }>
   projectStats: Array<ProjectStats & { project_name: string; project_id: string }>
-  recentSnags: Array<{
-    id: string; snag_number: number; title: string; status: string; created_at: string
-    project?: { name: string } | null
-    unit?: { name: string } | null
-    room?: { name: string } | null
-    contractor?: { name: string } | null
-  }>
   needsReview: number
 }
 
-const DONUT_COLORS = ['#DC2626', '#EA580C', '#1A56DB', '#16A34A', '#64748B']
 
-export default function DashboardClient({ orgName, terms, projects, projectStats, recentSnags, needsReview }: Props) {
+export default function DashboardClient({ orgName, terms, projects, projectStats, needsReview }: Props) {
   const totals = projectStats.reduce(
     (acc, p) => ({
       total: acc.total + (p.total_snags ?? 0),
       open: acc.open + (p.open_snags ?? 0),
-      critical: acc.critical + (p.critical_snags ?? 0),
       resolved: acc.resolved + (p.resolved_snags ?? 0),
     }),
-    { total: 0, open: 0, critical: 0, resolved: 0 }
+    { total: 0, open: 0, resolved: 0 }
   )
 
   const completionPct = totals.total > 0 ? Math.round((totals.resolved / totals.total) * 100) : 0
-
-  const donutData = [
-    { name: 'Open', value: totals.open },
-    { name: 'In Progress', value: totals.total - totals.open - totals.resolved },
-    { name: 'Resolved', value: totals.resolved },
-  ].filter(d => d.value > 0)
 
   return (
     <div className="min-h-screen bg-sf-base pb-28">
@@ -157,16 +142,6 @@ export default function DashboardClient({ orgName, terms, projects, projectStats
           <div className="sf-card p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Critical</p>
-                <p className="mt-1 text-3xl font-bold text-orange-600">{totals.critical}</p>
-              </div>
-              <AlertTriangle className="h-5 w-5 text-orange-200 mt-0.5" />
-            </div>
-          </div>
-
-          <div className="sf-card p-4">
-            <div className="flex items-start justify-between">
-              <div>
                 <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Complete</p>
                 <p className="mt-1 text-3xl font-bold text-green-600">{completionPct}%</p>
               </div>
@@ -214,33 +189,6 @@ export default function DashboardClient({ orgName, terms, projects, projectStats
           </div>
         </div>
 
-        {/* Status chart */}
-        {donutData.length > 0 && (
-          <div className="sf-card p-4">
-            <h2 className="mb-3 text-sm font-semibold text-slate-900">Status Breakdown</h2>
-            <div className="flex items-center gap-4">
-              <ResponsiveContainer width={120} height={120}>
-                <PieChart>
-                  <Pie data={donutData} cx={55} cy={55} innerRadius={35} outerRadius={55} dataKey="value" strokeWidth={0}>
-                    {donutData.map((_, i) => (
-                      <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="space-y-1.5">
-                {donutData.map((d, i) => (
-                  <div key={d.name} className="flex items-center gap-2">
-                    <div className="h-2.5 w-2.5 rounded-full" style={{ background: DONUT_COLORS[i] }} />
-                    <span className="text-xs text-slate-600">{d.name}</span>
-                    <span className="ml-auto text-xs font-semibold text-slate-900">{d.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Project completion bar chart */}
         {projectStats.length > 0 && (
           <div className="sf-card p-4">
@@ -257,33 +205,6 @@ export default function DashboardClient({ orgName, terms, projects, projectStats
           </div>
         )}
 
-        {/* Recent snags */}
-        <div className="sf-card overflow-hidden">
-          <div className="px-4 pt-4 pb-3">
-            <h2 className="text-sm font-semibold text-slate-900">Recent {terms.issues}</h2>
-          </div>
-          <div className="divide-y divide-slate-100">
-            {recentSnags.map(snag => (
-              <Link key={snag.id} href={`/snags/${snag.id}`} className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
-                <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-[#1A56DB]" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">#{snag.snag_number} {snag.title}</p>
-                  <p className="text-xs text-slate-400 truncate">
-                    {snag.project?.name} · {snag.unit?.name}
-                    {snag.room ? ` · ${snag.room.name}` : ''}
-                  </p>
-                </div>
-                <span className={`flex-shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${
-                  snag.status === 'open' ? 'bg-red-50 text-red-700' :
-                  snag.status === 'closed' ? 'bg-gray-100 text-gray-600' :
-                  'bg-blue-50 text-blue-700'
-                }`}>
-                  {snag.status.replace('_', ' ')}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   )
