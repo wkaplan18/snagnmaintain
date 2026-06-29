@@ -313,16 +313,12 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
         </div>
       )}
       {photos.length < 3 && (
-        <button
-          onClick={() => photoInputRef.current?.click()}
-          disabled={uploadingPhoto}
-          className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#1A56DB] hover:underline disabled:opacity-50"
-        >
+        <label className={`mt-2 inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer ${uploadingPhoto ? 'opacity-50 pointer-events-none text-[#1A56DB]' : 'text-[#1A56DB] hover:underline'}`}>
           {uploadingPhoto ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
           {uploadingPhoto ? 'Uploading…' : '+ Add photo'}
-        </button>
+          <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handleAddPhoto} disabled={uploadingPhoto} />
+        </label>
       )}
-      <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handleAddPhoto} />
 
       {resolutionPhotos.length > 0 && (
         <>

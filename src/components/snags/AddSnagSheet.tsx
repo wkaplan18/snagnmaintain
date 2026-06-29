@@ -224,20 +224,17 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
             <p className="text-lg font-semibold text-slate-900">Take a photo</p>
             <p className="mt-1 text-sm text-slate-500">Then circle the problem with your finger</p>
           </div>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="sf-btn-primary w-full max-w-xs py-4 text-base"
-          >
+          <label className="sf-btn-primary w-full max-w-xs py-4 text-base cursor-pointer flex items-center justify-center gap-2">
             <Camera className="h-5 w-5" />
-            Open Camera
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
+            Add Photo
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </label>
           <button
             onClick={() => setStep('form')}
             className="text-sm text-slate-400 underline underline-offset-2"
