@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 export default function LoginClient() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [remember, setRemember] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const supabase = createClient()
@@ -20,10 +21,19 @@ export default function LoginClient() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError('Incorrect email or password.')
-    } else {
-      router.push('/dashboard')
+      setLoading(false)
+      return
     }
-    setLoading(false)
+    if (!remember) {
+      // Remove persisted session from localStorage so it doesn't survive a browser restart
+      Object.keys(localStorage)
+        .filter(k => k.startsWith('sb-'))
+        .forEach(k => sessionStorage.setItem(k, localStorage.getItem(k) ?? ''))
+      Object.keys(localStorage)
+        .filter(k => k.startsWith('sb-'))
+        .forEach(k => localStorage.removeItem(k))
+    }
+    router.push('/dashboard')
   }
 
   async function handleGoogleLogin() {
@@ -98,6 +108,15 @@ export default function LoginClient() {
               className="sf-input"
             />
           </div>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={e => setRemember(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 accent-[#1A56DB]"
+            />
+            <span className="text-sm text-slate-600">Keep me signed in</span>
+          </label>
           {error && <p className="text-xs text-red-600">{error}</p>}
           <button type="submit" disabled={loading} className="sf-btn-primary w-full">
             {loading ? 'Signing in…' : 'Sign in'}
