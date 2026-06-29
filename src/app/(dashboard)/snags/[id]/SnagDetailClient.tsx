@@ -106,6 +106,7 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
   async function handleAddPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    if (photos.length >= 3) return
     setUploadingPhoto(true)
     try {
       const compressed = await compressImage(file)
@@ -311,15 +312,17 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
           <Camera className="h-4 w-4" /> No photos attached
         </div>
       )}
-      <button
-        onClick={() => photoInputRef.current?.click()}
-        disabled={uploadingPhoto}
-        className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#1A56DB] hover:underline disabled:opacity-50"
-      >
-        {uploadingPhoto ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
-        {uploadingPhoto ? 'Uploading…' : '+ Add photo'}
-      </button>
-      <input ref={photoInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleAddPhoto} />
+      {photos.length < 3 && (
+        <button
+          onClick={() => photoInputRef.current?.click()}
+          disabled={uploadingPhoto}
+          className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#1A56DB] hover:underline disabled:opacity-50"
+        >
+          {uploadingPhoto ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
+          {uploadingPhoto ? 'Uploading…' : '+ Add photo'}
+        </button>
+      )}
+      <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handleAddPhoto} />
 
       {resolutionPhotos.length > 0 && (
         <>

@@ -42,6 +42,13 @@ export async function POST(req: NextRequest) {
   // Handle resolution photo upload
   const resolutionPhoto = formData.get('resolutionPhoto') as File | null
   if (resolutionPhoto && resolutionPhoto.size > 0) {
+    const { count: existingFixPhotos } = await supabase
+      .from('attachments')
+      .select('id', { count: 'exact', head: true })
+      .eq('snag_id', snagId)
+      .eq('is_resolution', true)
+
+    if ((existingFixPhotos ?? 0) < 3) {
     const buffer = await resolutionPhoto.arrayBuffer()
     const fileName = `snags/${snagId}/resolution-${Date.now()}.jpg`
 
@@ -61,6 +68,7 @@ export async function POST(req: NextRequest) {
       is_resolution: true,
       uploaded_by_contractor: true,
     })
+    }
   }
 
   const resolutionNote = formData.get('resolutionNote') as string | null

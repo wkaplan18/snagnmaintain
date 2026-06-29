@@ -544,7 +544,6 @@ export default function ContractorPortal({ contractor, snags, token }: Props) {
         ref={photoPickerRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={handlePhotoSelect}
       />

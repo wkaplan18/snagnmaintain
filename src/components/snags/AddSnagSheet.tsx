@@ -235,7 +235,6 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            capture="environment"
             className="hidden"
             onChange={handleFileChange}
           />
