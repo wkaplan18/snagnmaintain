@@ -136,7 +136,7 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
     setInlineBusy(false)
   }
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
+
 
   const handlePhotoTaken = (file: File) => {
     setPhoto(file)
@@ -221,19 +221,17 @@ export default function AddSnagSheet({ projectId, unitId, rooms, contractors, te
             <Camera className="h-12 w-12 text-[#1A56DB]" />
           </div>
           <div className="text-center">
-            <p className="text-lg font-semibold text-slate-900">Take a photo</p>
+            <p className="text-lg font-semibold text-slate-900">Add a photo</p>
             <p className="mt-1 text-sm text-slate-500">Then circle the problem with your finger</p>
           </div>
           <label className="sf-btn-primary w-full max-w-xs py-4 text-base cursor-pointer flex items-center justify-center gap-2">
             <Camera className="h-5 w-5" />
-            Add Photo
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
+            Take Photo
+            <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
+          </label>
+          <label className="w-full max-w-xs flex items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white py-4 text-base font-medium text-slate-700 cursor-pointer hover:bg-slate-50 active:bg-slate-100 transition-colors">
+            Choose from Library
+            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
           </label>
           <button
             onClick={() => setStep('form')}
