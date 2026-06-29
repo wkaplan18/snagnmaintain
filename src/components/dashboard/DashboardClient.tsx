@@ -140,16 +140,6 @@ export default function DashboardClient({ orgName, terms, projects, projectStats
             </div>
           </div>
 
-          <div className="sf-card p-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Complete</p>
-                <p className="mt-1 text-3xl font-bold text-green-600">{completionPct}%</p>
-              </div>
-              <CheckCircle className="h-5 w-5 text-green-200 mt-0.5" />
-            </div>
-          </div>
-
           <Link href="/snags?tab=rejected" className="sf-card p-4 transition-colors hover:bg-slate-50">
             <div className="flex items-start justify-between">
               <div>
@@ -159,6 +149,16 @@ export default function DashboardClient({ orgName, terms, projects, projectStats
               <XCircle className={`h-5 w-5 mt-0.5 ${totalRejected > 0 ? 'text-amber-300' : 'text-slate-200'}`} />
             </div>
           </Link>
+
+          <div className="sf-card p-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Complete</p>
+                <p className="mt-1 text-3xl font-bold text-green-600">{completionPct}%</p>
+              </div>
+              <CheckCircle className="h-5 w-5 text-green-200 mt-0.5" />
+            </div>
+          </div>
         </div>
 
         {/* Projects */}
