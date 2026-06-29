@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Camera, Loader2, ChevronDown, BookUser } from 'lucide-react'
 import PhotoAnnotator from '@/components/snags/PhotoAnnotator'
 import { createClient } from '@/lib/supabase/client'
