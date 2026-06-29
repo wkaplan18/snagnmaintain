@@ -1,8 +1,101 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { Camera, CheckCircle, Loader2, X } from 'lucide-react'
+import { useRef, useState, useCallback, useEffect } from 'react'
+import { Camera, CheckCircle, Loader2, Pencil, RotateCcw, X } from 'lucide-react'
 import { compressImage } from '@/lib/compressImage'
+
+const MARKUP_COLORS = ['#ef4444', '#f97316', '#3b82f6', '#22c55e', '#ffffff']
+
+function PhotoMarkupEditor({ photoUrl, onDone, onCancel }: {
+  photoUrl: string
+  onDone: (file: File) => void
+  onCancel: () => void
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const imgRef = useRef<HTMLImageElement | null>(null)
+  const [color, setColor] = useState('#ef4444')
+  const [paths, setPaths] = useState<Array<{ color: string; pts: { x: number; y: number }[] }>>([])
+  const drawing = useRef(false)
+  const currentPts = useRef<{ x: number; y: number }[]>([])
+
+  const redraw = useCallback((extraPts?: { x: number; y: number }[]) => {
+    const canvas = canvasRef.current
+    const img = imgRef.current
+    if (!canvas || !img) return
+    const ctx = canvas.getContext('2d')!
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+    const all = extraPts ? [...paths, { color, pts: extraPts }] : paths
+    for (const path of all) {
+      if (path.pts.length < 2) continue
+      ctx.beginPath()
+      ctx.strokeStyle = path.color
+      ctx.lineWidth = Math.max(3, canvas.width / 120)
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.moveTo(path.pts[0].x, path.pts[0].y)
+      for (let i = 1; i < path.pts.length; i++) ctx.lineTo(path.pts[i].x, path.pts[i].y)
+      ctx.stroke()
+    }
+  }, [paths, color])
+
+  function initCanvas(img: HTMLImageElement) {
+    const canvas = canvasRef.current!
+    canvas.width = img.naturalWidth
+    canvas.height = img.naturalHeight
+    imgRef.current = img
+    const ctx = canvas.getContext('2d')!
+    ctx.drawImage(img, 0, 0)
+  }
+
+  function getXY(e: React.TouchEvent | React.MouseEvent) {
+    const canvas = canvasRef.current!
+    const rect = canvas.getBoundingClientRect()
+    const sx = canvas.width / rect.width
+    const sy = canvas.height / rect.height
+    const src = 'touches' in e ? e.touches[0] : e
+    return { x: (src.clientX - rect.left) * sx, y: (src.clientY - rect.top) * sy }
+  }
+
+  function onStart(e: React.TouchEvent | React.MouseEvent) { e.preventDefault(); drawing.current = true; currentPts.current = [getXY(e)] }
+  function onMove(e: React.TouchEvent | React.MouseEvent) { e.preventDefault(); if (!drawing.current) return; currentPts.current = [...currentPts.current, getXY(e)]; redraw(currentPts.current) }
+  function onEnd(e: React.TouchEvent | React.MouseEvent) { e.preventDefault(); if (!drawing.current || currentPts.current.length < 2) { drawing.current = false; return }; const pts = [...currentPts.current]; currentPts.current = []; drawing.current = false; setPaths(p => [...p, { color, pts }]) }
+
+  useEffect(() => { redraw() }, [redraw])
+
+  function handleDone() {
+    const canvas = canvasRef.current
+    if (!canvas) { onCancel(); return }
+    const timeout = setTimeout(() => onCancel(), 6000)
+    canvas.toBlob(blob => { clearTimeout(timeout); if (!blob) { onCancel(); return }; onDone(new File([blob], 'marked-up.jpg', { type: 'image/jpeg' })) }, 'image/jpeg', 0.92)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-black">
+      <img src={photoUrl} className="hidden" alt="" onLoad={e => initCanvas(e.currentTarget)} />
+      <div className="flex-1 flex items-center justify-center overflow-hidden">
+        <canvas ref={canvasRef} className="max-h-full max-w-full touch-none" style={{ cursor: 'crosshair' }}
+          onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
+          onMouseDown={onStart} onMouseMove={onMove} onMouseUp={onEnd} />
+      </div>
+      <div className="bg-black/90" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+        <div className="flex items-center justify-center gap-4 px-4 pt-3 pb-2">
+          {MARKUP_COLORS.map(c => (
+            <button key={c} onClick={() => setColor(c)} className="h-9 w-9 flex-shrink-0 rounded-full border-[3px] transition-transform active:scale-90"
+              style={{ backgroundColor: c, borderColor: color === c ? 'white' : 'rgba(255,255,255,0.2)' }} />
+          ))}
+        </div>
+        <div className="flex items-center justify-between px-4 pb-3">
+          <button onClick={() => setPaths(p => p.slice(0, -1))} disabled={paths.length === 0} className="flex items-center gap-1.5 text-sm text-white disabled:opacity-40">
+            <RotateCcw className="h-4 w-4" /> Undo
+          </button>
+          <button onClick={handleDone} className="rounded-xl bg-white px-6 py-2.5 text-sm font-bold text-black active:scale-95 transition-transform">Done</button>
+          <button onClick={onCancel} className="text-sm text-slate-400">Cancel</button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function ReportClient({
   projectId,
@@ -15,6 +108,7 @@ export default function ReportClient({
 }) {
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
+  const [showMarkup, setShowMarkup] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [unitName, setUnitName] = useState('')
@@ -102,6 +196,13 @@ export default function ReportClient({
           <label className="mb-2 block text-sm font-semibold text-slate-700">
             Photo <span className="font-normal text-slate-400">(optional but helpful)</span>
           </label>
+          {showMarkup && photoUrl && (
+            <PhotoMarkupEditor
+              photoUrl={photoUrl}
+              onDone={file => { setPhoto(file); setPhotoUrl(URL.createObjectURL(file)); setShowMarkup(false) }}
+              onCancel={() => setShowMarkup(false)}
+            />
+          )}
           {photoUrl ? (
             <div className="relative">
               <img src={photoUrl} alt="Issue" className="h-52 w-full rounded-2xl object-cover" />
@@ -111,6 +212,13 @@ export default function ReportClient({
                 className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white"
               >
                 <X className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowMarkup(true)}
+                className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#1A56DB] underline underline-offset-2"
+              >
+                <Pencil className="h-3.5 w-3.5" /> Mark up photo
               </button>
             </div>
           ) : (
