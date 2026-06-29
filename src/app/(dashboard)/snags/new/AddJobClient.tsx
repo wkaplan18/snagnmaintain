@@ -667,9 +667,10 @@ export default function AddJobClient() {
                 </button>
               </div>
               <div className="mt-2 flex items-center gap-4">
-                <button onClick={() => fileInputRef.current?.click()} className="text-xs font-medium text-slate-400 underline underline-offset-2">
+                <label className="text-xs font-medium text-slate-400 underline underline-offset-2 cursor-pointer">
                   Retake
-                </button>
+                  <input ref={fileInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoChange} />
+                </label>
                 <button
                   onClick={() => setShowMarkup(true)}
                   className="inline-flex items-center gap-1.5 text-xs font-medium text-[#1A56DB] underline underline-offset-2"
@@ -679,17 +680,21 @@ export default function AddJobClient() {
               </div>
             </div>
           ) : (
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex h-52 w-full max-w-sm flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 text-slate-400 active:bg-slate-100 transition-colors"
-            >
-              <Camera className="h-14 w-14" />
-              <span className="text-base font-medium">Tap to take a photo</span>
-            </button>
+            <div className="flex w-full max-w-sm flex-col gap-3">
+              <label className="flex h-44 w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 text-slate-400 active:bg-slate-100 transition-colors cursor-pointer">
+                <Camera className="h-14 w-14" />
+                <span className="text-base font-medium">Take a photo</span>
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoChange} />
+              </label>
+              <label className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white py-3 text-sm font-medium text-slate-600 cursor-pointer hover:bg-slate-50 active:bg-slate-100 transition-colors">
+                Choose from Library
+                <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+              </label>
+            </div>
           )}
         </div>
 
-        <input ref={fileInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoChange} />
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
 
         <div className="px-4 pb-28 pt-4 space-y-2">
           <button onClick={() => setStep('details')} className="sf-btn-primary flex w-full items-center justify-center gap-2 py-4 text-base">
