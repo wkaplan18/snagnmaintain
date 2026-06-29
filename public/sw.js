@@ -1,4 +1,4 @@
-const CACHE = 'snagit-v1'
+const CACHE = 'snagit-v2'
 const OFFLINE_URL = '/offline'
 
 // Static assets to pre-cache
