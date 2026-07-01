@@ -68,7 +68,16 @@ export async function POST(req: NextRequest) {
     <tr><td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
         <tr><td style="background:#fff;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;border-bottom:1px solid #E2E8F0">
-          <img src="https://snagitapp.co.za/icons/icon-192.png" alt="SnagIT" width="48" height="48" style="border-radius:12px;display:block;margin:0 auto 10px" />
+          <table cellpadding="0" cellspacing="0" style="margin:0 auto 14px">
+            <tr>
+              <td style="vertical-align:middle;padding-right:10px">
+                <img src="https://snagitapp.co.za/icons/icon-192.png" alt="SnagIT" width="36" height="36" style="border-radius:9px;display:block" />
+              </td>
+              <td style="vertical-align:middle">
+                <p style="margin:0;font-size:18px;font-weight:800;color:#1E293B;letter-spacing:-0.02em">Snag<span style="color:#1A56DB">IT</span></p>
+              </td>
+            </tr>
+          </table>
           <p style="margin:0;font-size:20px;font-weight:700;color:#1E293B">Material Request</p>
           <p style="margin:6px 0 0;font-size:13px;color:#64748B">${projectName}</p>
         </td></tr>
