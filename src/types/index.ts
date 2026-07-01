@@ -276,6 +276,27 @@ export const BUILDER_UNIT_TYPES: UnitType[] = ['apartment', 'house', 'townhouse'
 export const TRADES = ['Painter', 'Tiler', 'Plumber', 'Electrician', 'Carpenter', 'Builder', 'Glazier', 'HVAC', 'Waterproofing', 'General']
 export const HOTEL_ROLES = ['Maintenance', 'Housekeeping', 'Front Desk', 'Security', 'F&B', 'Management', 'Concierge', 'Other']
 
+export type MaterialRequestStatus = 'pending' | 'ordered' | 'fulfilled'
+export type MaterialRequestUrgency = 'normal' | 'urgent'
+
+export interface MaterialRequest {
+  id: string
+  org_id: string
+  project_id: string
+  requested_by: string | null
+  item: string
+  quantity: string | null
+  urgency: MaterialRequestUrgency
+  notes: string | null
+  status: MaterialRequestStatus
+  status_note: string | null
+  ordered_at: string | null
+  fulfilled_at: string | null
+  created_at: string
+  // joined
+  project?: { id: string; name: string } | null
+}
+
 export const SA_PROVINCES = [
   'Gauteng',
   'Western Cape',

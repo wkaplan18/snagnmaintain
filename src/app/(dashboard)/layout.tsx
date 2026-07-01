@@ -29,6 +29,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     fixedCount = count ?? 0
   }
 
+  const activeOrg = orgs.find(o => o.org_id === activeOrgId)
+  const orgType2 = (activeOrg?.org?.org_type ?? 'builder') as OrgType
+
   return (
     <div className="relative min-h-screen pt-safe">
       {orgs.length > 1 && (
@@ -38,7 +41,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       )}
       {children}
-      <BottomNav terms={terms} fixedCount={fixedCount} />
+      <BottomNav terms={terms} fixedCount={fixedCount} orgType={orgType2} />
     </div>
   )
 }

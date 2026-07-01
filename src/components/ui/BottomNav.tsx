@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, FolderOpen, AlertCircle, Users, FileText } from 'lucide-react'
-import type { DashboardTerms } from '@/types'
+import { LayoutDashboard, FolderOpen, AlertCircle, Users, FileText, Package } from 'lucide-react'
+import type { DashboardTerms, OrgType } from '@/types'
 
-export default function BottomNav({ terms, fixedCount = 0 }: { terms: DashboardTerms; fixedCount?: number }) {
+export default function BottomNav({ terms, fixedCount = 0, orgType = 'builder' }: { terms: DashboardTerms; fixedCount?: number; orgType?: OrgType }) {
   const pathname = usePathname()
 
   const NAV_ITEMS = [
@@ -13,7 +13,9 @@ export default function BottomNav({ terms, fixedCount = 0 }: { terms: DashboardT
     { href: '/projects',    label: terms.projects, icon: FolderOpen,      badge: 0 },
     { href: '/snags',       label: terms.issues,   icon: AlertCircle,     badge: fixedCount },
     { href: '/contractors', label: 'Team',         icon: Users,           badge: 0 },
-    { href: '/reports',     label: 'Reports',      icon: FileText,        badge: 0 },
+    orgType === 'builder'
+      ? { href: '/materials', label: 'Materials', icon: Package,   badge: 0 }
+      : { href: '/reports',   label: 'Reports',   icon: FileText,  badge: 0 },
   ]
 
   return (
