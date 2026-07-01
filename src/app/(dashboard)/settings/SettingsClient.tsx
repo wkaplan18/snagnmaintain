@@ -27,6 +27,7 @@ interface Props {
   currentUserId: string
   profile: { full_name: string | null; whatsapp: string | null; phone: string | null; job_title: string | null }
   orgName: string | null
+  orgEmail: string | null
   orgType: string | null
   orgId: string | null
   members: Member[]
@@ -38,7 +39,7 @@ function initials(name: string | null, email: string) {
   return email.slice(0, 2).toUpperCase()
 }
 
-export default function SettingsClient({ email, currentUserId, profile, orgName, orgType, orgId, members, pendingInvites }: Props) {
+export default function SettingsClient({ email, currentUserId, profile, orgName, orgEmail, orgType, orgId, members, pendingInvites }: Props) {
   const orgTypeConfig = orgType ? ORG_TYPE_CONFIG[orgType as OrgType] : null
   const terms = DASHBOARD_TERMS[(orgType ?? 'builder') as OrgType]
   const [fullName, setFullName] = useState(profile.full_name ?? '')
@@ -46,6 +47,7 @@ export default function SettingsClient({ email, currentUserId, profile, orgName,
   const [phone, setPhone] = useState(profile.phone ?? '')
   const [jobTitle, setJobTitle] = useState(profile.job_title ?? '')
   const [orgNameVal, setOrgNameVal] = useState(orgName ?? '')
+  const [orgEmailVal, setOrgEmailVal] = useState(orgEmail ?? '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -75,7 +77,7 @@ export default function SettingsClient({ email, currentUserId, profile, orgName,
         phone: phone.trim() || null,
         job_title: jobTitle.trim() || null,
       }).eq('id', user!.id),
-      orgId ? supabase.from('organizations').update({ name: orgNameVal.trim() || null }).eq('id', orgId) : Promise.resolve({ error: null }),
+      orgId ? supabase.from('organizations').update({ name: orgNameVal.trim() || null, email: orgEmailVal.trim() || null }).eq('id', orgId) : Promise.resolve({ error: null }),
     ])
 
     if (error || orgError) {
@@ -175,6 +177,18 @@ export default function SettingsClient({ email, currentUserId, profile, orgName,
             placeholder="My Organisation"
             className="sf-input"
           />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">Office email</label>
+          <input
+            type="email"
+            value={orgEmailVal}
+            onChange={e => setOrgEmailVal(e.target.value)}
+            placeholder="office@example.com"
+            className="sf-input"
+          />
+          <p className="mt-1 text-xs text-slate-400">Material requests will be emailed here.</p>
         </div>
 
         <div className="h-px bg-slate-100" />

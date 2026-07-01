@@ -20,6 +20,11 @@ export default async function SettingsPage() {
   const activeOrg = allOrgs.find(o => o.org_id === orgId)
   const org = activeOrg?.org ?? null
 
+  const admin2 = createAdminClient()
+  const { data: orgData } = orgId
+    ? await admin2.from('organizations').select('email').eq('id', orgId).single()
+    : { data: null }
+
   // Fetch team members + pending invites in parallel
   const admin = createAdminClient()
   const [{ data: rawMembers }, { data: invites }] = await Promise.all([
@@ -59,6 +64,7 @@ export default async function SettingsPage() {
       currentUserId={user.id}
       profile={profile ?? { full_name: null, whatsapp: null, phone: null, job_title: null }}
       orgName={org?.name ?? null}
+      orgEmail={orgData?.email ?? null}
       orgType={org?.org_type ?? null}
       orgId={orgId}
       members={members}
