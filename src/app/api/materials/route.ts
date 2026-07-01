@@ -106,9 +106,12 @@ export async function POST(req: NextRequest) {
           </table>
           <table cellpadding="0" cellspacing="0" style="margin:28px auto 0">
             <tr><td style="background:#1A56DB;border-radius:12px;padding:14px 32px;text-align:center">
-              <a href="${BASE_URL}/materials" style="color:#fff;font-size:15px;font-weight:700;text-decoration:none">View in SnagIT →</a>
+              <a href="${BASE_URL}/materials" style="color:#fff;font-size:15px;font-weight:700;text-decoration:none">View &amp; update in SnagIT →</a>
             </td></tr>
           </table>
+          <p style="margin:20px 0 0;font-size:12px;color:#94A3B8;text-align:center;line-height:1.6">
+            Don't have a SnagIT account? Ask <strong style="color:#64748B">${org?.name ?? 'your team'}</strong> to invite you<br>so you can mark requests as ordered or fulfilled directly in the app.
+          </p>
         </td></tr>
         <tr><td style="padding:16px 0;text-align:center">
           <p style="margin:0;font-size:11px;color:#CBD5E1">SnagIT · snagitapp.co.za</p>
