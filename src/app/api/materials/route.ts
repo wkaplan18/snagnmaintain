@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
                 <img src="https://snagitapp.co.za/icons/icon-192.png" alt="SnagIT" width="36" height="36" style="border-radius:9px;display:block" />
               </td>
               <td style="vertical-align:middle">
-                <p style="margin:0;font-size:18px;font-weight:800;color:#1E293B;letter-spacing:-0.02em">Snag<span style="color:#1A56DB">IT</span></p>
+                <p style="margin:0;font-size:18px;font-weight:700;color:#1E293B;letter-spacing:-0.02em">Snag<span style="color:#22C55E">IT</span></p>
               </td>
             </tr>
           </table>
