@@ -362,6 +362,10 @@ export default function LandingPage() {
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: '#1A56DB' }}>Pricing</p>
           <h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">Simple, flat pricing.</h2>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-500">You manage everything. Your contractors just fix things — no logins, no app installs, no per-user fees. Ever.</p>
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full px-5 py-2.5" style={{ background: 'linear-gradient(135deg, rgba(26,86,219,0.08), rgba(99,102,241,0.08))', border: '1px solid rgba(26,86,219,0.2)' }}>
+            <svg className="h-4 w-4 shrink-0" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#1A56DB" strokeWidth="1.5"/><path d="M5 8.5l2 2 4-4" stroke="#1A56DB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <span className="text-sm font-semibold" style={{ color: '#1A56DB' }}>One of the best-value platforms in the market — priced per property, never per user</span>
+          </div>
         </FadeUp>
 
         <div className="mx-auto grid max-w-6xl items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -385,6 +389,7 @@ export default function LandingPage() {
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     '1 property',
+                    'Unlimited users',
                     'Unlimited contractors',
                     'Photo before & after logging',
                     'Live dashboard & reports',
@@ -423,6 +428,7 @@ export default function LandingPage() {
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     'Up to 5 properties',
+                    'Unlimited users',
                     'Unlimited contractors',
                     'Photo before & after logging',
                     'Live dashboard & reports',
@@ -461,6 +467,7 @@ export default function LandingPage() {
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     'Up to 20 properties',
+                    'Unlimited users',
                     'Unlimited contractors',
                     'Photo before & after logging',
                     'Live dashboard & reports',
@@ -497,6 +504,7 @@ export default function LandingPage() {
                 <ul className="mb-8 flex-1 space-y-3">
                   {[
                     'Unlimited properties',
+                    'Unlimited users',
                     'Unlimited contractors',
                     'Photo before & after logging',
                     'Live dashboard & reports',
