@@ -19,7 +19,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     supabase.from('projects').select('id, org_id, name, address, city, province, status, description, client_name, client_whatsapp, share_token').eq('id', id).maybeSingle(),
     supabase.from('units').select('id, name, unit_type, floor_number, rooms(id, unit_id, name, room_order, created_at)').eq('project_id', id).order('created_at', { ascending: true }),
     supabase.from('contractors').select('*').eq('org_id', orgId).eq('is_active', true).order('name'),
-    supabase.from('snags').select('*, attachments(*), contractor:contractors(id, name, company), room:rooms(id, name), unit:units(id, name)').eq('project_id', id).order('created_at', { ascending: false }),
+    supabase.from('snags').select('*, attachments(*), contractor:contractors(id, name, company, whatsapp, trade, access_token), room:rooms(id, name), unit:units(id, name)').eq('project_id', id).order('created_at', { ascending: false }),
   ])
 
   if (!project) notFound()
