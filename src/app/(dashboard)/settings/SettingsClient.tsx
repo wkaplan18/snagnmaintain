@@ -188,7 +188,7 @@ export default function SettingsClient({ email, currentUserId, profile, orgName,
             placeholder="office@example.com"
             className="sf-input"
           />
-          <p className="mt-1 text-xs text-slate-400">Material requests will be emailed here.</p>
+          <p className="mt-1 text-xs text-slate-400">Material requests and client questions will be emailed here.</p>
         </div>
 
         <div className="h-px bg-slate-100" />
