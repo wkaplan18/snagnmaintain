@@ -73,6 +73,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
       project={project}
       units={unitGroups}
       stats={{ total: flatSnags.length, resolved, inProgress }}
+      token={token}
     />
   )
 }

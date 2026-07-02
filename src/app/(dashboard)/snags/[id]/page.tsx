@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import { getAllUserOrgs, getActiveOrgId } from '@/lib/activeOrg'
 import SnagDetailClient from './SnagDetailClient'
@@ -15,6 +16,8 @@ export default async function SnagDetailPage({ params }: { params: Promise<{ id:
   const orgId = (await getActiveOrgId(user.id, allOrgs)) ?? ''
   const activeOrg = allOrgs.find(o => o.org_id === orgId)
 
+  const admin = createAdminClient()
+
   const [{ data: snag }, { data: contractors }] = await Promise.all([
     supabase.from('snags').select(`
       *,
@@ -29,9 +32,10 @@ export default async function SnagDetailPage({ params }: { params: Promise<{ id:
 
   if (!snag) notFound()
 
-  const { data: rooms } = await supabase
-    .from('rooms').select('id, name, room_order')
-    .eq('unit_id', snag.unit_id).order('room_order')
+  const [{ data: rooms }, { data: questions }] = await Promise.all([
+    supabase.from('rooms').select('id, name, room_order').eq('unit_id', snag.unit_id).order('room_order'),
+    admin.from('snag_questions').select('id, snag_id, body, created_at, reply_body, replied_at').eq('snag_id', id).order('created_at', { ascending: true }),
+  ])
 
   const terms = DASHBOARD_TERMS[(activeOrg?.org?.org_type ?? 'builder') as OrgType]
 
@@ -47,5 +51,5 @@ export default async function SnagDetailPage({ params }: { params: Promise<{ id:
     project: one(snag.project),
   }
 
-  return <SnagDetailClient snag={flat} contractors={contractors ?? []} terms={terms} orgId={orgId} rooms={rooms ?? []} />
+  return <SnagDetailClient snag={flat} contractors={contractors ?? []} terms={terms} orgId={orgId} rooms={rooms ?? []} questions={questions ?? []} />
 }

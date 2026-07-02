@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { CheckCircle, Clock, X, ChevronDown, ChevronUp } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { CheckCircle, ChevronDown, ChevronUp, Clock, Loader2, MessageCircle, X } from 'lucide-react'
 
 // ─── Client-facing status labels ─────────────────────────────────────────────
-// Intentionally simplified — clients don't need to see internal workflow steps
 function clientStatus(status: string): { label: string; color: string; bg: string } {
   if (['approved', 'closed'].includes(status))
     return { label: 'Resolved',     color: 'text-green-700',  bg: 'bg-green-50 border-green-200' }
@@ -32,6 +31,14 @@ interface ProjectInfo {
   city: string | null
   province: string | null
 }
+interface Question {
+  id: string
+  snag_id: string
+  body: string
+  created_at: string
+  reply_body: string | null
+  replied_at: string | null
+}
 
 // ─── Photo lightbox ───────────────────────────────────────────────────────────
 function PhotoViewer({ url, onClose }: { url: string; onClose: () => void }) {
@@ -58,8 +65,137 @@ function PhotoViewer({ url, onClose }: { url: string; onClose: () => void }) {
   )
 }
 
-// ─── Snag card (read-only) ────────────────────────────────────────────────────
-function SnagCard({ snag, onViewPhoto }: { snag: ClientSnag; onViewPhoto: (url: string) => void }) {
+// ─── Inline question thread ───────────────────────────────────────────────────
+function QuestionThread({
+  snagId,
+  token,
+  questions,
+  onQuestionAdded,
+}: {
+  snagId: string
+  token: string
+  questions: Question[]
+  onQuestionAdded: (q: Question) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [body, setBody] = useState('')
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+
+  const myQuestions = questions.filter(q => q.snag_id === snagId)
+
+  async function submit() {
+    if (!body.trim() || sending) return
+    setSending(true)
+    try {
+      const res = await fetch(`/api/share/${token}/questions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ snag_id: snagId, body: body.trim() }),
+      })
+      if (res.ok) {
+        const q: Question = await res.json()
+        onQuestionAdded(q)
+        setBody('')
+        setSent(true)
+        setOpen(false)
+        setTimeout(() => setSent(false), 4000)
+      }
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="mt-3 border-t border-slate-100 pt-3">
+      {/* Existing questions */}
+      {myQuestions.length > 0 && (
+        <div className="mb-3 space-y-2">
+          {myQuestions.map(q => (
+            <div key={q.id} className="space-y-1.5">
+              <div className="flex items-start gap-2">
+                <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-slate-200">
+                  <MessageCircle className="h-3 w-3 text-slate-500" />
+                </div>
+                <p className="text-sm text-slate-700 leading-relaxed">{q.body}</p>
+              </div>
+              {q.reply_body && (
+                <div className="ml-7 rounded-xl bg-[#EEF4FF] border border-[#C7D9F8] px-3 py-2">
+                  <p className="text-[11px] font-semibold text-[#1A56DB] mb-0.5">Reply</p>
+                  <p className="text-sm text-slate-700 leading-relaxed">{q.reply_body}</p>
+                </div>
+              )}
+              {!q.reply_body && (
+                <p className="ml-7 text-[11px] text-slate-400">Awaiting reply…</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Sent confirmation */}
+      {sent && (
+        <div className="mb-2 flex items-center gap-2 rounded-xl bg-green-50 border border-green-200 px-3 py-2">
+          <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+          <p className="text-sm text-green-700 font-medium">Question sent — we'll be in touch.</p>
+        </div>
+      )}
+
+      {/* Ask button / form */}
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-[#1A56DB] transition-colors"
+        >
+          <MessageCircle className="h-3.5 w-3.5" />
+          Ask a question about this item
+        </button>
+      ) : (
+        <div className="space-y-2">
+          <textarea
+            autoFocus
+            value={body}
+            onChange={e => setBody(e.target.value)}
+            placeholder="Type your question…"
+            rows={3}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-[#1A56DB] focus:bg-white resize-none transition-colors"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={submit}
+              disabled={sending || !body.trim()}
+              className="flex items-center gap-1.5 rounded-xl bg-[#1A56DB] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 active:scale-[0.97] transition-[transform,opacity]"
+            >
+              {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+              Send
+            </button>
+            <button
+              onClick={() => { setOpen(false); setBody('') }}
+              className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-500 hover:bg-slate-50 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Snag card (read-only + questions) ───────────────────────────────────────
+function SnagCard({
+  snag,
+  token,
+  questions,
+  onQuestionAdded,
+  onViewPhoto,
+}: {
+  snag: ClientSnag
+  token: string
+  questions: Question[]
+  onQuestionAdded: (q: Question) => void
+  onViewPhoto: (url: string) => void
+}) {
   const [expanded, setExpanded] = useState(false)
   const s = clientStatus(snag.status)
   const photo = snag.attachments.find(a => !a.is_resolution)
@@ -109,6 +245,12 @@ function SnagCard({ snag, onViewPhoto }: { snag: ClientSnag; onViewPhoto: (url: 
               <p className="text-sm font-medium text-amber-700">Fix submitted — under review</p>
             </div>
           )}
+          <QuestionThread
+            snagId={snag.id}
+            token={token}
+            questions={questions}
+            onQuestionAdded={onQuestionAdded}
+          />
         </div>
       )}
     </div>
@@ -120,11 +262,24 @@ interface Props {
   project: ProjectInfo
   units: UnitGroup[]
   stats: { total: number; resolved: number; inProgress: number }
+  token: string
 }
 
-export default function ClientView({ project, units, stats }: Props) {
+export default function ClientView({ project, units, stats, token }: Props) {
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null)
+  const [questions, setQuestions] = useState<Question[]>([])
   const completionPct = stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0
+
+  useEffect(() => {
+    fetch(`/api/share/${token}/questions`)
+      .then(r => r.ok ? r.json() : [])
+      .then((data: Question[]) => setQuestions(data))
+      .catch(() => {})
+  }, [token])
+
+  function handleQuestionAdded(q: Question) {
+    setQuestions(prev => [...prev, q])
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 pb-12">
@@ -211,7 +366,14 @@ export default function ClientView({ project, units, stats }: Props) {
                       )}
                       <div className="space-y-2">
                         {room.snags.map(snag => (
-                          <SnagCard key={snag.id} snag={snag} onViewPhoto={setViewingPhoto} />
+                          <SnagCard
+                            key={snag.id}
+                            snag={snag}
+                            token={token}
+                            questions={questions}
+                            onQuestionAdded={handleQuestionAdded}
+                            onViewPhoto={setViewingPhoto}
+                          />
                         ))}
                       </div>
                     </div>

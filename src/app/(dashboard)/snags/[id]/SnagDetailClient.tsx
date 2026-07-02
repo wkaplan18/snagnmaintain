@@ -4,10 +4,19 @@ import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, BookUser, Camera, ChevronRight, Loader2, MapPin, Pencil, Plus, User, CalendarClock, X } from 'lucide-react'
+import { ArrowLeft, BookUser, Camera, ChevronRight, Loader2, MapPin, MessageCircle, Pencil, Plus, User, CalendarClock, X } from 'lucide-react'
 import { waLink } from '@/lib/whatsappLink'
 import { compressImage } from '@/lib/compressImage'
 import { STATUS_CONFIG, TRADES, HOTEL_ROLES, type Attachment, type Contractor, type DashboardTerms, type SnagStatus } from '@/types'
+
+interface SnagQuestion {
+  id: string
+  snag_id: string
+  body: string
+  created_at: string
+  reply_body: string | null
+  replied_at: string | null
+}
 
 const STATUS_FLOW: SnagStatus[] = ['open', 'assigned', 'fixed', 'approved']
 
@@ -70,10 +79,13 @@ function formatWhatsApp(raw: string): string {
   return num
 }
 
-export default function SnagDetailClient({ snag, contractors, terms, orgId, rooms }: { snag: SnagDetail; contractors: Contractor[]; terms: DashboardTerms; orgId: string; rooms: { id: string; name: string; room_order: number }[] }) {
+export default function SnagDetailClient({ snag, contractors, terms, orgId, rooms, questions: initialQuestions }: { snag: SnagDetail; contractors: Contractor[]; terms: DashboardTerms; orgId: string; rooms: { id: string; name: string; room_order: number }[]; questions: SnagQuestion[] }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [origin, setOrigin] = useState('')
+  const [questions, setQuestions] = useState<SnagQuestion[]>(initialQuestions)
+  const [replyDraft, setReplyDraft] = useState<Record<string, string>>({})
+  const [replyBusy, setReplyBusy] = useState<string | null>(null)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [viewingPhoto, setViewingPhoto] = useState<string | null>(null)
   const photoInputRef = useRef<HTMLInputElement>(null)
@@ -192,6 +204,26 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
     if (!editTitle.trim()) return
     await update({ title: editTitle.trim(), description: editDescription.trim() || null, room_id: editRoomId || null })
     setEditing(false)
+  }
+
+  async function sendReply(qid: string) {
+    const text = replyDraft[qid]?.trim()
+    if (!text || replyBusy) return
+    setReplyBusy(qid)
+    try {
+      const res = await fetch(`/api/snags/${snag.id}/questions/${qid}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reply_body: text }),
+      })
+      if (res.ok) {
+        const updated: SnagQuestion = await res.json()
+        setQuestions(prev => prev.map(q => q.id === qid ? updated : q))
+        setReplyDraft(prev => { const n = { ...prev }; delete n[qid]; return n })
+      }
+    } finally {
+      setReplyBusy(null)
+    }
   }
 
   async function pickContact() {
@@ -563,6 +595,58 @@ export default function SnagDetailClient({ snag, contractors, terms, orgId, room
 
         {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
       </div>
+
+      {/* Client Questions */}
+      {questions.length > 0 && (
+        <div className="sf-card mt-3 p-4">
+          <h2 className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+            <MessageCircle className="h-4 w-4 text-slate-400" />
+            Client questions
+            <span className="ml-1 rounded-full bg-[#1A56DB] px-2 py-0.5 text-[10px] font-bold text-white">{questions.length}</span>
+          </h2>
+          <div className="space-y-4">
+            {questions.map(q => (
+              <div key={q.id} className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                <div className="flex items-start gap-2 mb-2">
+                  <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-slate-100">
+                    <MessageCircle className="h-3 w-3 text-slate-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-slate-700 leading-relaxed">{q.body}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-400">
+                      {new Date(q.created_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+                {q.reply_body ? (
+                  <div className="ml-7 rounded-xl bg-green-50 border border-green-200 px-3 py-2">
+                    <p className="text-[11px] font-semibold text-green-700 mb-0.5">Your reply</p>
+                    <p className="text-sm text-slate-700 leading-relaxed">{q.reply_body}</p>
+                  </div>
+                ) : (
+                  <div className="ml-7 space-y-2">
+                    <textarea
+                      value={replyDraft[q.id] ?? ''}
+                      onChange={e => setReplyDraft(prev => ({ ...prev, [q.id]: e.target.value }))}
+                      placeholder="Type your reply…"
+                      rows={2}
+                      className="sf-input resize-none text-sm"
+                    />
+                    <button
+                      onClick={() => sendReply(q.id)}
+                      disabled={replyBusy === q.id || !replyDraft[q.id]?.trim()}
+                      className="flex items-center gap-1.5 rounded-xl bg-[#1A56DB] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 active:scale-[0.97] transition-[transform,opacity]"
+                    >
+                      {replyBusy === q.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                      Send reply
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <button onClick={handleDelete} disabled={busy} className="mt-8 w-full text-center text-xs font-medium text-red-400 hover:text-red-600 disabled:opacity-50">
         Delete this {terms.issue.toLowerCase()}
