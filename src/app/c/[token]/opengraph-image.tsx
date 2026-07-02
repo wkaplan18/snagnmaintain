@@ -5,10 +5,10 @@ export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 export default async function Image({ params }: { params: { token: string } }) {
-  let projectName = 'Snag Report'
+  let contractorName = 'Contractor Portal'
 
   try {
-    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/projects?share_token=eq.${params.token}&select=name&limit=1`
+    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/contractors?access_token=eq.${params.token}&select=name,company&limit=1`
     const res = await fetch(url, {
       headers: {
         apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -16,7 +16,7 @@ export default async function Image({ params }: { params: { token: string } }) {
       },
     })
     const data = await res.json()
-    if (data?.[0]?.name) projectName = data[0].name
+    if (data?.[0]?.name) contractorName = data[0].name
   } catch {}
 
   return new ImageResponse(
@@ -36,7 +36,7 @@ export default async function Image({ params }: { params: { token: string } }) {
           padding: '0 80px',
         }}
       >
-        <div style={{ position: 'absolute', top: -120, right: -80, width: 600, height: 600, background: 'radial-gradient(circle, rgba(26,86,219,0.15) 0%, transparent 70%)' }} />
+        <div style={{ position: 'absolute', top: -120, right: -80, width: 600, height: 600, background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)' }} />
         <div style={{ position: 'absolute', bottom: -100, left: -60, width: 500, height: 500, background: 'radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)' }} />
 
         {/* SnagIT wordmark top-left */}
@@ -60,15 +60,15 @@ export default async function Image({ params }: { params: { token: string } }) {
 
         {/* Label */}
         <div style={{ display: 'flex', marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(26,86,219,0.25)', border: '1px solid rgba(26,86,219,0.4)', borderRadius: 99, padding: '8px 20px' }}>
-            <div style={{ width: 8, height: 8, borderRadius: 99, background: '#4ade80' }} />
-            <span style={{ fontSize: 18, fontWeight: 600, color: '#93B4FF', letterSpacing: '0.5px' }}>Snag Report</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', borderRadius: 99, padding: '8px 20px' }}>
+            <div style={{ width: 8, height: 8, borderRadius: 99, background: '#A5B4FC' }} />
+            <span style={{ fontSize: 18, fontWeight: 600, color: '#C4B5FD', letterSpacing: '0.5px' }}>Your assigned snags</span>
           </div>
         </div>
 
-        {/* Project name */}
-        <div style={{ display: 'flex', fontSize: projectName.length > 30 ? 60 : 76, fontWeight: 800, color: 'white', letterSpacing: '-2px', lineHeight: 1.1, textAlign: 'center', maxWidth: 900 }}>
-          {projectName}
+        {/* Contractor name */}
+        <div style={{ display: 'flex', fontSize: contractorName.length > 30 ? 60 : 76, fontWeight: 800, color: 'white', letterSpacing: '-2px', lineHeight: 1.1, textAlign: 'center', maxWidth: 900 }}>
+          {contractorName}
         </div>
 
         {/* Footer */}
